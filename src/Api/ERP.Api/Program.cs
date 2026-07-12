@@ -5,8 +5,17 @@ using ERP.Application;
 using ERP.Application.Common.Interfaces;
 using ERP.Infrastructure;
 using Scalar.AspNetCore;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// --- Serilog struktur logging (TDD §19) ---
+// Lokalda console + rolling fayl sink; serverdə eyni konfiqurasiya konsola (Docker log) yazır.
+builder.Host.UseSerilog((context, config) => config
+    .ReadFrom.Configuration(context.Configuration)
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .WriteTo.File("logs/erp-.log", rollingInterval: RollingInterval.Day, retainedFileCountLimit: 14));
 
 // --- Layer DI qeydiyyatı (TDD §18) ---
 builder.Services.AddApplication();
@@ -23,6 +32,9 @@ var app = builder.Build();
 
 // Global exception handling (TDD §21) — pipeline-ın əvvəlində.
 app.UseMiddleware<ExceptionHandlingMiddleware>();
+
+// Hər HTTP sorğusunu struktur şəkildə loglayır (metod, yol, status, müddət) — TDD §19.
+app.UseSerilogRequestLogging();
 
 if (app.Environment.IsDevelopment())
 {
