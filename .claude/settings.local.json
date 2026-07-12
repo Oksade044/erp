@@ -1,0 +1,38 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -c ' *)",
+      "Bash(dotnet --version)",
+      "Bash(dotnet --list-sdks)",
+      "Bash(dotnet new *)",
+      "Bash(dotnet sln *)",
+      "Bash(dotnet add *)",
+      "Bash(dotnet build *)",
+      "Bash(dotnet tool *)",
+      "Bash(echo \"---exit $?---\")",
+      "Bash(dotnet ef *)",
+      "Bash(ASPNETCORE_URLS=\"http://localhost:5080\" ASPNETCORE_ENVIRONMENT=Development dotnet run --no-launch-profile)",
+      "Bash(curl -s http://localhost:5080/health)",
+      "Bash(curl -s -X POST http://localhost:5080/api/v1/customers -H \"Content-Type: application/json\" -d '{\"type\":\"Fərdi\",\"name\":\"Aysel Məmmədova\",\"phone\":\"0551234567\",\"email\":\"aysel@example.az\",\"city\":\"Bakı\",\"addressLine\":\"Nizami küç. 10\"}')",
+      "Bash(curl -s -X POST http://localhost:5080/api/v1/customers -H \"Content-Type: application/json\" -d '{\"type\":\"Korporativ\",\"name\":\"Toy Sarayı MMC\",\"phone\":\"+994557654321\",\"taxId\":\"1234567890\"}')",
+      "Bash(curl -s -X POST http://localhost:5080/api/v1/customers -H \"Content-Type: application/json\" -d '{\"type\":\"Fərdi\",\"name\":\"Dublikat\",\"phone\":\"055 123 45 67\"}')",
+      "Bash(curl -s -X POST http://localhost:5080/api/v1/customers -H \"Content-Type: application/json\" -d '{\"type\":\"Fərdi\",\"name\":\"Yanlış\",\"phone\":\"123\"}')",
+      "Bash(curl -s -X POST http://localhost:5080/api/v1/customers -H \"Content-Type: application/json\" --data-binary @D:/tmp/c1.json)",
+      "Bash(curl -s -X POST http://localhost:5080/api/v1/customers -H \"Content-Type: application/json\" --data-binary @D:/tmp/c2.json)",
+      "Bash(curl -s -w \"  [HTTP %{http_code}]\\\\n\" -X POST http://localhost:5080/api/v1/customers -H \"Content-Type: application/json\" --data-binary @D:/tmp/c1.json)",
+      "Bash(curl -s -w \"  [HTTP %{http_code}]\\\\n\" -X POST http://localhost:5080/api/v1/customers -H \"Content-Type: application/json\" --data-binary @D:/tmp/c2.json)",
+      "Bash(curl -s \"http://localhost:5080/api/v1/customers?search=&page=1&pageSize=10\")",
+      "Bash(curl -s -w \"  [HTTP %{http_code}]\\\\n\" http://localhost:5080/health)",
+      "Bash(curl -s -o /dev/null -w \"scalar [HTTP %{http_code}]\\\\n\" http://localhost:5080/scalar/v1)",
+      "Bash(curl -s -w \"  [HTTP %{http_code}]\\\\n\" -X POST http://localhost:5080/api/v1/products -H \"Content-Type: application/json\" --data-binary @D:/tmp/p1.json)",
+      "Bash(curl -s -w \"  [HTTP %{http_code}]\\\\n\" -X POST http://localhost:5080/api/v1/products -H \"Content-Type: application/json\" --data-binary @D:/tmp/p2.json)",
+      "Bash(curl -s -w \"  [HTTP %{http_code}]\\\\n\" -X POST http://localhost:5080/api/v1/products -H \"Content-Type: application/json\" -d '{\"sku\":\"X-1\",\"name\":\"Test\",\"rentalPrice\":5,\"trackingMode\":\"Yanlis\"}')",
+      "Bash(curl -s \"http://localhost:5080/api/v1/products?page=1&pageSize=10\")",
+      "Bash(curl -s -w \"  [HTTP %{http_code}]\\\\n\" \"http://localhost:5080/api/v1/products?search=LED\")",
+      "Bash(curl -s -w \"  [HTTP %{http_code}]\\\\n\" \"http://localhost:5080/api/v1/products\")",
+      "Bash(curl -s -w \"  [HTTP %{http_code}]\\\\n\" \"http://localhost:5080/api/v1/customers?search=Toy\")",
+      "Bash(curl -s \"http://localhost:5080/api/v1/orders\")",
+      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\('total:',d['totalCount']\\); [print\\(' ',o['orderNumber'],'|',o['status'],'|',o['customerName'],'|',o['total'],o['currency'],'|',o['startDate'],'→',o['endDate']\\) for o in d['items']]\")"
+    ]
+  }
+}

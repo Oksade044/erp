@@ -1,0 +1,17 @@
+<Solution>
+  <Folder Name="/src/" />
+  <Folder Name="/src/Api/">
+    <Project Path="src/Api/ERP.Api/ERP.Api.csproj" />
+  </Folder>
+  <Folder Name="/src/Clients/">
+    <Project Path="src/Clients/ERP.Desktop/ERP.Desktop.csproj" />
+    <Project Path="src/Clients/ERP.Shared.Contracts/ERP.Shared.Contracts.csproj" />
+  </Folder>
+  <Folder Name="/src/Core/">
+    <Project Path="src/Core/ERP.Application/ERP.Application.csproj" />
+    <Project Path="src/Core/ERP.Domain/ERP.Domain.csproj" />
+  </Folder>
+  <Folder Name="/src/Infrastructure/">
+    <Project Path="src/Infrastructure/ERP.Infrastructure/ERP.Infrastructure.csproj" />
+  </Folder>
+</Solution>

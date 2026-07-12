@@ -1,0 +1,22 @@
+# .NET build output
+bin/
+obj/
+out/
+
+# Rider / VS
+.idea/
+.vs/
+*.user
+
+# Local database files (SQLite)
+*.db
+*.db-shm
+*.db-wal
+
+# Logs
+logs/
+*.log
+
+# Environment / secrets
+*.env
+appsettings.*.Local.json
