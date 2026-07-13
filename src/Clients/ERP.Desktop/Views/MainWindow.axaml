@@ -26,6 +26,8 @@
                         CommandParameter="Məhsullar" Classes="nav" />
                 <Button Content="🧾  Sifarişlər" Command="{Binding NavigateCommand}"
                         CommandParameter="Sifarişlər" Classes="nav" />
+                <Button Content="💰  Fakturalar" Command="{Binding NavigateCommand}"
+                        CommandParameter="Fakturalar" Classes="nav" />
             </StackPanel>
         </Border>
 

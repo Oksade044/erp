@@ -6,6 +6,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using ERP.Shared.Contracts.Customers;
+using ERP.Shared.Contracts.Invoices;
 using ERP.Shared.Contracts.Orders;
 using ERP.Shared.Contracts.Products;
 
@@ -68,6 +69,30 @@ public sealed class ErpApiClient(HttpClient http)
     {
         var resp = await http.PostAsync($"/api/v1/orders/{id}/return", null, ct);
         return await ReadResultAsync(resp, ct);
+    }
+
+    // --- Fakturalar ---
+    public Task<PagedResult<InvoiceDto>?> GetInvoicesAsync(string? search, CancellationToken ct = default) =>
+        http.GetFromJsonAsync<PagedResult<InvoiceDto>>(
+            $"/api/v1/invoices?search={Uri.EscapeDataString(search ?? "")}", JsonOpts, ct);
+
+    public async Task<(bool ok, string? error)> CreateInvoiceAsync(Guid orderId, CancellationToken ct = default)
+    {
+        var resp = await http.PostAsJsonAsync("/api/v1/invoices", new CreateInvoiceRequest(orderId), JsonOpts, ct);
+        return await ReadResultAsync(resp, ct);
+    }
+
+    public async Task<(bool ok, string? error)> AddInvoicePaymentAsync(
+        Guid invoiceId, AddPaymentRequest request, CancellationToken ct = default)
+    {
+        var resp = await http.PostAsJsonAsync($"/api/v1/invoices/{invoiceId}/payments", request, JsonOpts, ct);
+        return await ReadResultAsync(resp, ct);
+    }
+
+    public async Task<byte[]?> GetInvoicePdfAsync(Guid invoiceId, CancellationToken ct = default)
+    {
+        var resp = await http.GetAsync($"/api/v1/invoices/{invoiceId}/pdf", ct);
+        return resp.IsSuccessStatusCode ? await resp.Content.ReadAsByteArrayAsync(ct) : null;
     }
 
     private static async Task<(bool ok, string? error)> ReadResultAsync(HttpResponseMessage resp, CancellationToken ct)

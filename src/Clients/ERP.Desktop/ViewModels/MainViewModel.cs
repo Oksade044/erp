@@ -14,6 +14,7 @@ public partial class MainViewModel : ViewModelBase
     private readonly CustomersViewModel _customers;
     private readonly ProductsViewModel _products;
     private readonly OrdersViewModel _orders;
+    private readonly InvoicesViewModel _invoices;
 
     [ObservableProperty] private ViewModelBase _current = null!;
     [ObservableProperty] private string _selectedSection = "Müştərilər";
@@ -29,6 +30,7 @@ public partial class MainViewModel : ViewModelBase
         _customers = new CustomersViewModel(api);
         _products = new ProductsViewModel(api);
         _orders = new OrdersViewModel(api);
+        _invoices = new InvoicesViewModel(api);
 
         Current = _customers;
         _customers.LoadCommand.Execute(null);
@@ -42,6 +44,7 @@ public partial class MainViewModel : ViewModelBase
         {
             "Məhsullar" => _products,
             "Sifarişlər" => _orders,
+            "Fakturalar" => _invoices,
             _ => _customers
         };
 
@@ -50,6 +53,7 @@ public partial class MainViewModel : ViewModelBase
             case CustomersViewModel c: c.LoadCommand.Execute(null); break;
             case ProductsViewModel p: p.LoadCommand.Execute(null); break;
             case OrdersViewModel o: o.LoadCommand.Execute(null); break;
+            case InvoicesViewModel i: i.LoadCommand.Execute(null); break;
         }
     }
 }

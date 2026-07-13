@@ -23,6 +23,8 @@
                     Background="#7048E8" Foreground="White" />
             <Button Content="✕ Ləğv et" Command="{Binding CancelCommand}"
                     Background="#E03131" Foreground="White" />
+            <Button Content="💰 Faktura yarat" Command="{Binding CreateInvoiceCommand}"
+                    Background="#F08C00" Foreground="White" />
         </StackPanel>
 
         <DataGrid Grid.Row="2" ItemsSource="{Binding Orders}" SelectedItem="{Binding Selected}"

@@ -72,4 +72,12 @@ public partial class OrdersViewModel(ErpApiClient api) : ViewModelBase
         Status = ok ? "Sifariş qaytarıldı." : error ?? "Qaytarılmadı.";
         await LoadAsync();
     }
+
+    [RelayCommand]
+    private async Task CreateInvoiceAsync()
+    {
+        if (Selected is null) { Status = "Sifariş seçin."; return; }
+        var (ok, error) = await api.CreateInvoiceAsync(Selected.Id);
+        Status = ok ? "Faktura yaradıldı (Fakturalar bölməsinə baxın)." : error ?? "Faktura yaradılmadı.";
+    }
 }
