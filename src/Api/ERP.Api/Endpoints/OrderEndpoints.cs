@@ -1,7 +1,7 @@
-using ERP.Application.Modules.Orders.Commands;
+﻿using ERP.Application.Modules.Orders.Commands;
 using ERP.Application.Modules.Orders.Queries;
 using ERP.Shared.Contracts.Orders;
-using MediatR;
+using ERP.Application.Common.Messaging;
 
 namespace ERP.Api.Endpoints;
 

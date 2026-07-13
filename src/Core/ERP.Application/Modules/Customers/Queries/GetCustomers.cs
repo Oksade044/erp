@@ -1,7 +1,7 @@
-using ERP.Application.Common.Interfaces;
+﻿using ERP.Application.Common.Interfaces;
 using ERP.Application.Common.Models;
 using ERP.Shared.Contracts.Customers;
-using MediatR;
+using ERP.Application.Common.Messaging;
 
 namespace ERP.Application.Modules.Customers.Queries;
 

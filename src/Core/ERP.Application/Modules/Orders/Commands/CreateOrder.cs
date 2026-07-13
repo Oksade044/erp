@@ -1,10 +1,10 @@
-using ERP.Application.Common.Interfaces;
+﻿using ERP.Application.Common.Interfaces;
 using ERP.Application.Common.Models;
 using ERP.Domain.Modules.Orders;
 using ERP.Domain.ValueObjects;
 using ERP.Shared.Contracts.Orders;
 using FluentValidation;
-using MediatR;
+using ERP.Application.Common.Messaging;
 
 namespace ERP.Application.Modules.Orders.Commands;
 

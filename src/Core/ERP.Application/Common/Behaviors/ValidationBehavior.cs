@@ -1,5 +1,5 @@
-using FluentValidation;
-using MediatR;
+﻿using FluentValidation;
+using ERP.Application.Common.Messaging;
 
 namespace ERP.Application.Common.Behaviors;
 

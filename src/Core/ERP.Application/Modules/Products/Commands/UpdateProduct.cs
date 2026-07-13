@@ -1,9 +1,9 @@
-using ERP.Application.Common.Interfaces;
+﻿using ERP.Application.Common.Interfaces;
 using ERP.Application.Common.Models;
 using ERP.Domain.ValueObjects;
 using ERP.Shared.Contracts.Products;
 using FluentValidation;
-using MediatR;
+using ERP.Application.Common.Messaging;
 
 namespace ERP.Application.Modules.Products.Commands;
 
