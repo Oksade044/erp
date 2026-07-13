@@ -40,7 +40,10 @@
       "Bash(curl -s -o /dev/null -w \"[HTTP %{http_code}]\\\\n\" \"http://localhost:5080/api/v1/products\")",
       "Bash(echo '{\"type\":\"Fərdi\",\"name\":\"Mediator Test\",\"phone\":\"0555559999\"}')",
       "Bash(curl -s -w \"  [HTTP %{http_code}]\\\\n\" -X POST http://localhost:5080/api/v1/customers -H \"Content-Type: application/json\" --data-binary @D:/tmp/mt.json)",
-      "Bash(echo '{\"type\":\"Fərdi\",\"name\":\"\",\"phone\":\"0555550000\"}')"
+      "Bash(echo '{\"type\":\"Fərdi\",\"name\":\"\",\"phone\":\"0555550000\"}')",
+      "Bash(curl -s -o /dev/null -w \"API health [HTTP %{http_code}]\\\\n\" http://localhost:5080/health)",
+      "Bash(dotnet run *)",
+      "Bash(powershell -NoProfile -Command 'Get-Process ERP.Desktop -ErrorAction SilentlyContinue | Select-Object Id,ProcessName,@{n='\\\\''RAM_MB'\\\\'';e={[math]::Round\\($_.WorkingSet64/1MB\\)}} | Format-Table -AutoSize')"
     ]
   }
 }

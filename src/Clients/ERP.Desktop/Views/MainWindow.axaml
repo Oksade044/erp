@@ -3,20 +3,49 @@
         xmlns:vm="using:ERP.Desktop.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        mc:Ignorable="d" d:DesignWidth="1100" d:DesignHeight="680"
         x:Class="ERP.Desktop.Views.MainWindow"
         x:DataType="vm:MainViewModel"
         Icon="/Assets/avalonia-logo.ico"
-        Title="ERP.Desktop">
+        Width="1100" Height="680"
+        Title="{Binding Title}">
 
-    <Design.DataContext>
-        <!-- This only sets the DataContext for the previewer in an IDE,
-             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
-        <vm:MainViewModel />
-    </Design.DataContext>
+    <Grid ColumnDefinitions="220,*">
 
-    <TextBox Text="{Binding Greeting}"
-             HorizontalAlignment="Center"
-             VerticalAlignment="Center" />
+        <!-- Yan naviqasiya -->
+        <Border Grid.Column="0" Background="#1E2130" Padding="0,16">
+            <StackPanel Spacing="4">
+                <TextBlock Text="ERP" FontSize="26" FontWeight="Bold" Foreground="White"
+                           Margin="20,0,0,4" />
+                <TextBlock Text="Toy Dekoru &amp; Tədbir İcarəsi" FontSize="11"
+                           Foreground="#8A90A6" Margin="20,0,0,20" TextWrapping="Wrap" />
+
+                <Button Content="👤  Müştərilər" Command="{Binding NavigateCommand}"
+                        CommandParameter="Müştərilər" Classes="nav" />
+                <Button Content="📦  Məhsullar" Command="{Binding NavigateCommand}"
+                        CommandParameter="Məhsullar" Classes="nav" />
+                <Button Content="🧾  Sifarişlər" Command="{Binding NavigateCommand}"
+                        CommandParameter="Sifarişlər" Classes="nav" />
+            </StackPanel>
+        </Border>
+
+        <!-- Cari səhifə (ViewLocator VM → View) -->
+        <ContentControl Grid.Column="1" Content="{Binding Current}" Margin="0" />
+    </Grid>
+
+    <Window.Styles>
+        <Style Selector="Button.nav">
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="HorizontalContentAlignment" Value="Left" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="#D5D8E4" />
+            <Setter Property="Padding" Value="20,12" />
+            <Setter Property="FontSize" Value="14" />
+        </Style>
+        <Style Selector="Button.nav:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#2A2E42" />
+            <Setter Property="TextElement.Foreground" Value="White" />
+        </Style>
+    </Window.Styles>
 
 </Window>
