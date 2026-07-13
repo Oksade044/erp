@@ -58,6 +58,18 @@ public sealed class ErpApiClient(HttpClient http)
         return await ReadResultAsync(resp, ct);
     }
 
+    public async Task<(bool ok, string? error)> DeliverOrderAsync(Guid id, CancellationToken ct = default)
+    {
+        var resp = await http.PostAsync($"/api/v1/orders/{id}/deliver", null, ct);
+        return await ReadResultAsync(resp, ct);
+    }
+
+    public async Task<(bool ok, string? error)> ReturnOrderAsync(Guid id, CancellationToken ct = default)
+    {
+        var resp = await http.PostAsync($"/api/v1/orders/{id}/return", null, ct);
+        return await ReadResultAsync(resp, ct);
+    }
+
     private static async Task<(bool ok, string? error)> ReadResultAsync(HttpResponseMessage resp, CancellationToken ct)
     {
         if (resp.IsSuccessStatusCode)

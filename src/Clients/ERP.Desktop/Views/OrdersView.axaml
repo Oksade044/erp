@@ -17,6 +17,10 @@
             <Button Content="Axtar" Command="{Binding LoadCommand}" />
             <Button Content="✓ Təsdiqlə" Command="{Binding ConfirmCommand}"
                     Background="#2F9E44" Foreground="White" />
+            <Button Content="🚚 Təhvil ver" Command="{Binding DeliverCommand}"
+                    Background="#1971C2" Foreground="White" />
+            <Button Content="↩ Qaytar" Command="{Binding ReturnCommand}"
+                    Background="#7048E8" Foreground="White" />
             <Button Content="✕ Ləğv et" Command="{Binding CancelCommand}"
                     Background="#E03131" Foreground="White" />
         </StackPanel>

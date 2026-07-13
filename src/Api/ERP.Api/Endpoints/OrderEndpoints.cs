@@ -47,6 +47,18 @@ public static class OrderEndpoints
             return result.IsSuccess ? Results.NoContent() : Results.BadRequest(new { error = result.Error });
         });
 
+        group.MapPost("/{id:guid}/deliver", async (Guid id, ISender sender) =>
+        {
+            var result = await sender.Send(new DeliverOrderCommand(id));
+            return result.IsSuccess ? Results.NoContent() : Results.BadRequest(new { error = result.Error });
+        });
+
+        group.MapPost("/{id:guid}/return", async (Guid id, ISender sender) =>
+        {
+            var result = await sender.Send(new ReturnOrderCommand(id));
+            return result.IsSuccess ? Results.NoContent() : Results.BadRequest(new { error = result.Error });
+        });
+
         return app;
     }
 }

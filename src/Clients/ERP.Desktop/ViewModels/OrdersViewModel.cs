@@ -54,4 +54,22 @@ public partial class OrdersViewModel(ErpApiClient api) : ViewModelBase
         Status = ok ? "Sifariş ləğv edildi." : error ?? "Ləğv edilmədi.";
         await LoadAsync();
     }
+
+    [RelayCommand]
+    private async Task DeliverAsync()
+    {
+        if (Selected is null) { Status = "Sifariş seçin."; return; }
+        var (ok, error) = await api.DeliverOrderAsync(Selected.Id);
+        Status = ok ? "Sifariş təhvil verildi." : error ?? "Təhvil verilmədi.";
+        await LoadAsync();
+    }
+
+    [RelayCommand]
+    private async Task ReturnAsync()
+    {
+        if (Selected is null) { Status = "Sifariş seçin."; return; }
+        var (ok, error) = await api.ReturnOrderAsync(Selected.Id);
+        Status = ok ? "Sifariş qaytarıldı." : error ?? "Qaytarılmadı.";
+        await LoadAsync();
+    }
 }
