@@ -50,5 +50,6 @@ app.MapGet("/health", () => Results.Ok(new { status = "ok", service = "ERP.Api" 
 app.MapCustomerEndpoints();
 app.MapProductEndpoints();
 app.MapOrderEndpoints();
+app.MapInvoiceEndpoints();
 
 app.Run();
