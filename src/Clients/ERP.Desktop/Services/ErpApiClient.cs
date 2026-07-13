@@ -5,6 +5,8 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Net.Http.Headers;
+using ERP.Shared.Contracts.Auth;
 using ERP.Shared.Contracts.Customers;
 using ERP.Shared.Contracts.Invoices;
 using ERP.Shared.Contracts.Orders;
@@ -20,6 +22,30 @@ namespace ERP.Desktop.Services;
 public sealed class ErpApiClient(HttpClient http)
 {
     private static readonly JsonSerializerOptions JsonOpts = new(JsonSerializerDefaults.Web);
+
+    // --- Autentifikasiya ---
+    public async Task<(AuthResponse? auth, string? error)> LoginAsync(string username, string password, CancellationToken ct = default)
+    {
+        try
+        {
+            var resp = await http.PostAsJsonAsync("/api/v1/auth/login", new LoginRequest(username, password), JsonOpts, ct);
+            if (resp.IsSuccessStatusCode)
+            {
+                var auth = await resp.Content.ReadFromJsonAsync<AuthResponse>(JsonOpts, ct);
+                return (auth, null);
+            }
+            return (null, "İstifadəçi adı və ya parol yanlışdır.");
+        }
+        catch (Exception ex)
+        {
+            return (null, $"Serverə qoşulmaq mümkün olmadı: {ex.Message}");
+        }
+    }
+
+    /// <summary>Bearer token-i bütün sonrakı sorğulara qoşur.</summary>
+    public void SetBearerToken(string? token) =>
+        http.DefaultRequestHeaders.Authorization =
+            string.IsNullOrEmpty(token) ? null : new AuthenticationHeaderValue("Bearer", token);
 
     // --- Müştərilər ---
     public Task<PagedResult<CustomerDto>?> GetCustomersAsync(string? search, CancellationToken ct = default) =>

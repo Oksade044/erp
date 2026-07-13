@@ -1,13 +1,14 @@
-using System.Net.Http;
+using System;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using ERP.Desktop.Services;
+using ERP.Shared.Contracts.Auth;
 
 namespace ERP.Desktop.ViewModels;
 
 /// <summary>
 /// Əsas pəncərə ViewModel-i — yan naviqasiya və cari səhifə. Bütün alt-ekranlar eyni
-/// ErpApiClient-i bölüşür (TDD §31 — API-first).
+/// (autentifikasiya olunmuş) ErpApiClient-i bölüşür (TDD §31 — API-first).
 /// </summary>
 public partial class MainViewModel : ViewModelBase
 {
@@ -16,17 +17,18 @@ public partial class MainViewModel : ViewModelBase
     private readonly ProductsViewModel _products;
     private readonly OrdersViewModel _orders;
     private readonly InvoicesViewModel _invoices;
+    private readonly Action _onLogout;
 
     [ObservableProperty] private ViewModelBase _current = null!;
     [ObservableProperty] private string _selectedSection = "İdarə Paneli";
 
     public string Title => "ERP — Toy Dekoru & Tədbir Avadanlığı İcarəsi";
+    public string CurrentUser { get; }
 
-    public MainViewModel()
+    public MainViewModel(ErpApiClient api, AuthResponse auth, Action onLogout)
     {
-        // Sadə kompozisiya (Desktop-da DI konteyneri yoxdur — tək HttpClient bölüşülür).
-        var http = new HttpClient { BaseAddress = new System.Uri("http://localhost:5080") };
-        var api = new ErpApiClient(http);
+        _onLogout = onLogout;
+        CurrentUser = $"{auth.FullName} ({auth.Role})";
 
         _dashboard = new DashboardViewModel(api);
         _customers = new CustomersViewModel(api);
@@ -60,4 +62,7 @@ public partial class MainViewModel : ViewModelBase
             case InvoicesViewModel i: i.LoadCommand.Execute(null); break;
         }
     }
+
+    [RelayCommand]
+    private void Logout() => _onLogout();
 }

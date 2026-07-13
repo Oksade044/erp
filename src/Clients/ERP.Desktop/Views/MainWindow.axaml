@@ -14,23 +14,31 @@
 
         <!-- Yan naviqasiya -->
         <Border Grid.Column="0" Background="#1E2130" Padding="0,16">
-            <StackPanel Spacing="4">
-                <TextBlock Text="ERP" FontSize="26" FontWeight="Bold" Foreground="White"
-                           Margin="20,0,0,4" />
-                <TextBlock Text="Toy Dekoru &amp; Tədbir İcarəsi" FontSize="11"
-                           Foreground="#8A90A6" Margin="20,0,0,20" TextWrapping="Wrap" />
+            <DockPanel LastChildFill="False">
+                <StackPanel DockPanel.Dock="Top" Spacing="4">
+                    <TextBlock Text="ERP" FontSize="26" FontWeight="Bold" Foreground="White"
+                               Margin="20,0,0,4" />
+                    <TextBlock Text="Toy Dekoru &amp; Tədbir İcarəsi" FontSize="11"
+                               Foreground="#8A90A6" Margin="20,0,0,20" TextWrapping="Wrap" />
 
-                <Button Content="📊  İdarə Paneli" Command="{Binding NavigateCommand}"
-                        CommandParameter="İdarə Paneli" Classes="nav" />
-                <Button Content="👤  Müştərilər" Command="{Binding NavigateCommand}"
-                        CommandParameter="Müştərilər" Classes="nav" />
-                <Button Content="📦  Məhsullar" Command="{Binding NavigateCommand}"
-                        CommandParameter="Məhsullar" Classes="nav" />
-                <Button Content="🧾  Sifarişlər" Command="{Binding NavigateCommand}"
-                        CommandParameter="Sifarişlər" Classes="nav" />
-                <Button Content="💰  Fakturalar" Command="{Binding NavigateCommand}"
-                        CommandParameter="Fakturalar" Classes="nav" />
-            </StackPanel>
+                    <Button Content="📊  İdarə Paneli" Command="{Binding NavigateCommand}"
+                            CommandParameter="İdarə Paneli" Classes="nav" />
+                    <Button Content="👤  Müştərilər" Command="{Binding NavigateCommand}"
+                            CommandParameter="Müştərilər" Classes="nav" />
+                    <Button Content="📦  Məhsullar" Command="{Binding NavigateCommand}"
+                            CommandParameter="Məhsullar" Classes="nav" />
+                    <Button Content="🧾  Sifarişlər" Command="{Binding NavigateCommand}"
+                            CommandParameter="Sifarişlər" Classes="nav" />
+                    <Button Content="💰  Fakturalar" Command="{Binding NavigateCommand}"
+                            CommandParameter="Fakturalar" Classes="nav" />
+                </StackPanel>
+
+                <StackPanel DockPanel.Dock="Bottom" Spacing="4">
+                    <TextBlock Text="{Binding CurrentUser}" Foreground="#8A90A6" FontSize="11"
+                               Margin="20,0,20,6" TextWrapping="Wrap" />
+                    <Button Content="🚪  Çıxış" Command="{Binding LogoutCommand}" Classes="nav" />
+                </StackPanel>
+            </DockPanel>
         </Border>
 
         <!-- Cari səhifə (ViewLocator VM → View) -->
