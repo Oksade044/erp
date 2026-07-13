@@ -1,16 +1,21 @@
+using System.Text;
 using ERP.Api.Auth;
 using ERP.Api.Endpoints;
 using ERP.Api.Middleware;
 using ERP.Application;
 using ERP.Application.Common.Interfaces;
+using ERP.Domain.Modules.Users;
 using ERP.Infrastructure;
+using ERP.Infrastructure.Auth;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // --- Serilog struktur logging (TDD §19) ---
-// Lokalda console + rolling fayl sink; serverdə eyni konfiqurasiya konsola (Docker log) yazır.
 builder.Host.UseSerilog((context, config) => config
     .ReadFrom.Configuration(context.Configuration)
     .Enrich.FromLogContext()
@@ -25,6 +30,34 @@ builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUser, HttpCurrentUser>();
 
+// --- Autentifikasiya: JWT Bearer (TDD §6) ---
+var jwt = builder.Configuration.GetSection("Jwt");
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = jwt["Issuer"],
+            ValidAudience = jwt["Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt["Key"]!))
+        };
+    });
+
+// --- Avtorizasiya: default olaraq bütün endpoint-lər autentifikasiya tələb edir (TDD §7, §39) ---
+builder.Services.AddAuthorization(options =>
+{
+    options.FallbackPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
+
+    // İcazə-əsaslı siyasətlər (permission-based RBAC).
+    options.AddPolicy(Permissions.OrdersApprove, p => p.RequireClaim("permission", Permissions.OrdersApprove));
+    options.AddPolicy(Permissions.ReportsView, p => p.RequireClaim("permission", Permissions.ReportsView));
+    options.AddPolicy(Permissions.InvoicesEdit, p => p.RequireClaim("permission", Permissions.InvoicesEdit));
+});
+
 // OpenAPI/Swagger (TDD §11)
 builder.Services.AddOpenApi();
 
@@ -32,25 +65,29 @@ var app = builder.Build();
 
 // Global exception handling (TDD §21) — pipeline-ın əvvəlində.
 app.UseMiddleware<ExceptionHandlingMiddleware>();
-
-// Hər HTTP sorğusunu struktur şəkildə loglayır (metod, yol, status, müddət) — TDD §19.
 app.UseSerilogRequestLogging();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
-    // İnteraktiv API interfeysi (canlı test üçün): /scalar
+    app.MapOpenApi().AllowAnonymous();
     app.MapScalarApiReference(options =>
-        options.WithTitle("ERP API — Toy Dekoru & Tədbir Avadanlığı"));
+        options.WithTitle("ERP API — Toy Dekoru & Tədbir Avadanlığı")).AllowAnonymous();
 }
 
 app.MapGet("/health", () => Results.Ok(new { status = "ok", service = "ERP.Api" }))
-   .WithName("HealthCheck");
+   .WithName("HealthCheck").AllowAnonymous();
 
+app.MapAuthEndpoints();
 app.MapCustomerEndpoints();
 app.MapProductEndpoints();
 app.MapOrderEndpoints();
 app.MapInvoiceEndpoints();
 app.MapReportEndpoints();
+
+// İlkin data: admin istifadəçisi + gözləyən migration-lar (TDD §6).
+await DbSeeder.SeedAsync(app.Services);
 
 app.Run();

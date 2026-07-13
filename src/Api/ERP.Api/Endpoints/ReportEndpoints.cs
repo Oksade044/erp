@@ -8,7 +8,9 @@ public static class ReportEndpoints
 {
     public static IEndpointRouteBuilder MapReportEndpoints(this IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("/api/v1/reports").WithTags("Reports");
+        // Hesabatlar yalnız reports.view icazəsi olanlara (TDD §7).
+        var group = app.MapGroup("/api/v1/reports").WithTags("Reports")
+            .RequireAuthorization(ERP.Domain.Modules.Users.Permissions.ReportsView);
 
         group.MapGet("/dashboard", async (ISender sender) =>
             Results.Ok(await sender.Send(new GetDashboardQuery())));

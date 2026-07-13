@@ -35,11 +35,12 @@ public static class OrderEndpoints
                 : Results.BadRequest(new { error = result.Error });
         });
 
+        // Sifariş təsdiqi yalnız orders.approve icazəsi olanlara (TDD §7).
         group.MapPost("/{id:guid}/confirm", async (Guid id, ISender sender) =>
         {
             var result = await sender.Send(new ConfirmOrderCommand(id));
             return result.IsSuccess ? Results.NoContent() : Results.BadRequest(new { error = result.Error });
-        });
+        }).RequireAuthorization(ERP.Domain.Modules.Users.Permissions.OrdersApprove);
 
         group.MapPost("/{id:guid}/cancel", async (Guid id, ISender sender) =>
         {

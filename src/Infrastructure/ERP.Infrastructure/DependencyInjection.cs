@@ -1,4 +1,5 @@
 using ERP.Application.Common.Interfaces;
+using ERP.Infrastructure.Auth;
 using ERP.Infrastructure.Pdf;
 using ERP.Infrastructure.Reports;
 using ERP.Infrastructure.Persistence;
@@ -43,6 +44,12 @@ public static class DependencyInjection
         services.AddScoped<IProductRepository, ProductRepository>();
         services.AddScoped<IRentalOrderRepository, RentalOrderRepository>();
         services.AddScoped<IInvoiceRepository, InvoiceRepository>();
+        services.AddScoped<IUserRepository, UserRepository>();
+
+        // Autentifikasiya servisləri (TDD §6, §39).
+        services.Configure<JwtSettings>(configuration.GetSection("Jwt"));
+        services.AddSingleton<IPasswordHasher, PasswordHasher>();
+        services.AddScoped<ITokenService, TokenService>();
 
         // PDF generasiya (TDD §25). QuestPDF Community lisenziyası (kiçik şirkətlər üçün pulsuz).
         QuestPDF.Settings.License = LicenseType.Community;
