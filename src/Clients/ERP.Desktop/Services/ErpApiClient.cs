@@ -9,6 +9,7 @@ using ERP.Shared.Contracts.Customers;
 using ERP.Shared.Contracts.Invoices;
 using ERP.Shared.Contracts.Orders;
 using ERP.Shared.Contracts.Products;
+using ERP.Shared.Contracts.Reports;
 
 namespace ERP.Desktop.Services;
 
@@ -94,6 +95,16 @@ public sealed class ErpApiClient(HttpClient http)
         var resp = await http.GetAsync($"/api/v1/invoices/{invoiceId}/pdf", ct);
         return resp.IsSuccessStatusCode ? await resp.Content.ReadAsByteArrayAsync(ct) : null;
     }
+
+    // --- Hesabatlar ---
+    public Task<DashboardDto?> GetDashboardAsync(CancellationToken ct = default) =>
+        http.GetFromJsonAsync<DashboardDto>("/api/v1/reports/dashboard", JsonOpts, ct);
+
+    public Task<List<OutstandingInvoiceDto>?> GetOutstandingAsync(CancellationToken ct = default) =>
+        http.GetFromJsonAsync<List<OutstandingInvoiceDto>>("/api/v1/reports/outstanding", JsonOpts, ct);
+
+    public Task<List<TopProductDto>?> GetTopProductsAsync(int top = 10, CancellationToken ct = default) =>
+        http.GetFromJsonAsync<List<TopProductDto>>($"/api/v1/reports/top-products?top={top}", JsonOpts, ct);
 
     private static async Task<(bool ok, string? error)> ReadResultAsync(HttpResponseMessage resp, CancellationToken ct)
     {

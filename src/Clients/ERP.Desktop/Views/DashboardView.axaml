@@ -1,0 +1,111 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:ERP.Desktop.ViewModels"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="850" d:DesignHeight="620"
+             x:Class="ERP.Desktop.Views.DashboardView"
+             x:DataType="vm:DashboardViewModel">
+
+    <ScrollViewer>
+        <Grid RowDefinitions="Auto,Auto,Auto,*" Margin="24">
+
+            <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12" Margin="0,0,0,20">
+                <TextBlock Text="İdarə Paneli" FontSize="24" FontWeight="SemiBold" VerticalAlignment="Center" />
+                <Button Content="⟳ Yenilə" Command="{Binding LoadCommand}" VerticalAlignment="Center" />
+                <TextBlock Text="{Binding Status}" Foreground="#8A90A6" VerticalAlignment="Center" />
+            </StackPanel>
+
+            <!-- Əsas göstərici kartları -->
+            <WrapPanel Grid.Row="1" Margin="0,0,0,20">
+                <Border Classes="card" Background="#E7F5FF">
+                    <StackPanel>
+                        <TextBlock Text="GƏLİR (ödənilmiş)" Classes="cardLabel" />
+                        <TextBlock Text="{Binding Summary.TotalPaid, StringFormat={}{0:0.00} AZN}" Classes="cardValue" Foreground="#1971C2" />
+                    </StackPanel>
+                </Border>
+                <Border Classes="card" Background="#FFF0F6">
+                    <StackPanel>
+                        <TextBlock Text="QALIQ BORC" Classes="cardLabel" />
+                        <TextBlock Text="{Binding Summary.TotalOutstanding, StringFormat={}{0:0.00} AZN}" Classes="cardValue" Foreground="#E03131" />
+                    </StackPanel>
+                </Border>
+                <Border Classes="card" Background="#EBFBEE">
+                    <StackPanel>
+                        <TextBlock Text="MÜŞTƏRİLƏR" Classes="cardLabel" />
+                        <TextBlock Text="{Binding Summary.CustomerCount}" Classes="cardValue" Foreground="#2F9E44" />
+                    </StackPanel>
+                </Border>
+                <Border Classes="card" Background="#FFF9DB">
+                    <StackPanel>
+                        <TextBlock Text="MƏHSULLAR" Classes="cardLabel" />
+                        <TextBlock Text="{Binding Summary.ProductCount}" Classes="cardValue" Foreground="#F08C00" />
+                    </StackPanel>
+                </Border>
+                <Border Classes="card" Background="#F3F0FF">
+                    <StackPanel>
+                        <TextBlock Text="SİFARİŞLƏR" Classes="cardLabel" />
+                        <TextBlock Text="{Binding Summary.OrderCount}" Classes="cardValue" Foreground="#7048E8" />
+                    </StackPanel>
+                </Border>
+            </WrapPanel>
+
+            <!-- Sifariş statusları -->
+            <Border Grid.Row="2" Background="#F5F6FA" CornerRadius="8" Padding="16" Margin="0,0,0,20">
+                <StackPanel Orientation="Horizontal" Spacing="24">
+                    <TextBlock Text="Sifariş statusları:" FontWeight="SemiBold" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding Summary.DraftOrders, StringFormat=Qaralama: {0}}" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding Summary.ConfirmedOrders, StringFormat=Təsdiqlənmiş: {0}}" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding Summary.DeliveredOrders, StringFormat=Təhvil: {0}}" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding Summary.ReturnedOrders, StringFormat=Qaytarılmış: {0}}" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding Summary.CancelledOrders, StringFormat=Ləğv: {0}}" VerticalAlignment="Center" />
+                </StackPanel>
+            </Border>
+
+            <!-- İki siyahı: top məhsullar + borclar -->
+            <Grid Grid.Row="3" ColumnDefinitions="*,16,*">
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="Ən çox icarəyə verilən" FontWeight="SemiBold" FontSize="15" Margin="0,0,0,8" />
+                    <DataGrid ItemsSource="{Binding TopProducts}" IsReadOnly="True" Height="240"
+                              GridLinesVisibility="Horizontal" BorderThickness="1" BorderBrush="#E0E2EA">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Məhsul" Binding="{Binding ProductName}" Width="2*" />
+                            <DataGridTextColumn Header="Ədəd" Binding="{Binding TotalQuantityRented}" Width="*" />
+                            <DataGridTextColumn Header="Sifariş" Binding="{Binding OrderCount}" Width="*" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </StackPanel>
+
+                <StackPanel Grid.Column="2">
+                    <TextBlock Text="Borclu fakturalar" FontWeight="SemiBold" FontSize="15" Margin="0,0,0,8" />
+                    <DataGrid ItemsSource="{Binding Outstanding}" IsReadOnly="True" Height="240"
+                              GridLinesVisibility="Horizontal" BorderThickness="1" BorderBrush="#E0E2EA">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Faktura" Binding="{Binding InvoiceNumber}" Width="Auto" />
+                            <DataGridTextColumn Header="Müştəri" Binding="{Binding CustomerName}" Width="2*" />
+                            <DataGridTextColumn Header="Borc" Binding="{Binding Balance}" Width="*" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </StackPanel>
+            </Grid>
+        </Grid>
+    </ScrollViewer>
+
+    <UserControl.Styles>
+        <Style Selector="Border.card">
+            <Setter Property="CornerRadius" Value="10" />
+            <Setter Property="Padding" Value="18" />
+            <Setter Property="Margin" Value="0,0,12,12" />
+            <Setter Property="Width" Value="180" />
+        </Style>
+        <Style Selector="TextBlock.cardLabel">
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="Foreground" Value="#5A6072" />
+        </Style>
+        <Style Selector="TextBlock.cardValue">
+            <Setter Property="FontSize" Value="24" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Margin" Value="0,4,0,0" />
+        </Style>
+    </UserControl.Styles>
+</UserControl>

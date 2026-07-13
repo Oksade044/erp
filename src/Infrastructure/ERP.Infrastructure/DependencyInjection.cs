@@ -1,5 +1,6 @@
 using ERP.Application.Common.Interfaces;
 using ERP.Infrastructure.Pdf;
+using ERP.Infrastructure.Reports;
 using ERP.Infrastructure.Persistence;
 using ERP.Infrastructure.Persistence.Interceptors;
 using ERP.Infrastructure.Persistence.Repositories;
@@ -46,6 +47,9 @@ public static class DependencyInjection
         // PDF generasiya (TDD §25). QuestPDF Community lisenziyası (kiçik şirkətlər üçün pulsuz).
         QuestPDF.Settings.License = LicenseType.Community;
         services.AddScoped<IInvoicePdfService, InvoicePdfService>();
+
+        // Hesabat/analitika oxumaları (TDD §5).
+        services.AddScoped<IReportService, ReportService>();
 
         return services;
     }

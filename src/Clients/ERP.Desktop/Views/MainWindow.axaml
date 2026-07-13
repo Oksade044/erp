@@ -20,6 +20,8 @@
                 <TextBlock Text="Toy Dekoru &amp; Tədbir İcarəsi" FontSize="11"
                            Foreground="#8A90A6" Margin="20,0,0,20" TextWrapping="Wrap" />
 
+                <Button Content="📊  İdarə Paneli" Command="{Binding NavigateCommand}"
+                        CommandParameter="İdarə Paneli" Classes="nav" />
                 <Button Content="👤  Müştərilər" Command="{Binding NavigateCommand}"
                         CommandParameter="Müştərilər" Classes="nav" />
                 <Button Content="📦  Məhsullar" Command="{Binding NavigateCommand}"

@@ -51,5 +51,6 @@ app.MapCustomerEndpoints();
 app.MapProductEndpoints();
 app.MapOrderEndpoints();
 app.MapInvoiceEndpoints();
+app.MapReportEndpoints();
 
 app.Run();

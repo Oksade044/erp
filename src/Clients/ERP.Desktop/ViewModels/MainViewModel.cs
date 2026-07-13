@@ -11,13 +11,14 @@ namespace ERP.Desktop.ViewModels;
 /// </summary>
 public partial class MainViewModel : ViewModelBase
 {
+    private readonly DashboardViewModel _dashboard;
     private readonly CustomersViewModel _customers;
     private readonly ProductsViewModel _products;
     private readonly OrdersViewModel _orders;
     private readonly InvoicesViewModel _invoices;
 
     [ObservableProperty] private ViewModelBase _current = null!;
-    [ObservableProperty] private string _selectedSection = "Müştərilər";
+    [ObservableProperty] private string _selectedSection = "İdarə Paneli";
 
     public string Title => "ERP — Toy Dekoru & Tədbir Avadanlığı İcarəsi";
 
@@ -27,13 +28,14 @@ public partial class MainViewModel : ViewModelBase
         var http = new HttpClient { BaseAddress = new System.Uri("http://localhost:5080") };
         var api = new ErpApiClient(http);
 
+        _dashboard = new DashboardViewModel(api);
         _customers = new CustomersViewModel(api);
         _products = new ProductsViewModel(api);
         _orders = new OrdersViewModel(api);
         _invoices = new InvoicesViewModel(api);
 
-        Current = _customers;
-        _customers.LoadCommand.Execute(null);
+        Current = _dashboard;
+        _dashboard.LoadCommand.Execute(null);
     }
 
     [RelayCommand]
@@ -42,14 +44,16 @@ public partial class MainViewModel : ViewModelBase
         SelectedSection = section;
         Current = section switch
         {
+            "Müştərilər" => _customers,
             "Məhsullar" => _products,
             "Sifarişlər" => _orders,
             "Fakturalar" => _invoices,
-            _ => _customers
+            _ => _dashboard
         };
 
         switch (Current)
         {
+            case DashboardViewModel dv: dv.LoadCommand.Execute(null); break;
             case CustomersViewModel c: c.LoadCommand.Execute(null); break;
             case ProductsViewModel p: p.LoadCommand.Execute(null); break;
             case OrdersViewModel o: o.LoadCommand.Execute(null); break;

@@ -1,0 +1,43 @@
+using System;
+using System.Collections.ObjectModel;
+using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using ERP.Desktop.Services;
+using ERP.Shared.Contracts.Reports;
+
+namespace ERP.Desktop.ViewModels;
+
+/// <summary>İdarə paneli — əsas göstəricilər, top məhsullar, borclu fakturalar.</summary>
+public partial class DashboardViewModel(ErpApiClient api) : ViewModelBase
+{
+    [ObservableProperty] private DashboardDto? _summary;
+    [ObservableProperty] private bool _isBusy;
+    [ObservableProperty] private string? _status;
+
+    public ObservableCollection<TopProductDto> TopProducts { get; } = [];
+    public ObservableCollection<OutstandingInvoiceDto> Outstanding { get; } = [];
+
+    [RelayCommand]
+    private async Task LoadAsync()
+    {
+        IsBusy = true;
+        Status = "Yüklənir...";
+        try
+        {
+            Summary = await api.GetDashboardAsync();
+
+            TopProducts.Clear();
+            var top = await api.GetTopProductsAsync(10);
+            if (top is not null) foreach (var p in top) TopProducts.Add(p);
+
+            Outstanding.Clear();
+            var debts = await api.GetOutstandingAsync();
+            if (debts is not null) foreach (var d in debts) Outstanding.Add(d);
+
+            Status = "Yeniləndi";
+        }
+        catch (Exception ex) { Status = $"Xəta: {ex.Message}"; }
+        finally { IsBusy = false; }
+    }
+}
