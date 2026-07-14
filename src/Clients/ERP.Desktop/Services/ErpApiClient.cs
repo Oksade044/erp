@@ -12,6 +12,7 @@ using ERP.Shared.Contracts.Invoices;
 using ERP.Shared.Contracts.Orders;
 using ERP.Shared.Contracts.Products;
 using ERP.Shared.Contracts.Reports;
+using ERP.Shared.Contracts.Users;
 
 namespace ERP.Desktop.Services;
 
@@ -131,6 +132,16 @@ public sealed class ErpApiClient(HttpClient http)
 
     public Task<List<TopProductDto>?> GetTopProductsAsync(int top = 10, CancellationToken ct = default) =>
         http.GetFromJsonAsync<List<TopProductDto>>($"/api/v1/reports/top-products?top={top}", JsonOpts, ct);
+
+    // --- İstifadəçilər ---
+    public Task<List<UserDto>?> GetUsersAsync(CancellationToken ct = default) =>
+        http.GetFromJsonAsync<List<UserDto>>("/api/v1/users", JsonOpts, ct);
+
+    public async Task<(bool ok, string? error)> CreateUserAsync(CreateUserRequest request, CancellationToken ct = default)
+    {
+        var resp = await http.PostAsJsonAsync("/api/v1/users", request, JsonOpts, ct);
+        return await ReadResultAsync(resp, ct);
+    }
 
     private static async Task<(bool ok, string? error)> ReadResultAsync(HttpResponseMessage resp, CancellationToken ct)
     {

@@ -56,6 +56,7 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy(Permissions.OrdersApprove, p => p.RequireClaim("permission", Permissions.OrdersApprove));
     options.AddPolicy(Permissions.ReportsView, p => p.RequireClaim("permission", Permissions.ReportsView));
     options.AddPolicy(Permissions.InvoicesEdit, p => p.RequireClaim("permission", Permissions.InvoicesEdit));
+    options.AddPolicy(Permissions.UsersManage, p => p.RequireClaim("permission", Permissions.UsersManage));
 });
 
 // OpenAPI/Swagger (TDD §11)
@@ -86,6 +87,7 @@ app.MapProductEndpoints();
 app.MapOrderEndpoints();
 app.MapInvoiceEndpoints();
 app.MapReportEndpoints();
+app.MapUserEndpoints();
 
 // İlkin data: admin istifadəçisi + gözləyən migration-lar (TDD §6).
 await DbSeeder.SeedAsync(app.Services);
