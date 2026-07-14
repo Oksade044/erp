@@ -1,6 +1,7 @@
 using System;
 using ERP.Application.Common.Interfaces;
 using ERP.Infrastructure.Auth;
+using ERP.Infrastructure.Excel;
 using ERP.Infrastructure.Pdf;
 using ERP.Infrastructure.Reports;
 using ERP.Infrastructure.Persistence;
@@ -66,6 +67,9 @@ public static class DependencyInjection
 
         // Hesabat/analitika oxumaları (TDD §5).
         services.AddScoped<IReportService, ReportService>();
+
+        // Excel idxal/ixrac (TDD §26).
+        services.AddScoped<IExcelService, ExcelService>();
 
         return services;
     }

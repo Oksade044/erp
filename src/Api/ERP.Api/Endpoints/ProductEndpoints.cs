@@ -40,6 +40,26 @@ public static class ProductEndpoints
             return result.IsSuccess ? Results.NoContent() : Results.BadRequest(new { error = result.Error });
         });
 
+        // Excel ixrac (TDD §26) — bütün məhsullar xlsx kimi.
+        group.MapGet("/export", async (ISender sender) =>
+        {
+            var bytes = await sender.Send(new ExportProductsQuery());
+            return Results.File(bytes,
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                $"mehsullar-{DateTime.Now:yyyyMMdd}.xlsx");
+        });
+
+        // Excel idxal (TDD §26) — yalnız products.edit icazəsi.
+        group.MapPost("/import", async (IFormFile file, ISender sender) =>
+        {
+            using var ms = new MemoryStream();
+            await file.CopyToAsync(ms);
+            var result = await sender.Send(new ImportProductsCommand(ms.ToArray()));
+            return result.IsSuccess ? Results.Ok(result.Value) : Results.BadRequest(new { error = result.Error });
+        })
+        .RequireAuthorization(ERP.Domain.Modules.Users.Permissions.ProductsEdit)
+        .DisableAntiforgery();
+
         return app;
     }
 }

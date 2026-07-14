@@ -1,4 +1,7 @@
+using System;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.IO;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -72,5 +75,17 @@ public partial class ProductsViewModel(ErpApiClient api) : ViewModelBase
             else Status = error ?? "Əlavə edilmədi.";
         }
         finally { IsBusy = false; }
+    }
+
+    [RelayCommand]
+    private async Task ExportExcelAsync()
+    {
+        var bytes = await api.ExportProductsExcelAsync();
+        if (bytes is null) { Status = "İxrac alınmadı."; return; }
+
+        var path = Path.Combine(Path.GetTempPath(), $"mehsullar-{DateTime.Now:yyyyMMdd-HHmmss}.xlsx");
+        await File.WriteAllBytesAsync(path, bytes);
+        Process.Start(new ProcessStartInfo(path) { UseShellExecute = true });
+        Status = $"Excel ixrac olundu: {Path.GetFileName(path)}";
     }
 }

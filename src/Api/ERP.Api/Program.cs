@@ -57,6 +57,7 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy(Permissions.ReportsView, p => p.RequireClaim("permission", Permissions.ReportsView));
     options.AddPolicy(Permissions.InvoicesEdit, p => p.RequireClaim("permission", Permissions.InvoicesEdit));
     options.AddPolicy(Permissions.UsersManage, p => p.RequireClaim("permission", Permissions.UsersManage));
+    options.AddPolicy(Permissions.ProductsEdit, p => p.RequireClaim("permission", Permissions.ProductsEdit));
 });
 
 // OpenAPI/Swagger (TDD §11)

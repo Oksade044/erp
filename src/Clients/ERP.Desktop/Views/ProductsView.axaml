@@ -18,6 +18,8 @@
                     <TextBox Width="240" PlaceholderText="Ad, SKU və ya kateqoriya üzrə axtar"
                              Text="{Binding Search}" />
                     <Button Content="Axtar" Command="{Binding LoadCommand}" />
+                    <Button Content="📊 Excel ixrac" Command="{Binding ExportExcelCommand}"
+                            Background="#2F9E44" Foreground="White" />
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" Spacing="8">
                     <TextBox Width="130" PlaceholderText="SKU *" Text="{Binding NewSku}" />
