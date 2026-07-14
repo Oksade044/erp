@@ -14,4 +14,7 @@
   <Folder Name="/src/Infrastructure/">
     <Project Path="src/Infrastructure/ERP.Infrastructure/ERP.Infrastructure.csproj" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/ERP.Tests/ERP.Tests.csproj" />
+  </Folder>
 </Solution>
