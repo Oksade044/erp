@@ -1,3 +1,4 @@
+using System;
 using ERP.Application.Common.Interfaces;
 using ERP.Infrastructure.Auth;
 using ERP.Infrastructure.Pdf;
@@ -25,13 +26,21 @@ public static class DependencyInjection
         var connectionString =
             configuration.GetConnectionString("Default") ?? "Data Source=erp.db";
 
+        // Provider config ilə seçilir — app kodu dəyişmir (TDD §4, §32).
+        // "Sqlite" (lokal, default) və ya "Postgres" (server). Yalnız bu registrasiya fərqlənir.
+        var provider = configuration["Database:Provider"] ?? "Sqlite";
+
         // Audit interceptor (TDD §20) — DbContext-ə qoşulur.
         services.AddScoped<AuditInterceptor>();
 
-        // Provider hələlik SQLite (lokal). Serverdə UseNpgsql-a keçid yalnız bu sətir + connection string.
         services.AddDbContext<AppDbContext>((sp, options) =>
         {
-            options.UseSqlite(connectionString);
+            if (provider.Equals("Postgres", StringComparison.OrdinalIgnoreCase)
+                || provider.Equals("Npgsql", StringComparison.OrdinalIgnoreCase))
+                options.UseNpgsql(connectionString);
+            else
+                options.UseSqlite(connectionString);
+
             options.AddInterceptors(sp.GetRequiredService<AuditInterceptor>());
         });
 
