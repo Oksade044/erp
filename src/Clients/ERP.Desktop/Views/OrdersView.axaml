@@ -1,4 +1,4 @@
-﻿<UserControl xmlns="https://github.com/avaloniaui"
+<UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:ERP.Desktop.ViewModels"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -7,27 +7,85 @@
              x:Class="ERP.Desktop.Views.OrdersView"
              x:DataType="vm:OrdersViewModel">
 
-    <Grid RowDefinitions="Auto,Auto,*,Auto" Margin="24">
+    <Grid RowDefinitions="Auto,Auto,Auto,*,Auto" Margin="24">
 
         <TextBlock Grid.Row="0" Text="İcarə Sifarişləri" FontSize="24"
                    FontWeight="SemiBold" Margin="0,0,0,16" />
 
         <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="8" Margin="0,0,0,16">
-            <TextBox Width="240" PlaceholderText="Sifariş № və ya müştəri üzrə axtar" Text="{Binding Search}" />
+            <TextBox Width="200" PlaceholderText="Sifariş № və ya müştəri" Text="{Binding Search}" />
             <Button Content="Axtar" Command="{Binding LoadCommand}" />
+            <Button Content="➕ Yeni Sifariş" Command="{Binding ToggleNewOrderCommand}"
+                    Background="#3B5BDB" Foreground="White" />
             <Button Content="✓ Təsdiqlə" Command="{Binding ConfirmCommand}"
                     Background="#2F9E44" Foreground="White" />
-            <Button Content="🚚 Təhvil ver" Command="{Binding DeliverCommand}"
+            <Button Content="🚚 Təhvil" Command="{Binding DeliverCommand}"
                     Background="#1971C2" Foreground="White" />
             <Button Content="↩ Qaytar" Command="{Binding ReturnCommand}"
                     Background="#7048E8" Foreground="White" />
-            <Button Content="✕ Ləğv et" Command="{Binding CancelCommand}"
+            <Button Content="✕ Ləğv" Command="{Binding CancelCommand}"
                     Background="#E03131" Foreground="White" />
-            <Button Content="💰 Faktura yarat" Command="{Binding CreateInvoiceCommand}"
+            <Button Content="💰 Faktura" Command="{Binding CreateInvoiceCommand}"
                     Background="#F08C00" Foreground="White" />
         </StackPanel>
 
-        <DataGrid Grid.Row="2" ItemsSource="{Binding Orders}" SelectedItem="{Binding Selected}"
+        <!-- Yeni sifariş forması -->
+        <Border Grid.Row="2" Background="#F5F6FA" CornerRadius="8" Padding="16" Margin="0,0,0,16"
+                IsVisible="{Binding ShowNewOrder}">
+            <StackPanel Spacing="10">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <TextBlock Text="Müştəri:" VerticalAlignment="Center" Width="60" />
+                    <ComboBox ItemsSource="{Binding AllCustomers}" SelectedItem="{Binding NewCustomer}" Width="220">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate><TextBlock Text="{Binding Name}" /></DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <TextBlock Text="Tarix:" VerticalAlignment="Center" Margin="12,0,0,0" />
+                    <DatePicker SelectedDate="{Binding NewStartDate}" />
+                    <TextBlock Text="—" VerticalAlignment="Center" />
+                    <DatePicker SelectedDate="{Binding NewEndDate}" />
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <TextBlock Text="Məhsul:" VerticalAlignment="Center" Width="60" />
+                    <ComboBox ItemsSource="{Binding AllProducts}" SelectedItem="{Binding LineProduct}" Width="220">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate><TextBlock Text="{Binding Name}" /></DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <TextBox Width="80" PlaceholderText="Say" Text="{Binding LineQuantity}" />
+                    <Button Content="+ Sətir" Command="{Binding AddLineCommand}" />
+                </StackPanel>
+
+                <DataGrid ItemsSource="{Binding DraftLines}" IsReadOnly="True" Height="130"
+                          GridLinesVisibility="Horizontal" BorderThickness="1" BorderBrush="#E0E2EA">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Məhsul" Binding="{Binding ProductName}" Width="2*" />
+                        <DataGridTextColumn Header="Say" Binding="{Binding Quantity}" Width="*" />
+                        <DataGridTextColumn Header="Qiymət" Binding="{Binding UnitPrice}" Width="*" />
+                        <DataGridTextColumn Header="Cəm" Binding="{Binding LineTotal}" Width="*" />
+                        <DataGridTemplateColumn Header="" Width="Auto">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:CompileBindings="False">
+                                    <Button Content="✕" Background="#E03131" Foreground="White"
+                                            Command="{Binding $parent[DataGrid].DataContext.RemoveLineCommand}"
+                                            CommandParameter="{Binding}" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <StackPanel Orientation="Horizontal" Spacing="12">
+                    <TextBlock Text="{Binding DraftTotal, StringFormat=Cəmi: {0:0.00} AZN}"
+                               FontWeight="SemiBold" VerticalAlignment="Center" />
+                    <Button Content="Sifarişi yarat" Command="{Binding CreateOrderCommand}"
+                            Background="#2F9E44" Foreground="White" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <DataGrid Grid.Row="3" ItemsSource="{Binding Orders}" SelectedItem="{Binding Selected}"
                   IsReadOnly="True" GridLinesVisibility="Horizontal"
                   BorderThickness="1" BorderBrush="#E0E2EA">
             <DataGrid.Columns>
@@ -41,6 +99,6 @@
             </DataGrid.Columns>
         </DataGrid>
 
-        <TextBlock Grid.Row="3" Text="{Binding Status}" Foreground="#5A6072" Margin="0,10,0,0" />
+        <TextBlock Grid.Row="4" Text="{Binding Status}" Foreground="#5A6072" Margin="0,10,0,0" />
     </Grid>
 </UserControl>

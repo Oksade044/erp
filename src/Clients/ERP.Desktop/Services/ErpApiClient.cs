@@ -75,6 +75,12 @@ public sealed class ErpApiClient(HttpClient http)
         http.GetFromJsonAsync<PagedResult<OrderDto>>(
             $"/api/v1/orders?search={Uri.EscapeDataString(search ?? "")}", JsonOpts, ct);
 
+    public async Task<(bool ok, string? error)> CreateOrderAsync(CreateOrderRequest request, CancellationToken ct = default)
+    {
+        var resp = await http.PostAsJsonAsync("/api/v1/orders", request, JsonOpts, ct);
+        return await ReadResultAsync(resp, ct);
+    }
+
     public async Task<(bool ok, string? error)> ConfirmOrderAsync(Guid id, CancellationToken ct = default)
     {
         var resp = await http.PostAsync($"/api/v1/orders/{id}/confirm", null, ct);

@@ -1,13 +1,23 @@
+using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using ERP.Desktop.Services;
+using ERP.Shared.Contracts.Customers;
 using ERP.Shared.Contracts.Orders;
+using ERP.Shared.Contracts.Products;
 
 namespace ERP.Desktop.ViewModels;
 
-/// <summary>Sifarişlər ekranı — icarə sifarişlərinin siyahısı, təsdiq/ləğv.</summary>
+/// <summary>Sifariş yaradarkən müvəqqəti sətir (UI-da göstərilir).</summary>
+public sealed record DraftLine(Guid ProductId, string ProductName, int Quantity, decimal UnitPrice)
+{
+    public decimal LineTotal => Quantity * UnitPrice;
+}
+
+/// <summary>Sifarişlər ekranı — siyahı, təsdiq/ləğv/təhvil, faktura, və yeni sifariş yaratma.</summary>
 public partial class OrdersViewModel(ErpApiClient api) : ViewModelBase
 {
     public ObservableCollection<OrderDto> Orders { get; } = [];
@@ -16,6 +26,76 @@ public partial class OrdersViewModel(ErpApiClient api) : ViewModelBase
     [ObservableProperty] private bool _isBusy;
     [ObservableProperty] private string? _status;
     [ObservableProperty] private OrderDto? _selected;
+
+    // --- Yeni sifariş forması ---
+    [ObservableProperty] private bool _showNewOrder;
+    public ObservableCollection<CustomerDto> AllCustomers { get; } = [];
+    public ObservableCollection<ProductDto> AllProducts { get; } = [];
+    public ObservableCollection<DraftLine> DraftLines { get; } = [];
+
+    [ObservableProperty] private CustomerDto? _newCustomer;
+    [ObservableProperty] private DateTimeOffset _newStartDate = DateTimeOffset.Now;
+    [ObservableProperty] private DateTimeOffset _newEndDate = DateTimeOffset.Now.AddDays(1);
+    [ObservableProperty] private ProductDto? _lineProduct;
+    [ObservableProperty] private int _lineQuantity = 1;
+
+    public decimal DraftTotal => DraftLines.Sum(l => l.LineTotal);
+
+    [RelayCommand]
+    private async Task ToggleNewOrderAsync()
+    {
+        ShowNewOrder = !ShowNewOrder;
+        if (ShowNewOrder && AllCustomers.Count == 0)
+        {
+            var custs = await api.GetCustomersAsync(null);
+            if (custs is not null) foreach (var c in custs.Items) AllCustomers.Add(c);
+            var prods = await api.GetProductsAsync(null);
+            if (prods is not null) foreach (var p in prods.Items) AllProducts.Add(p);
+        }
+    }
+
+    [RelayCommand]
+    private void AddLine()
+    {
+        if (LineProduct is null || LineQuantity <= 0) { Status = "Məhsul və say seçin."; return; }
+        if (DraftLines.Any(l => l.ProductId == LineProduct.Id)) { Status = "Bu məhsul artıq əlavə olunub."; return; }
+
+        DraftLines.Add(new DraftLine(LineProduct.Id, LineProduct.Name, LineQuantity, LineProduct.RentalPrice));
+        OnPropertyChanged(nameof(DraftTotal));
+        LineQuantity = 1;
+    }
+
+    [RelayCommand]
+    private void RemoveLine(DraftLine line)
+    {
+        DraftLines.Remove(line);
+        OnPropertyChanged(nameof(DraftTotal));
+    }
+
+    [RelayCommand]
+    private async Task CreateOrderAsync()
+    {
+        if (NewCustomer is null) { Status = "Müştəri seçin."; return; }
+        if (DraftLines.Count == 0) { Status = "Ən azı bir sətir əlavə edin."; return; }
+
+        var request = new CreateOrderRequest(
+            CustomerId: NewCustomer.Id,
+            StartDate: DateOnly.FromDateTime(NewStartDate.DateTime),
+            EndDate: DateOnly.FromDateTime(NewEndDate.DateTime),
+            Lines: DraftLines.Select(l => new CreateOrderLineRequest(l.ProductId, l.Quantity, l.UnitPrice)).ToList());
+
+        var (ok, error) = await api.CreateOrderAsync(request);
+        if (ok)
+        {
+            Status = "Sifariş yaradıldı (Qaralama).";
+            DraftLines.Clear();
+            NewCustomer = null;
+            ShowNewOrder = false;
+            OnPropertyChanged(nameof(DraftTotal));
+            await LoadAsync();
+        }
+        else Status = error ?? "Sifariş yaradılmadı.";
+    }
 
     [RelayCommand]
     private async Task LoadAsync()
