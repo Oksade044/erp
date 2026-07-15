@@ -40,6 +40,15 @@ public static class ProductEndpoints
             return result.IsSuccess ? Results.NoContent() : Results.BadRequest(new { error = result.Error });
         });
 
+        // QR kod (TDD §27) — məhsulun SKU-su PNG QR kimi (anbar skanlaması üçün).
+        group.MapGet("/{id:guid}/qr", async (Guid id, ISender sender) =>
+        {
+            var result = await sender.Send(new GetProductQrQuery(id));
+            return result.IsSuccess
+                ? Results.File(result.Value!, "image/png")
+                : Results.NotFound(new { error = result.Error });
+        });
+
         // Excel ixrac (TDD §26) — bütün məhsullar xlsx kimi.
         group.MapGet("/export", async (ISender sender) =>
         {

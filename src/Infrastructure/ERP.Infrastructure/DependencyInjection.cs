@@ -71,6 +71,9 @@ public static class DependencyInjection
         // Excel idxal/ixrac (TDD §26).
         services.AddScoped<IExcelService, ExcelService>();
 
+        // QR/barkod generasiyası (TDD §27).
+        services.AddScoped<IBarcodeService, Barcodes.BarcodeService>();
+
         return services;
     }
 }

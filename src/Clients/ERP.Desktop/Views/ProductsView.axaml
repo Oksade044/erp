@@ -20,6 +20,8 @@
                     <Button Content="Axtar" Command="{Binding LoadCommand}" />
                     <Button Content="📊 Excel ixrac" Command="{Binding ExportExcelCommand}"
                             Background="#2F9E44" Foreground="White" />
+                    <Button Content="🏷 QR kod" Command="{Binding ShowQrCommand}"
+                            Background="#7048E8" Foreground="White" />
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" Spacing="8">
                     <TextBox Width="130" PlaceholderText="SKU *" Text="{Binding NewSku}" />
@@ -34,8 +36,8 @@
             </StackPanel>
         </Border>
 
-        <DataGrid Grid.Row="2" ItemsSource="{Binding Products}" IsReadOnly="True"
-                  GridLinesVisibility="Horizontal" BorderThickness="1" BorderBrush="#E0E2EA">
+        <DataGrid Grid.Row="2" ItemsSource="{Binding Products}" SelectedItem="{Binding Selected}"
+                  IsReadOnly="True" GridLinesVisibility="Horizontal" BorderThickness="1" BorderBrush="#E0E2EA">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="SKU" Binding="{Binding Sku}" Width="Auto" />
                 <DataGridTextColumn Header="Ad" Binding="{Binding Name}" Width="2*" />

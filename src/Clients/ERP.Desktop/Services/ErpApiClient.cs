@@ -76,6 +76,12 @@ public sealed class ErpApiClient(HttpClient http)
         return resp.IsSuccessStatusCode ? await resp.Content.ReadAsByteArrayAsync(ct) : null;
     }
 
+    public async Task<byte[]?> GetProductQrAsync(Guid id, CancellationToken ct = default)
+    {
+        var resp = await http.GetAsync($"/api/v1/products/{id}/qr", ct);
+        return resp.IsSuccessStatusCode ? await resp.Content.ReadAsByteArrayAsync(ct) : null;
+    }
+
     // --- Sifarişlər ---
     public Task<PagedResult<OrderDto>?> GetOrdersAsync(string? search, CancellationToken ct = default) =>
         http.GetFromJsonAsync<PagedResult<OrderDto>>(

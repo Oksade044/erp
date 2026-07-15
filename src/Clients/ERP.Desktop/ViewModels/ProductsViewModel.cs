@@ -18,6 +18,7 @@ public partial class ProductsViewModel(ErpApiClient api) : ViewModelBase
     [ObservableProperty] private string? _search;
     [ObservableProperty] private bool _isBusy;
     [ObservableProperty] private string? _status;
+    [ObservableProperty] private ProductDto? _selected;
 
     // Yeni məhsul forması
     [ObservableProperty] private string? _newSku;
@@ -87,5 +88,19 @@ public partial class ProductsViewModel(ErpApiClient api) : ViewModelBase
         await File.WriteAllBytesAsync(path, bytes);
         Process.Start(new ProcessStartInfo(path) { UseShellExecute = true });
         Status = $"Excel ixrac olundu: {Path.GetFileName(path)}";
+    }
+
+    [RelayCommand]
+    private async Task ShowQrAsync()
+    {
+        if (Selected is null) { Status = "Məhsul seçin."; return; }
+
+        var bytes = await api.GetProductQrAsync(Selected.Id);
+        if (bytes is null) { Status = "QR alınmadı."; return; }
+
+        var path = Path.Combine(Path.GetTempPath(), $"qr-{Selected.Sku}.png");
+        await File.WriteAllBytesAsync(path, bytes);
+        Process.Start(new ProcessStartInfo(path) { UseShellExecute = true });
+        Status = $"QR kod açıldı: {Selected.Sku}";
     }
 }
