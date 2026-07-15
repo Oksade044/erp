@@ -74,6 +74,9 @@ public static class DependencyInjection
         // QR/barkod generasiyası (TDD §27).
         services.AddScoped<IBarcodeService, Barcodes.BarcodeService>();
 
+        // Verilənlər bazası backup-ı (TDD §29).
+        services.AddScoped<IBackupService, Backup.SqliteBackupService>();
+
         return services;
     }
 }

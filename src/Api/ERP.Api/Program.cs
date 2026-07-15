@@ -7,6 +7,7 @@ using ERP.Application.Common.Interfaces;
 using ERP.Domain.Modules.Users;
 using ERP.Infrastructure;
 using ERP.Infrastructure.Auth;
+using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
@@ -60,6 +61,11 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy(Permissions.ProductsEdit, p => p.RequireClaim("permission", Permissions.ProductsEdit));
 });
 
+// --- Background jobs: Hangfire (TDD §36) ---
+// Lokalda in-memory storage; serverdə PostgreSQL storage-a keçiriləcək.
+builder.Services.AddHangfire(config => config.UseInMemoryStorage());
+builder.Services.AddHangfireServer();
+
 // OpenAPI/Swagger (TDD §11)
 builder.Services.AddOpenApi();
 
@@ -77,6 +83,8 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi().AllowAnonymous();
     app.MapScalarApiReference(options =>
         options.WithTitle("ERP API — Toy Dekoru & Tədbir Avadanlığı")).AllowAnonymous();
+    // Hangfire dashboard yalnız lokalda (default: yalnız localhost girişi) — /hangfire.
+    app.UseHangfireDashboard("/hangfire");
 }
 
 app.MapGet("/health", () => Results.Ok(new { status = "ok", service = "ERP.Api" }))
@@ -89,6 +97,17 @@ app.MapOrderEndpoints();
 app.MapInvoiceEndpoints();
 app.MapReportEndpoints();
 app.MapUserEndpoints();
+
+// Backup: manual trigger (users.manage) — Hangfire background job kimi növbəyə salır (TDD §29, §36).
+app.MapPost("/api/v1/admin/backup", (IBackgroundJobClient jobs) =>
+{
+    var jobId = jobs.Enqueue<IBackupService>(s => s.BackupAsync(CancellationToken.None));
+    return Results.Accepted(value: new { jobId, message = "Backup növbəyə salındı." });
+}).RequireAuthorization(Permissions.UsersManage).WithTags("Admin");
+
+// Gündəlik avtomatik backup (TDD §29).
+RecurringJob.AddOrUpdate<IBackupService>(
+    "daily-backup", s => s.BackupAsync(CancellationToken.None), Cron.Daily);
 
 // İlkin data: admin istifadəçisi + gözləyən migration-lar (TDD §6).
 await DbSeeder.SeedAsync(app.Services);
