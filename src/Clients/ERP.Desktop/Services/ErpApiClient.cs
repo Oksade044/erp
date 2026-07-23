@@ -9,6 +9,7 @@ using System.Net.Http.Headers;
 using ERP.Shared.Contracts.Auth;
 using ERP.Shared.Contracts.Customers;
 using ERP.Shared.Contracts.Finance;
+using ERP.Shared.Contracts.Hr;
 using ERP.Shared.Contracts.Invoices;
 using ERP.Shared.Contracts.Orders;
 using ERP.Shared.Contracts.Products;
@@ -157,6 +158,17 @@ public sealed class ErpApiClient(HttpClient http)
     public async Task<(bool ok, string? error)> CancelPurchaseAsync(Guid id, CancellationToken ct = default)
     {
         var resp = await http.PostAsync($"/api/v1/purchases/{id}/cancel", null, ct);
+        return await ReadResultAsync(resp, ct);
+    }
+
+    // --- İşçilər (HR) ---
+    public Task<PagedResult<EmployeeDto>?> GetEmployeesAsync(string? search, CancellationToken ct = default) =>
+        http.GetFromJsonAsync<PagedResult<EmployeeDto>>(
+            $"/api/v1/employees?search={Uri.EscapeDataString(search ?? "")}", JsonOpts, ct);
+
+    public async Task<(bool ok, string? error)> CreateEmployeeAsync(CreateEmployeeRequest request, CancellationToken ct = default)
+    {
+        var resp = await http.PostAsJsonAsync("/api/v1/employees", request, JsonOpts, ct);
         return await ReadResultAsync(resp, ct);
     }
 

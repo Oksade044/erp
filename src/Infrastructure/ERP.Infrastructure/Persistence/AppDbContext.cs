@@ -3,6 +3,7 @@ using ERP.Application.Common.Interfaces;
 using ERP.Domain.Common;
 using ERP.Domain.Modules.Customers;
 using ERP.Domain.Modules.Finance;
+using ERP.Domain.Modules.Hr;
 using ERP.Domain.Modules.Invoices;
 using ERP.Domain.Modules.Orders;
 using ERP.Domain.Modules.Products;
@@ -28,6 +29,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
     public DbSet<Supplier> Suppliers => Set<Supplier>();
     public DbSet<PurchaseOrder> Purchases => Set<PurchaseOrder>();
     public DbSet<FinancialTransaction> FinancialTransactions => Set<FinancialTransaction>();
+    public DbSet<Employee> Employees => Set<Employee>();
     public DbSet<User> Users => Set<User>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

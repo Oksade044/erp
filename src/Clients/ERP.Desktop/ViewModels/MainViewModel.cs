@@ -21,6 +21,7 @@ public partial class MainViewModel : ViewModelBase
     private readonly SuppliersViewModel _suppliers;
     private readonly PurchasesViewModel _purchases;
     private readonly FinanceViewModel _finance;
+    private readonly EmployeesViewModel _employees;
     private readonly UsersViewModel _users;
     private readonly Action _onLogout;
 
@@ -47,6 +48,7 @@ public partial class MainViewModel : ViewModelBase
         _suppliers = new SuppliersViewModel(api);
         _purchases = new PurchasesViewModel(api);
         _finance = new FinanceViewModel(api);
+        _employees = new EmployeesViewModel(api);
         _users = new UsersViewModel(api);
 
         Current = _dashboard;
@@ -66,6 +68,7 @@ public partial class MainViewModel : ViewModelBase
             "Təchizatçılar" => _suppliers,
             "Alışlar" => _purchases,
             "Maliyyə" => _finance,
+            "İşçilər" => _employees,
             "İstifadəçilər" => _users,
             _ => _dashboard
         };
@@ -80,6 +83,7 @@ public partial class MainViewModel : ViewModelBase
             case SuppliersViewModel s: s.LoadCommand.Execute(null); break;
             case PurchasesViewModel pu: pu.LoadCommand.Execute(null); break;
             case FinanceViewModel f: f.LoadCommand.Execute(null); break;
+            case EmployeesViewModel e: e.LoadCommand.Execute(null); break;
             case UsersViewModel u: u.LoadCommand.Execute(null); break;
         }
     }
