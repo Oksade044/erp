@@ -3,6 +3,7 @@ using System;
 using ERP.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ERP.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260723153056_AddSuppliers")]
+    partial class AddSuppliers
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.9");
@@ -539,7 +542,7 @@ namespace ERP.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("CustomerId");
 
-                            b1.ToTable("Customers", (string)null);
+                            b1.ToTable("Customers");
 
                             b1.WithOwner()
                                 .HasForeignKey("CustomerId");
@@ -558,7 +561,7 @@ namespace ERP.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("CustomerId");
 
-                            b1.ToTable("Customers", (string)null);
+                            b1.ToTable("Customers");
 
                             b1.WithOwner()
                                 .HasForeignKey("CustomerId");
@@ -580,7 +583,7 @@ namespace ERP.Infrastructure.Persistence.Migrations
                             b1.HasIndex("Value")
                                 .IsUnique();
 
-                            b1.ToTable("Customers", (string)null);
+                            b1.ToTable("Customers");
 
                             b1.WithOwner()
                                 .HasForeignKey("CustomerId");
@@ -614,7 +617,7 @@ namespace ERP.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("InvoiceId");
 
-                            b1.ToTable("Invoices", (string)null);
+                            b1.ToTable("Invoices");
 
                             b1.WithOwner()
                                 .HasForeignKey("InvoiceId");
@@ -650,7 +653,7 @@ namespace ERP.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("PaymentId");
 
-                            b1.ToTable("Payments", (string)null);
+                            b1.ToTable("Payments");
 
                             b1.WithOwner()
                                 .HasForeignKey("PaymentId");
@@ -686,7 +689,7 @@ namespace ERP.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("OrderLineId");
 
-                            b1.ToTable("OrderLines", (string)null);
+                            b1.ToTable("OrderLines");
 
                             b1.WithOwner()
                                 .HasForeignKey("OrderLineId");
@@ -716,7 +719,7 @@ namespace ERP.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("ProductId");
 
-                            b1.ToTable("Products", (string)null);
+                            b1.ToTable("Products");
 
                             b1.WithOwner()
                                 .HasForeignKey("ProductId");
@@ -738,7 +741,7 @@ namespace ERP.Infrastructure.Persistence.Migrations
                             b1.HasIndex("Value")
                                 .IsUnique();
 
-                            b1.ToTable("Products", (string)null);
+                            b1.ToTable("Products");
 
                             b1.WithOwner()
                                 .HasForeignKey("ProductId");
@@ -772,7 +775,7 @@ namespace ERP.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("SupplierId");
 
-                            b1.ToTable("Suppliers", (string)null);
+                            b1.ToTable("Suppliers");
 
                             b1.WithOwner()
                                 .HasForeignKey("SupplierId");
@@ -791,7 +794,7 @@ namespace ERP.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("SupplierId");
 
-                            b1.ToTable("Suppliers", (string)null);
+                            b1.ToTable("Suppliers");
 
                             b1.WithOwner()
                                 .HasForeignKey("SupplierId");
@@ -813,7 +816,7 @@ namespace ERP.Infrastructure.Persistence.Migrations
                             b1.HasIndex("Value")
                                 .IsUnique();
 
-                            b1.ToTable("Suppliers", (string)null);
+                            b1.ToTable("Suppliers");
 
                             b1.WithOwner()
                                 .HasForeignKey("SupplierId");

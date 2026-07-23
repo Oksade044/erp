@@ -15,6 +15,8 @@ public static class Permissions
     public const string OrdersApprove = "orders.approve";
     public const string InvoicesView = "invoices.view";
     public const string InvoicesEdit = "invoices.edit";
+    public const string SuppliersView = "suppliers.view";
+    public const string SuppliersEdit = "suppliers.edit";
     public const string ReportsView = "reports.view";
     public const string UsersManage = "users.manage";
 
@@ -25,16 +27,17 @@ public static class Permissions
         [
             CustomersView, CustomersEdit, ProductsView, ProductsEdit,
             OrdersView, OrdersEdit, OrdersApprove, InvoicesView, InvoicesEdit,
-            ReportsView, UsersManage
+            SuppliersView, SuppliersEdit, ReportsView, UsersManage
         ],
         Role.Menecer =>
         [
             CustomersView, CustomersEdit, ProductsView, ProductsEdit,
-            OrdersView, OrdersEdit, OrdersApprove, InvoicesView, InvoicesEdit, ReportsView
+            OrdersView, OrdersEdit, OrdersApprove, InvoicesView, InvoicesEdit,
+            SuppliersView, SuppliersEdit, ReportsView
         ],
         Role.Anbardar =>
         [
-            ProductsView, ProductsEdit, OrdersView, OrdersEdit
+            ProductsView, ProductsEdit, OrdersView, OrdersEdit, SuppliersView
         ],
         Role.Kassir =>
         [
