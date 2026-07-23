@@ -22,6 +22,7 @@ public partial class MainViewModel : ViewModelBase
     private readonly PurchasesViewModel _purchases;
     private readonly FinanceViewModel _finance;
     private readonly EmployeesViewModel _employees;
+    private readonly AttendanceViewModel _attendance;
     private readonly UsersViewModel _users;
     private readonly Action _onLogout;
 
@@ -49,6 +50,7 @@ public partial class MainViewModel : ViewModelBase
         _purchases = new PurchasesViewModel(api);
         _finance = new FinanceViewModel(api);
         _employees = new EmployeesViewModel(api);
+        _attendance = new AttendanceViewModel(api);
         _users = new UsersViewModel(api);
 
         Current = _dashboard;
@@ -69,6 +71,7 @@ public partial class MainViewModel : ViewModelBase
             "Alışlar" => _purchases,
             "Maliyyə" => _finance,
             "İşçilər" => _employees,
+            "Davamiyyət" => _attendance,
             "İstifadəçilər" => _users,
             _ => _dashboard
         };
@@ -84,6 +87,7 @@ public partial class MainViewModel : ViewModelBase
             case PurchasesViewModel pu: pu.LoadCommand.Execute(null); break;
             case FinanceViewModel f: f.LoadCommand.Execute(null); break;
             case EmployeesViewModel e: e.LoadCommand.Execute(null); break;
+            case AttendanceViewModel at: at.LoadCommand.Execute(null); break;
             case UsersViewModel u: u.LoadCommand.Execute(null); break;
         }
     }

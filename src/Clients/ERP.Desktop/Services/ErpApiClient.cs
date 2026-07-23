@@ -172,6 +172,17 @@ public sealed class ErpApiClient(HttpClient http)
         return await ReadResultAsync(resp, ct);
     }
 
+    // --- Davamiyyət (Attendance) ---
+    public Task<PagedResult<AttendanceDto>?> GetAttendanceAsync(string? search, CancellationToken ct = default) =>
+        http.GetFromJsonAsync<PagedResult<AttendanceDto>>(
+            $"/api/v1/attendance?search={Uri.EscapeDataString(search ?? "")}", JsonOpts, ct);
+
+    public async Task<(bool ok, string? error)> CreateAttendanceAsync(CreateAttendanceRequest request, CancellationToken ct = default)
+    {
+        var resp = await http.PostAsJsonAsync("/api/v1/attendance", request, JsonOpts, ct);
+        return await ReadResultAsync(resp, ct);
+    }
+
     // --- Maliyyə (kassa mədaxil/məxaric) ---
     public Task<PagedResult<TransactionDto>?> GetTransactionsAsync(string? search, string? type, CancellationToken ct = default) =>
         http.GetFromJsonAsync<PagedResult<TransactionDto>>(
