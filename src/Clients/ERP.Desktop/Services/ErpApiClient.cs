@@ -172,6 +172,23 @@ public sealed class ErpApiClient(HttpClient http)
         return await ReadResultAsync(resp, ct);
     }
 
+    // --- Əməkhaqqı (Payroll) ---
+    public Task<PagedResult<PayrollDto>?> GetPayrollsAsync(string? search, CancellationToken ct = default) =>
+        http.GetFromJsonAsync<PagedResult<PayrollDto>>(
+            $"/api/v1/payrolls?search={Uri.EscapeDataString(search ?? "")}", JsonOpts, ct);
+
+    public async Task<(bool ok, string? error)> CreatePayrollAsync(CreatePayrollRequest request, CancellationToken ct = default)
+    {
+        var resp = await http.PostAsJsonAsync("/api/v1/payrolls", request, JsonOpts, ct);
+        return await ReadResultAsync(resp, ct);
+    }
+
+    public async Task<(bool ok, string? error)> PayPayrollAsync(Guid id, CancellationToken ct = default)
+    {
+        var resp = await http.PostAsync($"/api/v1/payrolls/{id}/pay", null, ct);
+        return await ReadResultAsync(resp, ct);
+    }
+
     // --- Davamiyyət (Attendance) ---
     public Task<PagedResult<AttendanceDto>?> GetAttendanceAsync(string? search, CancellationToken ct = default) =>
         http.GetFromJsonAsync<PagedResult<AttendanceDto>>(

@@ -108,6 +108,7 @@ app.MapPurchaseEndpoints();
 app.MapFinanceEndpoints();
 app.MapEmployeeEndpoints();
 app.MapAttendanceEndpoints();
+app.MapPayrollEndpoints();
 app.MapReportEndpoints();
 app.MapUserEndpoints();
 

@@ -31,6 +31,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
     public DbSet<FinancialTransaction> FinancialTransactions => Set<FinancialTransaction>();
     public DbSet<Employee> Employees => Set<Employee>();
     public DbSet<Attendance> Attendances => Set<Attendance>();
+    public DbSet<Payroll> Payrolls => Set<Payroll>();
     public DbSet<User> Users => Set<User>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

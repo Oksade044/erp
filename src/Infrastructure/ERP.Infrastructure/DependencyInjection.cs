@@ -59,6 +59,7 @@ public static class DependencyInjection
         services.AddScoped<IFinancialTransactionRepository, FinancialTransactionRepository>();
         services.AddScoped<IEmployeeRepository, EmployeeRepository>();
         services.AddScoped<IAttendanceRepository, AttendanceRepository>();
+        services.AddScoped<IPayrollRepository, PayrollRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
 
         // Autentifikasiya servisləri (TDD §6, §39).

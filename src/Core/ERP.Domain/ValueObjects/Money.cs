@@ -38,6 +38,15 @@ public sealed class Money : ValueObject
         return new Money(Amount + other.Amount, Currency);
     }
 
+    public Money Subtract(Money other)
+    {
+        EnsureSameCurrency(other);
+        var result = Amount - other.Amount;
+        if (result < 0)
+            throw new InvalidOperationException("Nəticə mənfi ola bilməz.");
+        return new Money(result, Currency);
+    }
+
     public Money Multiply(decimal factor) => new(decimal.Round(Amount * factor, 2), Currency);
 
     private void EnsureSameCurrency(Money other)
