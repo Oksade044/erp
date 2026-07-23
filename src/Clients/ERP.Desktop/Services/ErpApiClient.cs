@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Net.Http.Headers;
 using ERP.Shared.Contracts.Auth;
 using ERP.Shared.Contracts.Customers;
+using ERP.Shared.Contracts.Finance;
 using ERP.Shared.Contracts.Invoices;
 using ERP.Shared.Contracts.Orders;
 using ERP.Shared.Contracts.Products;
@@ -156,6 +157,20 @@ public sealed class ErpApiClient(HttpClient http)
     public async Task<(bool ok, string? error)> CancelPurchaseAsync(Guid id, CancellationToken ct = default)
     {
         var resp = await http.PostAsync($"/api/v1/purchases/{id}/cancel", null, ct);
+        return await ReadResultAsync(resp, ct);
+    }
+
+    // --- Maliyyə (kassa mədaxil/məxaric) ---
+    public Task<PagedResult<TransactionDto>?> GetTransactionsAsync(string? search, string? type, CancellationToken ct = default) =>
+        http.GetFromJsonAsync<PagedResult<TransactionDto>>(
+            $"/api/v1/finance/transactions?search={Uri.EscapeDataString(search ?? "")}&type={Uri.EscapeDataString(type ?? "")}", JsonOpts, ct);
+
+    public Task<CashFlowSummaryDto?> GetCashFlowSummaryAsync(CancellationToken ct = default) =>
+        http.GetFromJsonAsync<CashFlowSummaryDto>("/api/v1/finance/summary", JsonOpts, ct);
+
+    public async Task<(bool ok, string? error)> CreateTransactionAsync(CreateTransactionRequest request, CancellationToken ct = default)
+    {
+        var resp = await http.PostAsJsonAsync("/api/v1/finance/transactions", request, JsonOpts, ct);
         return await ReadResultAsync(resp, ct);
     }
 
