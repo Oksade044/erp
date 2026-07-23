@@ -12,6 +12,7 @@ using ERP.Shared.Contracts.Invoices;
 using ERP.Shared.Contracts.Orders;
 using ERP.Shared.Contracts.Products;
 using ERP.Shared.Contracts.Reports;
+using ERP.Shared.Contracts.Suppliers;
 using ERP.Shared.Contracts.Users;
 
 namespace ERP.Desktop.Services;
@@ -56,6 +57,17 @@ public sealed class ErpApiClient(HttpClient http)
     public async Task<(bool ok, string? error)> CreateCustomerAsync(CreateCustomerRequest request, CancellationToken ct = default)
     {
         var resp = await http.PostAsJsonAsync("/api/v1/customers", request, JsonOpts, ct);
+        return await ReadResultAsync(resp, ct);
+    }
+
+    // --- Təchizatçılar ---
+    public Task<PagedResult<SupplierDto>?> GetSuppliersAsync(string? search, CancellationToken ct = default) =>
+        http.GetFromJsonAsync<PagedResult<SupplierDto>>(
+            $"/api/v1/suppliers?search={Uri.EscapeDataString(search ?? "")}", JsonOpts, ct);
+
+    public async Task<(bool ok, string? error)> CreateSupplierAsync(CreateSupplierRequest request, CancellationToken ct = default)
+    {
+        var resp = await http.PostAsJsonAsync("/api/v1/suppliers", request, JsonOpts, ct);
         return await ReadResultAsync(resp, ct);
     }
 
