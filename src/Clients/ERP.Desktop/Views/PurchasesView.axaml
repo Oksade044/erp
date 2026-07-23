@@ -1,0 +1,98 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:ERP.Desktop.ViewModels"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="850" d:DesignHeight="620"
+             x:Class="ERP.Desktop.Views.PurchasesView"
+             x:DataType="vm:PurchasesViewModel">
+
+    <Grid RowDefinitions="Auto,Auto,Auto,*,Auto" Margin="24">
+
+        <TextBlock Grid.Row="0" Text="Alışlar" FontSize="24"
+                   FontWeight="SemiBold" Margin="0,0,0,16" />
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="8" Margin="0,0,0,16">
+            <TextBox Width="200" PlaceholderText="Alış № və ya təchizatçı" Text="{Binding Search}" />
+            <Button Content="Axtar" Command="{Binding LoadCommand}" />
+            <Button Content="➕ Yeni Alış" Command="{Binding ToggleNewPurchaseCommand}"
+                    Background="#3B5BDB" Foreground="White" />
+            <Button Content="✓ Təsdiqlə" Command="{Binding ConfirmCommand}"
+                    Background="#2F9E44" Foreground="White" />
+            <Button Content="📥 Qəbul et" Command="{Binding ReceiveCommand}"
+                    Background="#1971C2" Foreground="White" />
+            <Button Content="✕ Ləğv" Command="{Binding CancelCommand}"
+                    Background="#E03131" Foreground="White" />
+        </StackPanel>
+
+        <!-- Yeni alış forması -->
+        <Border Grid.Row="2" Background="#F5F6FA" CornerRadius="8" Padding="16" Margin="0,0,0,16"
+                IsVisible="{Binding ShowNewPurchase}">
+            <StackPanel Spacing="10">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <TextBlock Text="Təchizatçı:" VerticalAlignment="Center" Width="70" />
+                    <ComboBox ItemsSource="{Binding AllSuppliers}" SelectedItem="{Binding NewSupplier}" Width="220">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate><TextBlock Text="{Binding Name}" /></DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <TextBlock Text="Tarix:" VerticalAlignment="Center" Margin="12,0,0,0" />
+                    <DatePicker SelectedDate="{Binding NewOrderDate}" />
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <TextBlock Text="Məhsul:" VerticalAlignment="Center" Width="70" />
+                    <ComboBox ItemsSource="{Binding AllProducts}" SelectedItem="{Binding LineProduct}" Width="220">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate><TextBlock Text="{Binding Name}" /></DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <TextBox Width="70" PlaceholderText="Say" Text="{Binding LineQuantity}" />
+                    <TextBox Width="100" PlaceholderText="Alış qiyməti" Text="{Binding LineUnitCost}" />
+                    <Button Content="+ Sətir" Command="{Binding AddLineCommand}" />
+                </StackPanel>
+
+                <DataGrid ItemsSource="{Binding DraftLines}" IsReadOnly="True" Height="130"
+                          GridLinesVisibility="Horizontal" BorderThickness="1" BorderBrush="#E0E2EA">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Məhsul" Binding="{Binding ProductName}" Width="2*" />
+                        <DataGridTextColumn Header="Say" Binding="{Binding Quantity}" Width="*" />
+                        <DataGridTextColumn Header="Alış qiyməti" Binding="{Binding UnitCost}" Width="*" />
+                        <DataGridTextColumn Header="Cəm" Binding="{Binding LineTotal}" Width="*" />
+                        <DataGridTemplateColumn Header="" Width="Auto">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:CompileBindings="False">
+                                    <Button Content="✕" Background="#E03131" Foreground="White"
+                                            Command="{Binding $parent[DataGrid].DataContext.RemoveLineCommand}"
+                                            CommandParameter="{Binding}" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <StackPanel Orientation="Horizontal" Spacing="12">
+                    <TextBlock Text="{Binding DraftTotal, StringFormat=Cəmi: {0:0.00} AZN}"
+                               FontWeight="SemiBold" VerticalAlignment="Center" />
+                    <Button Content="Alışı yarat" Command="{Binding CreatePurchaseCommand}"
+                            Background="#2F9E44" Foreground="White" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <DataGrid Grid.Row="3" ItemsSource="{Binding Purchases}" SelectedItem="{Binding Selected}"
+                  IsReadOnly="True" GridLinesVisibility="Horizontal"
+                  BorderThickness="1" BorderBrush="#E0E2EA">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Alış №" Binding="{Binding PurchaseNumber}" Width="Auto" />
+                <DataGridTextColumn Header="Təchizatçı" Binding="{Binding SupplierName}" Width="2*" />
+                <DataGridTextColumn Header="Tarix" Binding="{Binding OrderDate}" Width="Auto" />
+                <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="Auto" />
+                <DataGridTextColumn Header="Məbləğ" Binding="{Binding Total}" Width="Auto" />
+                <DataGridTextColumn Header="Valyuta" Binding="{Binding Currency}" Width="Auto" />
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <TextBlock Grid.Row="4" Text="{Binding Status}" Foreground="#5A6072" Margin="0,10,0,0" />
+    </Grid>
+</UserControl>

@@ -11,6 +11,7 @@ using ERP.Shared.Contracts.Customers;
 using ERP.Shared.Contracts.Invoices;
 using ERP.Shared.Contracts.Orders;
 using ERP.Shared.Contracts.Products;
+using ERP.Shared.Contracts.Purchases;
 using ERP.Shared.Contracts.Reports;
 using ERP.Shared.Contracts.Suppliers;
 using ERP.Shared.Contracts.Users;
@@ -126,6 +127,35 @@ public sealed class ErpApiClient(HttpClient http)
     public async Task<(bool ok, string? error)> ReturnOrderAsync(Guid id, CancellationToken ct = default)
     {
         var resp = await http.PostAsync($"/api/v1/orders/{id}/return", null, ct);
+        return await ReadResultAsync(resp, ct);
+    }
+
+    // --- Alışlar (Purchase) ---
+    public Task<PagedResult<PurchaseDto>?> GetPurchasesAsync(string? search, CancellationToken ct = default) =>
+        http.GetFromJsonAsync<PagedResult<PurchaseDto>>(
+            $"/api/v1/purchases?search={Uri.EscapeDataString(search ?? "")}", JsonOpts, ct);
+
+    public async Task<(bool ok, string? error)> CreatePurchaseAsync(CreatePurchaseRequest request, CancellationToken ct = default)
+    {
+        var resp = await http.PostAsJsonAsync("/api/v1/purchases", request, JsonOpts, ct);
+        return await ReadResultAsync(resp, ct);
+    }
+
+    public async Task<(bool ok, string? error)> ConfirmPurchaseAsync(Guid id, CancellationToken ct = default)
+    {
+        var resp = await http.PostAsync($"/api/v1/purchases/{id}/confirm", null, ct);
+        return await ReadResultAsync(resp, ct);
+    }
+
+    public async Task<(bool ok, string? error)> ReceivePurchaseAsync(Guid id, CancellationToken ct = default)
+    {
+        var resp = await http.PostAsync($"/api/v1/purchases/{id}/receive", null, ct);
+        return await ReadResultAsync(resp, ct);
+    }
+
+    public async Task<(bool ok, string? error)> CancelPurchaseAsync(Guid id, CancellationToken ct = default)
+    {
+        var resp = await http.PostAsync($"/api/v1/purchases/{id}/cancel", null, ct);
         return await ReadResultAsync(resp, ct);
     }
 

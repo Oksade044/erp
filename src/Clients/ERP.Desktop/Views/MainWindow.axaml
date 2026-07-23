@@ -33,6 +33,8 @@
                             CommandParameter="Fakturalar" Classes="nav" />
                     <Button Content="🚚  Təchizatçılar" Command="{Binding NavigateCommand}"
                             CommandParameter="Təchizatçılar" Classes="nav" />
+                    <Button Content="🛒  Alışlar" Command="{Binding NavigateCommand}"
+                            CommandParameter="Alışlar" Classes="nav" />
                     <Button Content="🔑  İstifadəçilər" Command="{Binding NavigateCommand}"
                             CommandParameter="İstifadəçilər" Classes="nav"
                             IsVisible="{Binding CanManageUsers}" />
