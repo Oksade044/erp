@@ -34,6 +34,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
     public DbSet<Attendance> Attendances => Set<Attendance>();
     public DbSet<Payroll> Payrolls => Set<Payroll>();
     public DbSet<Warehouse> Warehouses => Set<Warehouse>();
+    public DbSet<StockLevel> StockLevels => Set<StockLevel>();
     public DbSet<User> Users => Set<User>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

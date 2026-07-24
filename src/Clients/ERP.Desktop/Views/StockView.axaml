@@ -1,0 +1,71 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:ERP.Desktop.ViewModels"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="850" d:DesignHeight="660"
+             x:Class="ERP.Desktop.Views.StockView"
+             x:DataType="vm:StockViewModel">
+
+    <Grid RowDefinitions="Auto,Auto,Auto,Auto,*,Auto" Margin="24">
+
+        <TextBlock Grid.Row="0" Text="Stok İdarəetməsi" FontSize="24" FontWeight="SemiBold" Margin="0,0,0,16" />
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="8" Margin="0,0,0,12">
+            <TextBox Width="200" PlaceholderText="Məhsul və ya anbar üzrə axtar" Text="{Binding Search}" />
+            <CheckBox Content="Yalnız aşağı stok" IsChecked="{Binding LowOnly}" VerticalAlignment="Center" />
+            <Button Content="Axtar / Yenilə" Command="{Binding LoadCommand}" />
+        </StackPanel>
+
+        <!-- Stok təyini (adjust) -->
+        <Border Grid.Row="2" Background="#F5F6FA" CornerRadius="8" Padding="16" Margin="0,0,0,10">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <TextBlock Text="Stok təyin et:" VerticalAlignment="Center" FontWeight="SemiBold" />
+                <ComboBox ItemsSource="{Binding AllProducts}" SelectedItem="{Binding AdjProduct}" Width="180">
+                    <ComboBox.ItemTemplate><DataTemplate><TextBlock Text="{Binding Name}" /></DataTemplate></ComboBox.ItemTemplate>
+                </ComboBox>
+                <ComboBox ItemsSource="{Binding AllWarehouses}" SelectedItem="{Binding AdjWarehouse}" Width="150">
+                    <ComboBox.ItemTemplate><DataTemplate><TextBlock Text="{Binding Name}" /></DataTemplate></ComboBox.ItemTemplate>
+                </ComboBox>
+                <TextBox Width="90" PlaceholderText="Miqdar" Text="{Binding AdjQuantity}" />
+                <TextBox Width="90" PlaceholderText="Min. həd" Text="{Binding AdjMinQuantity}" />
+                <Button Content="Təyin et" Command="{Binding AdjustCommand}"
+                        Background="#3B5BDB" Foreground="White" />
+            </StackPanel>
+        </Border>
+
+        <!-- Transfer -->
+        <Border Grid.Row="3" Background="#F5F6FA" CornerRadius="8" Padding="16" Margin="0,0,0,16">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <TextBlock Text="Transfer:" VerticalAlignment="Center" FontWeight="SemiBold" />
+                <ComboBox ItemsSource="{Binding AllProducts}" SelectedItem="{Binding TrProduct}" Width="170">
+                    <ComboBox.ItemTemplate><DataTemplate><TextBlock Text="{Binding Name}" /></DataTemplate></ComboBox.ItemTemplate>
+                </ComboBox>
+                <ComboBox ItemsSource="{Binding AllWarehouses}" SelectedItem="{Binding TrFrom}" Width="140">
+                    <ComboBox.ItemTemplate><DataTemplate><TextBlock Text="{Binding Name}" /></DataTemplate></ComboBox.ItemTemplate>
+                </ComboBox>
+                <TextBlock Text="→" VerticalAlignment="Center" />
+                <ComboBox ItemsSource="{Binding AllWarehouses}" SelectedItem="{Binding TrTo}" Width="140">
+                    <ComboBox.ItemTemplate><DataTemplate><TextBlock Text="{Binding Name}" /></DataTemplate></ComboBox.ItemTemplate>
+                </ComboBox>
+                <TextBox Width="90" PlaceholderText="Miqdar" Text="{Binding TrQuantity}" />
+                <Button Content="🔀 Köçür" Command="{Binding TransferCommand}"
+                        Background="#2F9E44" Foreground="White" />
+            </StackPanel>
+        </Border>
+
+        <!-- Səviyyələr -->
+        <DataGrid Grid.Row="4" ItemsSource="{Binding Levels}" IsReadOnly="True"
+                  GridLinesVisibility="Horizontal" BorderThickness="1" BorderBrush="#E0E2EA">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Məhsul" Binding="{Binding ProductName}" Width="2*" />
+                <DataGridTextColumn Header="Anbar" Binding="{Binding WarehouseName}" Width="*" />
+                <DataGridTextColumn Header="Miqdar" Binding="{Binding Quantity}" Width="Auto" />
+                <DataGridTextColumn Header="Min. həd" Binding="{Binding MinQuantity}" Width="Auto" />
+                <DataGridCheckBoxColumn Header="Aşağı?" Binding="{Binding IsLow}" Width="Auto" />
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <TextBlock Grid.Row="5" Text="{Binding Status}" Foreground="#5A6072" Margin="0,10,0,0" />
+    </Grid>
+</UserControl>

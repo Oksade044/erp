@@ -184,6 +184,23 @@ public sealed class ErpApiClient(HttpClient http)
         return await ReadResultAsync(resp, ct);
     }
 
+    // --- Stok (per-anbar səviyyələr, transfer, min-stok) ---
+    public Task<PagedResult<StockLevelDto>?> GetStockLevelsAsync(string? search, bool lowOnly, CancellationToken ct = default) =>
+        http.GetFromJsonAsync<PagedResult<StockLevelDto>>(
+            $"/api/v1/stock/levels?search={Uri.EscapeDataString(search ?? "")}&low={(lowOnly ? "true" : "false")}", JsonOpts, ct);
+
+    public async Task<(bool ok, string? error)> AdjustStockAsync(AdjustStockRequest request, CancellationToken ct = default)
+    {
+        var resp = await http.PostAsJsonAsync("/api/v1/stock/adjust", request, JsonOpts, ct);
+        return await ReadResultAsync(resp, ct);
+    }
+
+    public async Task<(bool ok, string? error)> TransferStockAsync(TransferStockRequest request, CancellationToken ct = default)
+    {
+        var resp = await http.PostAsJsonAsync("/api/v1/stock/transfer", request, JsonOpts, ct);
+        return await ReadResultAsync(resp, ct);
+    }
+
     // --- Əməkhaqqı (Payroll) ---
     public Task<PagedResult<PayrollDto>?> GetPayrollsAsync(string? search, CancellationToken ct = default) =>
         http.GetFromJsonAsync<PagedResult<PayrollDto>>(
