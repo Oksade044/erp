@@ -30,6 +30,7 @@ public sealed class TransferStockValidator : AbstractValidator<TransferStockComm
 public sealed class TransferStockHandler(
     IStockLevelRepository stockLevels,
     IWarehouseRepository warehouses,
+    IStockNotifier notifier,
     IUnitOfWork unitOfWork)
     : IRequestHandler<TransferStockCommand, Result>
 {
@@ -71,6 +72,11 @@ public sealed class TransferStockHandler(
         }
 
         await unitOfWork.SaveChangesAsync(ct);
+
+        // Hər iki anbarın yeni səviyyəsini canlı yayımla (TDD §38).
+        await notifier.NotifyStockChangedAsync(source.ToNotification(), ct);
+        await notifier.NotifyStockChangedAsync(dest.ToNotification(), ct);
+
         return Result.Success();
     }
 }

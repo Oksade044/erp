@@ -1,17 +1,26 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using ERP.Desktop.Services;
 using ERP.Shared.Contracts.Products;
 using ERP.Shared.Contracts.Warehouses;
+using Microsoft.AspNetCore.SignalR.Client;
 
 namespace ERP.Desktop.ViewModels;
 
-/// <summary>Stok ekranı — per-anbar səviyyələr, stok təyini (adjust), anbarlar arası transfer, min-stok filtri.</summary>
+/// <summary>
+/// Stok ekranı — per-anbar səviyyələr, adjust, transfer, min-stok filtri. SignalR ilə canlı
+/// yenilənir: başqa istifadəçi stoku dəyişəndə siyahı dərhal təzələnir (TDD §38).
+/// </summary>
 public partial class StockViewModel(ErpApiClient api) : ViewModelBase
 {
+    private HubConnection? _hub;
+
+    [ObservableProperty] private string _liveStatus = "🔴 Oflayn";
+
     public ObservableCollection<StockLevelDto> Levels { get; } = [];
     public ObservableCollection<ProductDto> AllProducts { get; } = [];
     public ObservableCollection<WarehouseDto> AllWarehouses { get; } = [];
@@ -33,9 +42,42 @@ public partial class StockViewModel(ErpApiClient api) : ViewModelBase
     [ObservableProperty] private WarehouseDto? _trTo;
     [ObservableProperty] private int _trQuantity;
 
+    /// <summary>SignalR hub-a qoşulur (bir dəfə) və "StockChanged" hadisəsində siyahını təzələyir.</summary>
+    private async Task EnsureLiveConnectionAsync()
+    {
+        if (_hub is not null) return;
+
+        _hub = new HubConnectionBuilder()
+            .WithUrl($"{api.BaseUrl}/hubs/stock")
+            .WithAutomaticReconnect()
+            .Build();
+
+        _hub.On<StockChangedNotification>("StockChanged", n =>
+            Dispatcher.UIThread.Post(() =>
+            {
+                LiveStatus = $"🟢 Canlı — son: {n.ProductName} @ {n.WarehouseName} = {n.Quantity}"
+                    + (n.IsLow ? " ⚠️" : "");
+                LoadCommand.Execute(null);
+            }));
+
+        _hub.Reconnected += _ => { Dispatcher.UIThread.Post(() => LiveStatus = "🟢 Canlı"); return Task.CompletedTask; };
+        _hub.Closed += _ => { Dispatcher.UIThread.Post(() => LiveStatus = "🔴 Oflayn"); return Task.CompletedTask; };
+
+        try
+        {
+            await _hub.StartAsync();
+            LiveStatus = "🟢 Canlı";
+        }
+        catch (System.Exception ex)
+        {
+            LiveStatus = $"🔴 Canlı bağlantı yoxdur: {ex.Message}";
+        }
+    }
+
     [RelayCommand]
     private async Task LoadAsync()
     {
+        await EnsureLiveConnectionAsync();
         IsBusy = true;
         Status = "Yüklənir...";
         try

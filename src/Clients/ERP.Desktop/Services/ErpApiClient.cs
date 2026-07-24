@@ -29,6 +29,9 @@ public sealed class ErpApiClient(HttpClient http)
 {
     private static readonly JsonSerializerOptions JsonOpts = new(JsonSerializerDefaults.Web);
 
+    /// <summary>API-nin baza ünvanı (SignalR hub URL-i qurmaq üçün).</summary>
+    public string BaseUrl => http.BaseAddress?.ToString().TrimEnd('/') ?? "http://localhost:5080";
+
     // --- Autentifikasiya ---
     public async Task<(AuthResponse? auth, string? error)> LoginAsync(string username, string password, CancellationToken ct = default)
     {

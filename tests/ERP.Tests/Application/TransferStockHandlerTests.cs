@@ -11,9 +11,10 @@ public class TransferStockHandlerTests
 {
     private readonly IStockLevelRepository _levels = Substitute.For<IStockLevelRepository>();
     private readonly IWarehouseRepository _warehouses = Substitute.For<IWarehouseRepository>();
+    private readonly IStockNotifier _notifier = Substitute.For<IStockNotifier>();
     private readonly IUnitOfWork _uow = Substitute.For<IUnitOfWork>();
 
-    private TransferStockHandler Handler => new(_levels, _warehouses, _uow);
+    private TransferStockHandler Handler => new(_levels, _warehouses, _notifier, _uow);
 
     private static readonly Guid Prod = Guid.NewGuid();
     private static readonly Guid From = Guid.NewGuid();
@@ -34,6 +35,9 @@ public class TransferStockHandlerTests
         Assert.Equal(12, source.Quantity); // 20 - 8
         Assert.Equal(13, dest.Quantity);   // 5 + 8
         await _uow.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+        // Hər iki anbarın dəyişikliyi canlı yayımlanmalıdır (TDD §38).
+        await _notifier.Received(2).NotifyStockChangedAsync(
+            Arg.Any<ERP.Shared.Contracts.Warehouses.StockChangedNotification>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]

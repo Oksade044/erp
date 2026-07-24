@@ -126,6 +126,10 @@ builder.Services.AddRateLimiter(options =>
 builder.Services.AddHangfire(config => config.UseInMemoryStorage());
 builder.Services.AddHangfireServer();
 
+// --- Real-time: SignalR canlı stok bildirişi (TDD §38) ---
+builder.Services.AddSignalR();
+builder.Services.AddScoped<IStockNotifier, ERP.Api.Realtime.SignalRStockNotifier>();
+
 // OpenAPI/Swagger (TDD §11)
 builder.Services.AddOpenApi();
 
@@ -152,6 +156,9 @@ if (app.Environment.IsDevelopment())
 
 app.MapGet("/health", () => Results.Ok(new { status = "ok", service = "ERP.Api" }))
    .WithName("HealthCheck").AllowAnonymous();
+
+// Canlı stok hub-ı (TDD §38). Lokalda anonim (API-first, lokal PC).
+app.MapHub<ERP.Api.Realtime.StockHub>("/hubs/stock").AllowAnonymous();
 
 app.MapAuthEndpoints();
 app.MapCustomerEndpoints();

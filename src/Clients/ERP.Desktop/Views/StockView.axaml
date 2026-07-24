@@ -9,7 +9,11 @@
 
     <Grid RowDefinitions="Auto,Auto,Auto,Auto,*,Auto" Margin="24">
 
-        <TextBlock Grid.Row="0" Text="Stok İdarəetməsi" FontSize="24" FontWeight="SemiBold" Margin="0,0,0,16" />
+        <DockPanel Grid.Row="0" Margin="0,0,0,16">
+            <TextBlock Text="{Binding LiveStatus}" DockPanel.Dock="Right" VerticalAlignment="Center"
+                       FontSize="12" Foreground="#2B8A3E" />
+            <TextBlock Text="Stok İdarəetməsi" FontSize="24" FontWeight="SemiBold" />
+        </DockPanel>
 
         <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="8" Margin="0,0,0,12">
             <TextBox Width="200" PlaceholderText="Məhsul və ya anbar üzrə axtar" Text="{Binding Search}" />

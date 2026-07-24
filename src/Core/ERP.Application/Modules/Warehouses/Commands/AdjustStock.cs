@@ -4,6 +4,7 @@ using ERP.Application.Common.Models;
 using ERP.Domain.Modules.Warehouses;
 using ERP.Shared.Contracts.Warehouses;
 using FluentValidation;
+using ERP.Application.Modules.Warehouses;
 
 namespace ERP.Application.Modules.Warehouses.Commands;
 
@@ -28,6 +29,7 @@ public sealed class AdjustStockHandler(
     IStockLevelRepository stockLevels,
     IProductRepository products,
     IWarehouseRepository warehouses,
+    IStockNotifier notifier,
     IUnitOfWork unitOfWork)
     : IRequestHandler<AdjustStockCommand, Result<Guid>>
 {
@@ -42,6 +44,7 @@ public sealed class AdjustStockHandler(
             existing.SetMinQuantity(dto.MinQuantity);
             stockLevels.Update(existing);
             await unitOfWork.SaveChangesAsync(ct);
+            await notifier.NotifyStockChangedAsync(existing.ToNotification(), ct);
             return Result.Success(existing.Id);
         }
 
@@ -58,6 +61,7 @@ public sealed class AdjustStockHandler(
 
         await stockLevels.AddAsync(level, ct);
         await unitOfWork.SaveChangesAsync(ct);
+        await notifier.NotifyStockChangedAsync(level.ToNotification(), ct);
 
         return Result.Success(level.Id);
     }
