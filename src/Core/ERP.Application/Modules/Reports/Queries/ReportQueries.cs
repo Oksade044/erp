@@ -4,14 +4,17 @@ using ERP.Shared.Contracts.Reports;
 
 namespace ERP.Application.Modules.Reports.Queries;
 
-/// <summary>İdarə paneli xülasəsi (TDD §17 — Query). Nazik handler → IReportService.</summary>
+/// <summary>
+/// İdarə paneli xülasəsi (TDD §17 — Query). Ağır aqreqasiya olduğu üçün keşlənir (TDD §37);
+/// TTL keçdikdə yenilənir. Keçid Memory↔Redis konfiqurasiya ilə.
+/// </summary>
 public sealed record GetDashboardQuery : IRequest<DashboardDto>;
 
-public sealed class GetDashboardHandler(IReportService reports)
+public sealed class GetDashboardHandler(IReportService reports, ICacheService cache)
     : IRequestHandler<GetDashboardQuery, DashboardDto>
 {
     public Task<DashboardDto> Handle(GetDashboardQuery request, CancellationToken ct) =>
-        reports.GetDashboardAsync(ct);
+        cache.GetOrCreateAsync(CacheKeys.Dashboard, reports.GetDashboardAsync, ttl: null, ct);
 }
 
 /// <summary>Qalıq borcu olan fakturalar.</summary>

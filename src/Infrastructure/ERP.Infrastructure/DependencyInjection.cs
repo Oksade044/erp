@@ -88,6 +88,20 @@ public static class DependencyInjection
         // Fayl saxlama (TDD §23) — lokalda disk; serverdə MinIO/S3-ə keçirilə bilər.
         services.AddScoped<IFileStorage, Files.LocalFileStorage>();
 
+        // Keş (TDD §37) — lokalda IMemoryCache (default), serverdə Redis. Keçid yalnız konfiqurasiya.
+        services.AddMemoryCache();
+        var cacheProvider = configuration["Cache:Provider"] ?? "Memory";
+        if (cacheProvider.Equals("Redis", StringComparison.OrdinalIgnoreCase))
+        {
+            services.AddStackExchangeRedisCache(o =>
+                o.Configuration = configuration["Cache:RedisConnection"] ?? "localhost:6379");
+            services.AddScoped<ICacheService, Caching.RedisCacheService>();
+        }
+        else
+        {
+            services.AddScoped<ICacheService, Caching.MemoryCacheService>();
+        }
+
         return services;
     }
 }
