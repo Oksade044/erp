@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
+using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using ERP.Desktop.Services;
@@ -10,7 +11,7 @@ using ERP.Shared.Contracts.Products;
 
 namespace ERP.Desktop.ViewModels;
 
-/// <summary>Məhsullar ekranı — icarə avadanlığı kataloqu, siyahı, axtarış və əlavə.</summary>
+/// <summary>Məhsullar ekranı — icarə avadanlığı kataloqu, siyahı, axtarış, əlavə və şəkil (TDD §24).</summary>
 public partial class ProductsViewModel(ErpApiClient api) : ViewModelBase
 {
     public ObservableCollection<ProductDto> Products { get; } = [];
@@ -19,6 +20,49 @@ public partial class ProductsViewModel(ErpApiClient api) : ViewModelBase
     [ObservableProperty] private bool _isBusy;
     [ObservableProperty] private string? _status;
     [ObservableProperty] private ProductDto? _selected;
+
+    /// <summary>Seçilmiş məhsulun şəkli (API-dən yüklənir; hamıya görünür).</summary>
+    [ObservableProperty] private Bitmap? _selectedImage;
+
+    /// <summary>Seçim dəyişəndə şəkli API-dən yüklə.</summary>
+    partial void OnSelectedChanged(ProductDto? value) => _ = LoadSelectedImageAsync(value);
+
+    private async Task LoadSelectedImageAsync(ProductDto? product)
+    {
+        SelectedImage = null;
+        if (product is null || !product.HasImage) return;
+        try
+        {
+            var bytes = await api.GetProductImageBytesAsync(product.Id);
+            if (bytes is not null)
+            {
+                using var ms = new MemoryStream(bytes);
+                SelectedImage = new Bitmap(ms);
+            }
+        }
+        catch { /* şəkil yüklənə bilmədi — sükutla keç */ }
+    }
+
+    /// <summary>Kodun arxasından (fayl seçicidən) çağırılır: şəkli yükləyir və göstərir.</summary>
+    public async Task UploadImageAsync(string filePath)
+    {
+        if (Selected is null) { Status = "Əvvəlcə məhsul seçin."; return; }
+        IsBusy = true;
+        try
+        {
+            var (ok, error) = await api.UploadProductImageAsync(Selected.Id, filePath);
+            if (ok)
+            {
+                Status = "Şəkil yükləndi (bütün istifadəçilər görəcək).";
+                await LoadAsync();
+                var id = Selected.Id;
+                using var fs = File.OpenRead(filePath);
+                SelectedImage = new Bitmap(fs);
+            }
+            else Status = error ?? "Şəkil yüklənmədi.";
+        }
+        finally { IsBusy = false; }
+    }
 
     // Yeni məhsul forması
     [ObservableProperty] private string? _newSku;

@@ -12,4 +12,5 @@ public sealed record ProductDto(
     string TrackingMode,
     int StockQuantity,
     bool IsActive,
+    bool HasImage,
     DateTimeOffset CreatedAt);

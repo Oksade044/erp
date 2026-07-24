@@ -20,6 +20,7 @@ public sealed class ProductConfiguration : IEntityTypeConfiguration<Product>
         builder.Property(p => p.Description).HasMaxLength(2000);
         builder.Property(p => p.StockQuantity).IsRequired();
         builder.Property(p => p.IsActive).IsRequired();
+        builder.Property(p => p.ImagePath).HasMaxLength(500);
 
         builder.Property(p => p.TrackingMode)
             .HasConversion<string>()

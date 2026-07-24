@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.Json;
@@ -98,6 +99,24 @@ public sealed class ErpApiClient(HttpClient http)
     public async Task<byte[]?> GetProductQrAsync(Guid id, CancellationToken ct = default)
     {
         var resp = await http.GetAsync($"/api/v1/products/{id}/qr", ct);
+        return resp.IsSuccessStatusCode ? await resp.Content.ReadAsByteArrayAsync(ct) : null;
+    }
+
+    /// <summary>Məhsul şəklini yükləyir (fayl storage-ə, hamıya API ilə görünür — TDD §23/§24).</summary>
+    public async Task<(bool ok, string? error)> UploadProductImageAsync(Guid id, string filePath, CancellationToken ct = default)
+    {
+        using var form = new MultipartFormDataContent();
+        await using var stream = File.OpenRead(filePath);
+        var fileContent = new StreamContent(stream);
+        form.Add(fileContent, "file", Path.GetFileName(filePath));
+        var resp = await http.PostAsync($"/api/v1/products/{id}/image", form, ct);
+        return await ReadResultAsync(resp, ct);
+    }
+
+    /// <summary>Məhsul şəklini API-dən baytlar kimi alır (yoxdursa null).</summary>
+    public async Task<byte[]?> GetProductImageBytesAsync(Guid id, CancellationToken ct = default)
+    {
+        var resp = await http.GetAsync($"/api/v1/products/{id}/image", ct);
         return resp.IsSuccessStatusCode ? await resp.Content.ReadAsByteArrayAsync(ct) : null;
     }
 

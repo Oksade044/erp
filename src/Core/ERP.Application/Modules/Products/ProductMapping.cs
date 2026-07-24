@@ -18,6 +18,7 @@ public static class ProductMapping
         TrackingMode: p.TrackingMode.ToString(),
         StockQuantity: p.StockQuantity,
         IsActive: p.IsActive,
+        HasImage: !string.IsNullOrWhiteSpace(p.ImagePath),
         CreatedAt: p.CreatedAt);
 
     public static ProductTrackingMode ParseTrackingMode(string? mode)

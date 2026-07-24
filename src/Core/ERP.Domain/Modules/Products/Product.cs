@@ -26,6 +26,9 @@ public class Product : BaseEntity, IAggregateRoot
 
     public bool IsActive { get; private set; } = true;
 
+    /// <summary>Məhsul şəklinin saxlama açarı/yolu (fayl storage-də; DB-də yalnız yol — TDD §24).</summary>
+    public string? ImagePath { get; private set; }
+
     // EF Core üçün.
     private Product() { }
 
@@ -97,4 +100,7 @@ public class Product : BaseEntity, IAggregateRoot
 
     public void Activate() => IsActive = true;
     public void Deactivate() => IsActive = false;
+
+    /// <summary>Şəkil yolunu təyin edir (fayl storage açarı). Silmək üçün null verilir.</summary>
+    public void SetImagePath(string? path) => ImagePath = string.IsNullOrWhiteSpace(path) ? null : path.Trim();
 }

@@ -85,6 +85,9 @@ public static class DependencyInjection
         // Verilənlər bazası backup-ı (TDD §29).
         services.AddScoped<IBackupService, Backup.SqliteBackupService>();
 
+        // Fayl saxlama (TDD §23) — lokalda disk; serverdə MinIO/S3-ə keçirilə bilər.
+        services.AddScoped<IFileStorage, Files.LocalFileStorage>();
+
         return services;
     }
 }

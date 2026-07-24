@@ -69,6 +69,27 @@ public static class ProductEndpoints
         .RequireAuthorization(ERP.Domain.Modules.Users.Permissions.ProductsEdit)
         .DisableAntiforgery();
 
+        // Şəkil yükləmə (TDD §23/§24) — fayl storage-ə yazılır, hamıya API ilə görünür.
+        group.MapPost("/{id:guid}/image", async (Guid id, IFormFile file, ISender sender) =>
+        {
+            using var ms = new MemoryStream();
+            await file.CopyToAsync(ms);
+            var ext = Path.GetExtension(file.FileName);
+            var result = await sender.Send(new SetProductImageCommand(id, ms.ToArray(), ext));
+            return result.IsSuccess ? Results.Ok(new { key = result.Value }) : Results.BadRequest(new { error = result.Error });
+        })
+        .RequireAuthorization(ERP.Domain.Modules.Users.Permissions.ProductsEdit)
+        .DisableAntiforgery();
+
+        // Şəkil oxuma — istənilən istifadəçi (products.view) API-dən şəkli alır.
+        group.MapGet("/{id:guid}/image", async (Guid id, ISender sender) =>
+        {
+            var result = await sender.Send(new GetProductImageQuery(id));
+            return result.IsSuccess
+                ? Results.File(result.Value!.Content, result.Value.ContentType)
+                : Results.NotFound(new { error = result.Error });
+        });
+
         return app;
     }
 }
