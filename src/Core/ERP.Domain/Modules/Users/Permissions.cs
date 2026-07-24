@@ -23,6 +23,8 @@ public static class Permissions
     public const string FinanceEdit = "finance.edit";
     public const string HrView = "hr.view";
     public const string HrEdit = "hr.edit";
+    public const string WarehousesView = "warehouses.view";
+    public const string WarehousesEdit = "warehouses.edit";
     public const string ReportsView = "reports.view";
     public const string UsersManage = "users.manage";
 
@@ -34,19 +36,22 @@ public static class Permissions
             CustomersView, CustomersEdit, ProductsView, ProductsEdit,
             OrdersView, OrdersEdit, OrdersApprove, InvoicesView, InvoicesEdit,
             SuppliersView, SuppliersEdit, PurchasesView, PurchasesEdit,
-            FinanceView, FinanceEdit, HrView, HrEdit, ReportsView, UsersManage
+            FinanceView, FinanceEdit, HrView, HrEdit,
+            WarehousesView, WarehousesEdit, ReportsView, UsersManage
         ],
         Role.Menecer =>
         [
             CustomersView, CustomersEdit, ProductsView, ProductsEdit,
             OrdersView, OrdersEdit, OrdersApprove, InvoicesView, InvoicesEdit,
             SuppliersView, SuppliersEdit, PurchasesView, PurchasesEdit,
-            FinanceView, FinanceEdit, HrView, HrEdit, ReportsView
+            FinanceView, FinanceEdit, HrView, HrEdit,
+            WarehousesView, WarehousesEdit, ReportsView
         ],
         Role.Anbardar =>
         [
             ProductsView, ProductsEdit, OrdersView, OrdersEdit,
-            SuppliersView, PurchasesView, PurchasesEdit
+            SuppliersView, PurchasesView, PurchasesEdit,
+            WarehousesView, WarehousesEdit
         ],
         Role.Kassir =>
         [

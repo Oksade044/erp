@@ -43,6 +43,8 @@
                             CommandParameter="Davamiyyət" Classes="nav" />
                     <Button Content="💳  Əməkhaqqı" Command="{Binding NavigateCommand}"
                             CommandParameter="Əməkhaqqı" Classes="nav" />
+                    <Button Content="🏭  Anbarlar" Command="{Binding NavigateCommand}"
+                            CommandParameter="Anbarlar" Classes="nav" />
                     <Button Content="🔑  İstifadəçilər" Command="{Binding NavigateCommand}"
                             CommandParameter="İstifadəçilər" Classes="nav"
                             IsVisible="{Binding CanManageUsers}" />

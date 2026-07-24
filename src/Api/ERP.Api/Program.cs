@@ -67,6 +67,8 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy(Permissions.FinanceEdit, p => p.RequireClaim("permission", Permissions.FinanceEdit));
     options.AddPolicy(Permissions.HrView, p => p.RequireClaim("permission", Permissions.HrView));
     options.AddPolicy(Permissions.HrEdit, p => p.RequireClaim("permission", Permissions.HrEdit));
+    options.AddPolicy(Permissions.WarehousesView, p => p.RequireClaim("permission", Permissions.WarehousesView));
+    options.AddPolicy(Permissions.WarehousesEdit, p => p.RequireClaim("permission", Permissions.WarehousesEdit));
 });
 
 // --- Background jobs: Hangfire (TDD §36) ---
@@ -109,6 +111,7 @@ app.MapFinanceEndpoints();
 app.MapEmployeeEndpoints();
 app.MapAttendanceEndpoints();
 app.MapPayrollEndpoints();
+app.MapWarehouseEndpoints();
 app.MapReportEndpoints();
 app.MapUserEndpoints();
 

@@ -16,6 +16,7 @@ using ERP.Shared.Contracts.Products;
 using ERP.Shared.Contracts.Purchases;
 using ERP.Shared.Contracts.Reports;
 using ERP.Shared.Contracts.Suppliers;
+using ERP.Shared.Contracts.Warehouses;
 using ERP.Shared.Contracts.Users;
 
 namespace ERP.Desktop.Services;
@@ -169,6 +170,17 @@ public sealed class ErpApiClient(HttpClient http)
     public async Task<(bool ok, string? error)> CreateEmployeeAsync(CreateEmployeeRequest request, CancellationToken ct = default)
     {
         var resp = await http.PostAsJsonAsync("/api/v1/employees", request, JsonOpts, ct);
+        return await ReadResultAsync(resp, ct);
+    }
+
+    // --- Anbarlar (Warehouse) ---
+    public Task<PagedResult<WarehouseDto>?> GetWarehousesAsync(string? search, CancellationToken ct = default) =>
+        http.GetFromJsonAsync<PagedResult<WarehouseDto>>(
+            $"/api/v1/warehouses?search={Uri.EscapeDataString(search ?? "")}", JsonOpts, ct);
+
+    public async Task<(bool ok, string? error)> CreateWarehouseAsync(CreateWarehouseRequest request, CancellationToken ct = default)
+    {
+        var resp = await http.PostAsJsonAsync("/api/v1/warehouses", request, JsonOpts, ct);
         return await ReadResultAsync(resp, ct);
     }
 

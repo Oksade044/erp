@@ -8,6 +8,7 @@ using ERP.Domain.Modules.Invoices;
 using ERP.Domain.Modules.Orders;
 using ERP.Domain.Modules.Products;
 using ERP.Domain.Modules.Purchases;
+using ERP.Domain.Modules.Warehouses;
 using ERP.Domain.Modules.Suppliers;
 using ERP.Domain.Modules.Users;
 using Microsoft.EntityFrameworkCore;
@@ -32,6 +33,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
     public DbSet<Employee> Employees => Set<Employee>();
     public DbSet<Attendance> Attendances => Set<Attendance>();
     public DbSet<Payroll> Payrolls => Set<Payroll>();
+    public DbSet<Warehouse> Warehouses => Set<Warehouse>();
     public DbSet<User> Users => Set<User>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
