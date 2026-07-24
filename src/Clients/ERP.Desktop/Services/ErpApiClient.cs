@@ -133,6 +133,19 @@ public sealed class ErpApiClient(HttpClient http)
         return await ReadResultAsync(resp, ct);
     }
 
+    public async Task<(bool ok, string? error)> SetOrderDepositAsync(Guid id, decimal deposit, CancellationToken ct = default)
+    {
+        var resp = await http.PostAsJsonAsync($"/api/v1/orders/{id}/deposit", new SetDepositRequest(deposit), JsonOpts, ct);
+        return await ReadResultAsync(resp, ct);
+    }
+
+    public async Task<(bool ok, string? error)> SettleOrderAsync(Guid id, decimal damage, decimal penalty, string? notes, CancellationToken ct = default)
+    {
+        var resp = await http.PostAsJsonAsync($"/api/v1/orders/{id}/settle",
+            new SettleOrderRequest(damage, penalty, notes), JsonOpts, ct);
+        return await ReadResultAsync(resp, ct);
+    }
+
     // --- Alışlar (Purchase) ---
     public Task<PagedResult<PurchaseDto>?> GetPurchasesAsync(string? search, CancellationToken ct = default) =>
         http.GetFromJsonAsync<PagedResult<PurchaseDto>>(

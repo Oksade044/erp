@@ -24,6 +24,20 @@ public class RentalOrder : BaseEntity, IAggregateRoot
     public OrderStatus Status { get; private set; } = OrderStatus.Qaralama;
     public string? Notes { get; private set; }
 
+    // --- İcarə depozit & qaytarma hesablaşması (nullable → mövcud sətirlər üçün migration-safe) ---
+
+    /// <summary>Girov/depozit məbləği (təhvildə saxlanılır, qaytarmada geri qaytarılır).</summary>
+    public Money? Deposit { get; private set; }
+
+    /// <summary>Qaytarmada qeyd olunan zədə/itki dəyəri.</summary>
+    public Money? DamageCharge { get; private set; }
+
+    /// <summary>Qaytarmada qeyd olunan cərimə (gecikmə və s.).</summary>
+    public Money? PenaltyCharge { get; private set; }
+
+    public string? SettlementNotes { get; private set; }
+    public bool IsSettled { get; private set; }
+
     public IReadOnlyList<OrderLine> Lines => _lines.AsReadOnly();
 
     /// <summary>Sifarişin ümumi məbləği (bütün sətirlərin cəmi).</summary>
@@ -32,6 +46,20 @@ public class RentalOrder : BaseEntity, IAggregateRoot
 
     /// <summary>Bu sifariş anbarı rezerv edirmi? (yalnız təsdiqlənmiş/təhvil verilmiş).</summary>
     public bool ReservesStock => Status is OrderStatus.Təsdiqlənmiş or OrderStatus.TəhvilVerilmiş;
+
+    /// <summary>Ümumi tutulma (zədə + cərimə).</summary>
+    public Money TotalCharges =>
+        Money.Create((DamageCharge?.Amount ?? 0m) + (PenaltyCharge?.Amount ?? 0m));
+
+    /// <summary>Geri qaytarılacaq depozit = depozit − tutulmalar (0-dan aşağı düşmür).</summary>
+    public Money DepositRefund
+    {
+        get
+        {
+            var refund = (Deposit?.Amount ?? 0m) - TotalCharges.Amount;
+            return Money.Create(refund < 0m ? 0m : refund);
+        }
+    }
 
     // EF Core üçün.
     private RentalOrder() { }
@@ -128,6 +156,29 @@ public class RentalOrder : BaseEntity, IAggregateRoot
         if (Status is OrderStatus.Qaytarılmış or OrderStatus.Ləğv)
             throw new DomainException("Bu sifariş ləğv edilə bilməz.");
         Status = OrderStatus.Ləğv;
+    }
+
+    /// <summary>Depozit məbləğini təyin edir. Qaytarılmış/ləğv sifarişdə dəyişdirilə bilməz.</summary>
+    public void SetDeposit(Money deposit)
+    {
+        if (Status is OrderStatus.Qaytarılmış or OrderStatus.Ləğv)
+            throw new DomainException("Qaytarılmış və ya ləğv edilmiş sifarişdə depozit dəyişdirilə bilməz.");
+        Deposit = deposit ?? throw new DomainException("Depozit məbləği tələb olunur.");
+    }
+
+    /// <summary>
+    /// Qaytarma hesablaşması: zədə/itki dəyəri və cəriməni qeyd edir. Yalnız təhvil verilmiş
+    /// və ya qaytarılmış sifarişdə mümkündür. DepositRefund avtomatik hesablanır.
+    /// </summary>
+    public void Settle(Money damageCharge, Money penaltyCharge, string? notes = null)
+    {
+        if (Status is not (OrderStatus.TəhvilVerilmiş or OrderStatus.Qaytarılmış))
+            throw new DomainException("Hesablaşma yalnız təhvil verilmiş və ya qaytarılmış sifarişdə mümkündür.");
+
+        DamageCharge = damageCharge ?? throw new DomainException("Zədə dəyəri tələb olunur.");
+        PenaltyCharge = penaltyCharge ?? throw new DomainException("Cərimə dəyəri tələb olunur.");
+        SettlementNotes = notes?.Trim();
+        IsSettled = true;
     }
 
     private void EnsureDraft()

@@ -60,6 +60,20 @@ public static class OrderEndpoints
             return result.IsSuccess ? Results.NoContent() : Results.BadRequest(new { error = result.Error });
         });
 
+        // Depozit təyini (icarə girovu).
+        group.MapPost("/{id:guid}/deposit", async (Guid id, SetDepositRequest request, ISender sender) =>
+        {
+            var result = await sender.Send(new SetDepositCommand(id, request));
+            return result.IsSuccess ? Results.NoContent() : Results.BadRequest(new { error = result.Error });
+        });
+
+        // Qaytarma hesablaşması: zədə/itki + cərimə → depozit qaytarması hesablanır.
+        group.MapPost("/{id:guid}/settle", async (Guid id, SettleOrderRequest request, ISender sender) =>
+        {
+            var result = await sender.Send(new SettleOrderCommand(id, request));
+            return result.IsSuccess ? Results.NoContent() : Results.BadRequest(new { error = result.Error });
+        });
+
         return app;
     }
 }

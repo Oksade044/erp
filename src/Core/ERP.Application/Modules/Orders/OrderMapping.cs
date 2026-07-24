@@ -17,6 +17,13 @@ public static class OrderMapping
         Notes: o.Notes,
         Total: o.Total.Amount,
         Currency: o.Total.Currency,
+        Deposit: o.Deposit?.Amount ?? 0m,
+        DamageCharge: o.DamageCharge?.Amount ?? 0m,
+        PenaltyCharge: o.PenaltyCharge?.Amount ?? 0m,
+        TotalCharges: o.TotalCharges.Amount,
+        DepositRefund: o.DepositRefund.Amount,
+        IsSettled: o.IsSettled,
+        SettlementNotes: o.SettlementNotes,
         Lines: o.Lines.Select(l => new OrderLineDto(
             ProductId: l.ProductId,
             ProductName: l.ProductName,

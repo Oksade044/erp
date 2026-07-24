@@ -38,9 +38,31 @@ public sealed class RentalOrderConfiguration : IEntityTypeConfiguration<RentalOr
             .OnDelete(DeleteBehavior.Cascade);
         builder.Navigation(o => o.Lines).UsePropertyAccessMode(PropertyAccessMode.Field);
 
+        builder.Property(o => o.SettlementNotes).HasMaxLength(2000);
+        builder.Property(o => o.IsSettled).IsRequired();
+
+        // Depozit & hesablaşma məbləğləri — opsional owned Money (mövcud sətirlər üçün null).
+        builder.OwnsOne(o => o.Deposit, m =>
+        {
+            m.Property(x => x.Amount).HasColumnName("Deposit").HasPrecision(18, 2);
+            m.Property(x => x.Currency).HasColumnName("DepositCurrency").HasMaxLength(3);
+        });
+        builder.OwnsOne(o => o.DamageCharge, m =>
+        {
+            m.Property(x => x.Amount).HasColumnName("DamageCharge").HasPrecision(18, 2);
+            m.Property(x => x.Currency).HasColumnName("DamageCurrency").HasMaxLength(3);
+        });
+        builder.OwnsOne(o => o.PenaltyCharge, m =>
+        {
+            m.Property(x => x.Amount).HasColumnName("PenaltyCharge").HasPrecision(18, 2);
+            m.Property(x => x.Currency).HasColumnName("PenaltyCurrency").HasMaxLength(3);
+        });
+
         // Hesablanan xüsusiyyətlər DB-yə map olunmur.
         builder.Ignore(o => o.Total);
         builder.Ignore(o => o.ReservesStock);
+        builder.Ignore(o => o.TotalCharges);
+        builder.Ignore(o => o.DepositRefund);
 
         builder.HasQueryFilter(o => !o.IsDeleted);
     }

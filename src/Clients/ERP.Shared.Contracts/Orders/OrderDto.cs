@@ -12,6 +12,13 @@ public sealed record OrderDto(
     string? Notes,
     decimal Total,
     string Currency,
+    decimal Deposit,
+    decimal DamageCharge,
+    decimal PenaltyCharge,
+    decimal TotalCharges,
+    decimal DepositRefund,
+    bool IsSettled,
+    string? SettlementNotes,
     IReadOnlyList<OrderLineDto> Lines);
 
 public sealed record OrderLineDto(

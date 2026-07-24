@@ -39,6 +39,12 @@ public partial class OrdersViewModel(ErpApiClient api) : ViewModelBase
     [ObservableProperty] private ProductDto? _lineProduct;
     [ObservableProperty] private int _lineQuantity = 1;
 
+    // --- Depozit & qaytarma hesablaşması (seçilmiş sifariş üçün) ---
+    [ObservableProperty] private decimal _depositAmount;
+    [ObservableProperty] private decimal _damageCharge;
+    [ObservableProperty] private decimal _penaltyCharge;
+    [ObservableProperty] private string? _settlementNotes;
+
     public decimal DraftTotal => DraftLines.Sum(l => l.LineTotal);
 
     [RelayCommand]
@@ -159,5 +165,24 @@ public partial class OrdersViewModel(ErpApiClient api) : ViewModelBase
         if (Selected is null) { Status = "Sifariş seçin."; return; }
         var (ok, error) = await api.CreateInvoiceAsync(Selected.Id);
         Status = ok ? "Faktura yaradıldı (Fakturalar bölməsinə baxın)." : error ?? "Faktura yaradılmadı.";
+    }
+
+    [RelayCommand]
+    private async Task SetDepositAsync()
+    {
+        if (Selected is null) { Status = "Sifariş seçin."; return; }
+        var (ok, error) = await api.SetOrderDepositAsync(Selected.Id, DepositAmount);
+        Status = ok ? $"Depozit təyin edildi: {DepositAmount:0.00} AZN." : error ?? "Depozit təyin edilmədi.";
+        await LoadAsync();
+    }
+
+    [RelayCommand]
+    private async Task SettleAsync()
+    {
+        if (Selected is null) { Status = "Sifariş seçin."; return; }
+        var (ok, error) = await api.SettleOrderAsync(Selected.Id, DamageCharge, PenaltyCharge, SettlementNotes);
+        Status = ok ? "Hesablaşma qeyd edildi — depozit qaytarması hesablandı." : error ?? "Hesablaşma alınmadı.";
+        if (ok) { DamageCharge = PenaltyCharge = 0; SettlementNotes = null; }
+        await LoadAsync();
     }
 }

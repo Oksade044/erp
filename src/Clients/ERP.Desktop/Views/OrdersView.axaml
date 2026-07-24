@@ -7,7 +7,7 @@
              x:Class="ERP.Desktop.Views.OrdersView"
              x:DataType="vm:OrdersViewModel">
 
-    <Grid RowDefinitions="Auto,Auto,Auto,*,Auto" Margin="24">
+    <Grid RowDefinitions="Auto,Auto,Auto,Auto,*,Auto" Margin="24">
 
         <TextBlock Grid.Row="0" Text="İcarə Sifarişləri" FontSize="24"
                    FontWeight="SemiBold" Margin="0,0,0,16" />
@@ -85,7 +85,24 @@
             </StackPanel>
         </Border>
 
-        <DataGrid Grid.Row="3" ItemsSource="{Binding Orders}" SelectedItem="{Binding Selected}"
+        <!-- Depozit & qaytarma hesablaşması (seçilmiş sifariş üçün) -->
+        <Border Grid.Row="3" Background="#FFF9DB" CornerRadius="8" Padding="12" Margin="0,0,0,12">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <TextBlock Text="Depozit:" VerticalAlignment="Center" />
+                <TextBox Width="100" Text="{Binding DepositAmount}" />
+                <Button Content="Təyin et" Command="{Binding SetDepositCommand}" />
+                <Rectangle Width="1" Fill="#D0D0D0" Margin="6,0" />
+                <TextBlock Text="Hesablaşma — Zədə:" VerticalAlignment="Center" />
+                <TextBox Width="90" Text="{Binding DamageCharge}" />
+                <TextBlock Text="Cərimə:" VerticalAlignment="Center" />
+                <TextBox Width="90" Text="{Binding PenaltyCharge}" />
+                <TextBox Width="150" PlaceholderText="Qeyd" Text="{Binding SettlementNotes}" />
+                <Button Content="Hesablaş" Command="{Binding SettleCommand}"
+                        Background="#7048E8" Foreground="White" />
+            </StackPanel>
+        </Border>
+
+        <DataGrid Grid.Row="4" ItemsSource="{Binding Orders}" SelectedItem="{Binding Selected}"
                   IsReadOnly="True" GridLinesVisibility="Horizontal"
                   BorderThickness="1" BorderBrush="#E0E2EA">
             <DataGrid.Columns>
@@ -95,10 +112,12 @@
                 <DataGridTextColumn Header="Bitmə" Binding="{Binding EndDate}" Width="Auto" />
                 <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="Auto" />
                 <DataGridTextColumn Header="Məbləğ" Binding="{Binding Total}" Width="Auto" />
-                <DataGridTextColumn Header="Valyuta" Binding="{Binding Currency}" Width="Auto" />
+                <DataGridTextColumn Header="Depozit" Binding="{Binding Deposit}" Width="Auto" />
+                <DataGridTextColumn Header="Tutulma" Binding="{Binding TotalCharges}" Width="Auto" />
+                <DataGridTextColumn Header="Qaytarma" Binding="{Binding DepositRefund}" Width="Auto" />
             </DataGrid.Columns>
         </DataGrid>
 
-        <TextBlock Grid.Row="4" Text="{Binding Status}" Foreground="#5A6072" Margin="0,10,0,0" />
+        <TextBlock Grid.Row="5" Text="{Binding Status}" Foreground="#5A6072" Margin="0,10,0,0" />
     </Grid>
 </UserControl>
