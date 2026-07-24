@@ -312,6 +312,13 @@ public sealed class ErpApiClient(HttpClient http)
     public Task<List<TopProductDto>?> GetTopProductsAsync(int top = 10, CancellationToken ct = default) =>
         http.GetFromJsonAsync<List<TopProductDto>>($"/api/v1/reports/top-products?top={top}", JsonOpts, ct);
 
+    public Task<ProfitLossDto?> GetProfitLossAsync(CancellationToken ct = default) =>
+        http.GetFromJsonAsync<ProfitLossDto>("/api/v1/reports/profit-loss", JsonOpts, ct);
+
+    public Task<MonthlyRevenueDto?> GetMonthlyRevenueAsync(int? year = null, CancellationToken ct = default) =>
+        http.GetFromJsonAsync<MonthlyRevenueDto>(
+            $"/api/v1/reports/monthly-revenue{(year is null ? "" : $"?year={year}")}", JsonOpts, ct);
+
     // --- İstifadəçilər ---
     public Task<List<UserDto>?> GetUsersAsync(CancellationToken ct = default) =>
         http.GetFromJsonAsync<List<UserDto>>("/api/v1/users", JsonOpts, ct);

@@ -8,7 +8,7 @@
              x:DataType="vm:DashboardViewModel">
 
     <ScrollViewer>
-        <Grid RowDefinitions="Auto,Auto,Auto,*" Margin="24">
+        <Grid RowDefinitions="Auto,Auto,Auto,Auto,*" Margin="24">
 
             <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12" Margin="0,0,0,20">
                 <TextBlock Text="İdarə Paneli" FontSize="24" FontWeight="SemiBold" VerticalAlignment="Center" />
@@ -62,8 +62,46 @@
                 </StackPanel>
             </Border>
 
+            <!-- Mənfəət/Zərər (cari il) + aylıq analitika -->
+            <Grid Grid.Row="3" ColumnDefinitions="Auto,16,*" Margin="0,0,0,20">
+                <StackPanel Grid.Column="0" Spacing="10">
+                    <TextBlock Text="Mənfəət / Zərər (cari il)" FontWeight="SemiBold" FontSize="15" />
+                    <Border Classes="card" Background="#EBFBEE" Width="220" Margin="0">
+                        <StackPanel>
+                            <TextBlock Text="ÜMUMİ GƏLİR" Classes="cardLabel" />
+                            <TextBlock Text="{Binding ProfitLoss.TotalIncome, StringFormat={}{0:0.00} AZN}" Classes="cardValue" Foreground="#2B8A3E" />
+                        </StackPanel>
+                    </Border>
+                    <Border Classes="card" Background="#FFF0F0" Width="220" Margin="0">
+                        <StackPanel>
+                            <TextBlock Text="ÜMUMİ XƏRC" Classes="cardLabel" />
+                            <TextBlock Text="{Binding ProfitLoss.TotalExpense, StringFormat={}{0:0.00} AZN}" Classes="cardValue" Foreground="#C92A2A" />
+                        </StackPanel>
+                    </Border>
+                    <Border Classes="card" Background="#E7F5FF" Width="220" Margin="0">
+                        <StackPanel>
+                            <TextBlock Text="XALİS MƏNFƏƏT" Classes="cardLabel" />
+                            <TextBlock Text="{Binding ProfitLoss.NetProfit, StringFormat={}{0:0.00} AZN}" Classes="cardValue" Foreground="#1971C2" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <StackPanel Grid.Column="2">
+                    <TextBlock Text="Aylıq gəlir / xərc" FontWeight="SemiBold" FontSize="15" Margin="0,0,0,8" />
+                    <DataGrid ItemsSource="{Binding MonthlyRevenue}" IsReadOnly="True" Height="200"
+                              GridLinesVisibility="Horizontal" BorderThickness="1" BorderBrush="#E0E2EA">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Ay" Binding="{Binding Month}" Width="Auto" />
+                            <DataGridTextColumn Header="Gəlir" Binding="{Binding Income}" Width="*" />
+                            <DataGridTextColumn Header="Xərc" Binding="{Binding Expense}" Width="*" />
+                            <DataGridTextColumn Header="Xalis" Binding="{Binding Net}" Width="*" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </StackPanel>
+            </Grid>
+
             <!-- İki siyahı: top məhsullar + borclar -->
-            <Grid Grid.Row="3" ColumnDefinitions="*,16,*">
+            <Grid Grid.Row="4" ColumnDefinitions="*,16,*">
                 <StackPanel Grid.Column="0">
                     <TextBlock Text="Ən çox icarəyə verilən" FontWeight="SemiBold" FontSize="15" Margin="0,0,0,8" />
                     <DataGrid ItemsSource="{Binding TopProducts}" IsReadOnly="True" Height="240"

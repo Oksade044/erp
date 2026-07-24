@@ -12,11 +12,13 @@ namespace ERP.Desktop.ViewModels;
 public partial class DashboardViewModel(ErpApiClient api) : ViewModelBase
 {
     [ObservableProperty] private DashboardDto? _summary;
+    [ObservableProperty] private ProfitLossDto? _profitLoss;
     [ObservableProperty] private bool _isBusy;
     [ObservableProperty] private string? _status;
 
     public ObservableCollection<TopProductDto> TopProducts { get; } = [];
     public ObservableCollection<OutstandingInvoiceDto> Outstanding { get; } = [];
+    public ObservableCollection<MonthlyPointDto> MonthlyRevenue { get; } = [];
 
     [RelayCommand]
     private async Task LoadAsync()
@@ -34,6 +36,12 @@ public partial class DashboardViewModel(ErpApiClient api) : ViewModelBase
             Outstanding.Clear();
             var debts = await api.GetOutstandingAsync();
             if (debts is not null) foreach (var d in debts) Outstanding.Add(d);
+
+            // Mənfəət/Zərər (cari il) + aylıq gəlir analitikası.
+            ProfitLoss = await api.GetProfitLossAsync();
+            MonthlyRevenue.Clear();
+            var monthly = await api.GetMonthlyRevenueAsync();
+            if (monthly is not null) foreach (var p in monthly.Points) MonthlyRevenue.Add(p);
 
             Status = "Yeniləndi";
         }

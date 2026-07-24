@@ -36,3 +36,23 @@ public sealed class GetTopProductsHandler(IReportService reports)
     public Task<IReadOnlyList<TopProductDto>> Handle(GetTopProductsQuery request, CancellationToken ct) =>
         reports.GetTopProductsAsync(request.Top, ct);
 }
+
+/// <summary>Mənfəət/Zərər hesabatı — dövr üzrə (TDD §5).</summary>
+public sealed record GetProfitLossQuery(DateOnly From, DateOnly To) : IRequest<ProfitLossDto>;
+
+public sealed class GetProfitLossHandler(IReportService reports)
+    : IRequestHandler<GetProfitLossQuery, ProfitLossDto>
+{
+    public Task<ProfitLossDto> Handle(GetProfitLossQuery request, CancellationToken ct) =>
+        reports.GetProfitLossAsync(request.From, request.To, ct);
+}
+
+/// <summary>Aylıq gəlir/xərc analitikası — verilmiş il (qrafik).</summary>
+public sealed record GetMonthlyRevenueQuery(int Year) : IRequest<MonthlyRevenueDto>;
+
+public sealed class GetMonthlyRevenueHandler(IReportService reports)
+    : IRequestHandler<GetMonthlyRevenueQuery, MonthlyRevenueDto>
+{
+    public Task<MonthlyRevenueDto> Handle(GetMonthlyRevenueQuery request, CancellationToken ct) =>
+        reports.GetMonthlyRevenueAsync(request.Year, ct);
+}

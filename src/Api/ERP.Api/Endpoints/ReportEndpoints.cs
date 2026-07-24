@@ -21,6 +21,18 @@ public static class ReportEndpoints
         group.MapGet("/top-products", async (ISender sender, int top = 10) =>
             Results.Ok(await sender.Send(new GetTopProductsQuery(top))));
 
+        // Mənfəət/Zərər — dövr from/to (verilməzsə cari il).
+        group.MapGet("/profit-loss", async (ISender sender, DateOnly? from, DateOnly? to) =>
+        {
+            var f = from ?? new DateOnly(DateTime.UtcNow.Year, 1, 1);
+            var t = to ?? new DateOnly(DateTime.UtcNow.Year, 12, 31);
+            return Results.Ok(await sender.Send(new GetProfitLossQuery(f, t)));
+        });
+
+        // Aylıq gəlir/xərc — verilmiş il (default cari).
+        group.MapGet("/monthly-revenue", async (ISender sender, int? year) =>
+            Results.Ok(await sender.Send(new GetMonthlyRevenueQuery(year ?? DateTime.UtcNow.Year))));
+
         return app;
     }
 }

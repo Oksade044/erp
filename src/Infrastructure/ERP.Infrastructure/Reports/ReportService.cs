@@ -1,4 +1,5 @@
 using ERP.Application.Common.Interfaces;
+using ERP.Domain.Modules.Finance;
 using ERP.Domain.Modules.Invoices;
 using ERP.Domain.Modules.Orders;
 using ERP.Infrastructure.Persistence;
@@ -92,5 +93,52 @@ public sealed class ReportService(AppDbContext context) : IReportService
             .OrderByDescending(x => x.TotalQuantityRented)
             .Take(top)
             .ToList();
+    }
+
+    public async Task<ProfitLossDto> GetProfitLossAsync(DateOnly from, DateOnly to, CancellationToken ct = default)
+    {
+        // Dövr üzrə maliyyə əməliyyatları; pul cəmləri client tərəfdə (SQLite decimal gotcha).
+        var rows = await context.FinancialTransactions
+            .Where(t => t.Date >= from && t.Date <= to)
+            .Select(t => new { t.Type, t.Category, Amount = t.Amount.Amount })
+            .ToListAsync(ct);
+
+        var income = rows.Where(r => r.Type == TransactionType.Mədaxil).Sum(r => r.Amount);
+        var expense = rows.Where(r => r.Type == TransactionType.Məxaric).Sum(r => r.Amount);
+
+        var incomeByCat = rows.Where(r => r.Type == TransactionType.Mədaxil)
+            .GroupBy(r => r.Category)
+            .Select(g => new CategoryAmountDto(g.Key, g.Sum(x => x.Amount)))
+            .OrderByDescending(c => c.Amount).ToList();
+
+        var expenseByCat = rows.Where(r => r.Type == TransactionType.Məxaric)
+            .GroupBy(r => r.Category)
+            .Select(g => new CategoryAmountDto(g.Key, g.Sum(x => x.Amount)))
+            .OrderByDescending(c => c.Amount).ToList();
+
+        return new ProfitLossDto(
+            TotalIncome: income,
+            TotalExpense: expense,
+            NetProfit: income - expense,
+            Currency: DefaultCurrency,
+            IncomeByCategory: incomeByCat,
+            ExpenseByCategory: expenseByCat);
+    }
+
+    public async Task<MonthlyRevenueDto> GetMonthlyRevenueAsync(int year, CancellationToken ct = default)
+    {
+        var rows = await context.FinancialTransactions
+            .Where(t => t.Date.Year == year)
+            .Select(t => new { t.Type, t.Date.Month, Amount = t.Amount.Amount })
+            .ToListAsync(ct);
+
+        var points = Enumerable.Range(1, 12).Select(m =>
+        {
+            var inc = rows.Where(r => r.Month == m && r.Type == TransactionType.Mədaxil).Sum(r => r.Amount);
+            var exp = rows.Where(r => r.Month == m && r.Type == TransactionType.Məxaric).Sum(r => r.Amount);
+            return new MonthlyPointDto(m, inc, exp, inc - exp);
+        }).ToList();
+
+        return new MonthlyRevenueDto(year, DefaultCurrency, points);
     }
 }
