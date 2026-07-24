@@ -16,13 +16,13 @@ public static class AuthEndpoints
         {
             var result = await sender.Send(new LoginCommand(request));
             return result.IsSuccess ? Results.Ok(result.Value) : Results.Unauthorized();
-        }).AllowAnonymous();
+        }).AllowAnonymous().RequireRateLimiting("auth");
 
         group.MapPost("/refresh", async (RefreshRequest request, ISender sender) =>
         {
             var result = await sender.Send(new RefreshCommand(request));
             return result.IsSuccess ? Results.Ok(result.Value) : Results.Unauthorized();
-        }).AllowAnonymous();
+        }).AllowAnonymous().RequireRateLimiting("auth");
 
         group.MapGet("/me", (ClaimsPrincipal user) => Results.Ok(new
         {

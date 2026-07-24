@@ -1,4 +1,5 @@
 using System.Text;
+using System.Threading.RateLimiting;
 using ERP.Api.Auth;
 using ERP.Api.Endpoints;
 using ERP.Api.Middleware;
@@ -71,6 +72,55 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy(Permissions.WarehousesEdit, p => p.RequireClaim("permission", Permissions.WarehousesEdit));
 });
 
+// --- Rate limiting (TDD §39 — sui-istifadəyə qarşı müdafiə) ---
+// Qlobal: hər IP üçün sabit pəncərə. "auth": login/refresh üçün daha sərt (brute-force qorunması).
+// Limitlər appsettings-dən (RateLimiting) — kodda magic number yoxdur.
+var rl = builder.Configuration.GetSection("RateLimiting");
+var globalPermit = rl.GetValue("GlobalPermitLimit", 100);
+var globalWindow = rl.GetValue("GlobalWindowSeconds", 10);
+var authPermit = rl.GetValue("AuthPermitLimit", 5);
+var authWindow = rl.GetValue("AuthWindowSeconds", 30);
+
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+    // Qlobal limiter — bütün sorğulara, klient IP-si üzrə bölmələnmiş.
+    options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
+    {
+        var key = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+        return RateLimitPartition.GetFixedWindowLimiter(key, _ => new FixedWindowRateLimiterOptions
+        {
+            PermitLimit = globalPermit,
+            Window = TimeSpan.FromSeconds(globalWindow),
+            QueueLimit = 0
+        });
+    });
+
+    // "auth" siyasəti — login/refresh üçün sərt limit (IP üzrə).
+    options.AddPolicy("auth", context =>
+    {
+        var key = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+        return RateLimitPartition.GetFixedWindowLimiter($"auth:{key}", _ => new FixedWindowRateLimiterOptions
+        {
+            PermitLimit = authPermit,
+            Window = TimeSpan.FromSeconds(authWindow),
+            QueueLimit = 0
+        });
+    });
+
+    // Rədd edildikdə mənalı JSON cavab (ProblemDetails üslubunda, TDD §21).
+    options.OnRejected = async (ctx, ct) =>
+    {
+        ctx.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+        await ctx.HttpContext.Response.WriteAsJsonAsync(new
+        {
+            error = "Həddindən çox sorğu. Bir azdan yenidən cəhd edin.",
+            status = 429
+        }, ct);
+    };
+});
+
 // --- Background jobs: Hangfire (TDD §36) ---
 // Lokalda in-memory storage; serverdə PostgreSQL storage-a keçiriləcək.
 builder.Services.AddHangfire(config => config.UseInMemoryStorage());
@@ -84,6 +134,9 @@ var app = builder.Build();
 // Global exception handling (TDD §21) — pipeline-ın əvvəlində.
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseSerilogRequestLogging();
+
+// Rate limiting — autentifikasiyadan əvvəl (sui-istifadəni erkən dayandırır, TDD §39).
+app.UseRateLimiter();
 
 app.UseAuthentication();
 app.UseAuthorization();
