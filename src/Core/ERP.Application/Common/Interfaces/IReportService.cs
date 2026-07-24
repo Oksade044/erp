@@ -17,4 +17,10 @@ public interface IReportService
 
     /// <summary>Aylıq gəlir/xərc analitikası — verilmiş il üçün 12 nöqtə (qrafik).</summary>
     Task<MonthlyRevenueDto> GetMonthlyRevenueAsync(int year, CancellationToken ct = default);
+
+    /// <summary>Müştəri hesabatı — müştəri üzrə sifariş sayı + maliyyə xülasəsi.</summary>
+    Task<IReadOnlyList<CustomerReportRowDto>> GetCustomerReportAsync(CancellationToken ct = default);
+
+    /// <summary>Zədə/itki hesabatı — tutulması olan (hesablaşılmış) sifarişlər.</summary>
+    Task<IReadOnlyList<DamageReportRowDto>> GetDamageReportAsync(CancellationToken ct = default);
 }

@@ -1,0 +1,50 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:ERP.Desktop.ViewModels"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="850" d:DesignHeight="640"
+             x:Class="ERP.Desktop.Views.ReportsView"
+             x:DataType="vm:ReportsViewModel">
+
+    <Grid RowDefinitions="Auto,*,*,Auto" Margin="24">
+
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12" Margin="0,0,0,16">
+            <TextBlock Text="Hesabatlar" FontSize="24" FontWeight="SemiBold" VerticalAlignment="Center" />
+            <Button Content="⟳ Yenilə" Command="{Binding LoadCommand}" VerticalAlignment="Center" />
+        </StackPanel>
+
+        <!-- Müştəri hesabatı -->
+        <StackPanel Grid.Row="1" Margin="0,0,0,16">
+            <TextBlock Text="Müştəri hesabatı" FontWeight="SemiBold" FontSize="15" Margin="0,0,0,8" />
+            <DataGrid ItemsSource="{Binding Customers}" IsReadOnly="True" Height="220"
+                      GridLinesVisibility="Horizontal" BorderThickness="1" BorderBrush="#E0E2EA">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Müştəri" Binding="{Binding CustomerName}" Width="2*" />
+                    <DataGridTextColumn Header="Sifariş" Binding="{Binding OrderCount}" Width="*" />
+                    <DataGridTextColumn Header="Fakturalanıb" Binding="{Binding TotalInvoiced}" Width="*" />
+                    <DataGridTextColumn Header="Ödənilib" Binding="{Binding TotalPaid}" Width="*" />
+                    <DataGridTextColumn Header="Qalıq borc" Binding="{Binding Outstanding}" Width="*" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </StackPanel>
+
+        <!-- Zədə/itki hesabatı -->
+        <StackPanel Grid.Row="2">
+            <TextBlock Text="Zədə / İtki / Cərimə hesabatı" FontWeight="SemiBold" FontSize="15" Margin="0,0,0,8" />
+            <DataGrid ItemsSource="{Binding Damages}" IsReadOnly="True" Height="200"
+                      GridLinesVisibility="Horizontal" BorderThickness="1" BorderBrush="#E0E2EA">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Sifariş №" Binding="{Binding OrderNumber}" Width="Auto" />
+                    <DataGridTextColumn Header="Müştəri" Binding="{Binding CustomerName}" Width="2*" />
+                    <DataGridTextColumn Header="Zədə" Binding="{Binding DamageCharge}" Width="*" />
+                    <DataGridTextColumn Header="Cərimə" Binding="{Binding PenaltyCharge}" Width="*" />
+                    <DataGridTextColumn Header="Cəmi tutulma" Binding="{Binding TotalCharges}" Width="*" />
+                    <DataGridTextColumn Header="Qeyd" Binding="{Binding SettlementNotes}" Width="2*" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </StackPanel>
+
+        <TextBlock Grid.Row="3" Text="{Binding Status}" Foreground="#5A6072" Margin="0,10,0,0" />
+    </Grid>
+</UserControl>

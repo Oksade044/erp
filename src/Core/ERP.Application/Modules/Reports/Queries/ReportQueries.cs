@@ -56,3 +56,23 @@ public sealed class GetMonthlyRevenueHandler(IReportService reports)
     public Task<MonthlyRevenueDto> Handle(GetMonthlyRevenueQuery request, CancellationToken ct) =>
         reports.GetMonthlyRevenueAsync(request.Year, ct);
 }
+
+/// <summary>Müştəri hesabatı — müştəri üzrə maliyyə xülasəsi.</summary>
+public sealed record GetCustomerReportQuery : IRequest<IReadOnlyList<CustomerReportRowDto>>;
+
+public sealed class GetCustomerReportHandler(IReportService reports)
+    : IRequestHandler<GetCustomerReportQuery, IReadOnlyList<CustomerReportRowDto>>
+{
+    public Task<IReadOnlyList<CustomerReportRowDto>> Handle(GetCustomerReportQuery request, CancellationToken ct) =>
+        reports.GetCustomerReportAsync(ct);
+}
+
+/// <summary>Zədə/itki hesabatı — tutulması olan sifarişlər.</summary>
+public sealed record GetDamageReportQuery : IRequest<IReadOnlyList<DamageReportRowDto>>;
+
+public sealed class GetDamageReportHandler(IReportService reports)
+    : IRequestHandler<GetDamageReportQuery, IReadOnlyList<DamageReportRowDto>>
+{
+    public Task<IReadOnlyList<DamageReportRowDto>> Handle(GetDamageReportQuery request, CancellationToken ct) =>
+        reports.GetDamageReportAsync(ct);
+}

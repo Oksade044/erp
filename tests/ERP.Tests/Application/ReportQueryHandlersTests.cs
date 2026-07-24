@@ -37,4 +37,32 @@ public class ReportQueryHandlersTests
         Assert.Equal(2026, result.Year);
         await _reports.Received(1).GetMonthlyRevenueAsync(2026, Arg.Any<CancellationToken>());
     }
+
+    [Fact]
+    public async Task CustomerReport_delegates()
+    {
+        IReadOnlyList<CustomerReportRowDto> rows =
+            [new(Guid.NewGuid(), "Aysel", 2, 300m, 200m, 100m, "AZN")];
+        _reports.GetCustomerReportAsync(Arg.Any<CancellationToken>()).Returns(rows);
+
+        var handler = new GetCustomerReportHandler(_reports);
+        var result = await handler.Handle(new GetCustomerReportQuery(), default);
+
+        Assert.Single(result);
+        Assert.Equal(100m, result[0].Outstanding);
+    }
+
+    [Fact]
+    public async Task DamageReport_delegates()
+    {
+        IReadOnlyList<DamageReportRowDto> rows =
+            [new("ORD-1", "Aysel", 50m, 30m, 80m, "AZN", "zədə")];
+        _reports.GetDamageReportAsync(Arg.Any<CancellationToken>()).Returns(rows);
+
+        var handler = new GetDamageReportHandler(_reports);
+        var result = await handler.Handle(new GetDamageReportQuery(), default);
+
+        Assert.Single(result);
+        Assert.Equal(80m, result[0].TotalCharges);
+    }
 }

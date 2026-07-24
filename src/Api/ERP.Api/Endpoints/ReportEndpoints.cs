@@ -33,6 +33,14 @@ public static class ReportEndpoints
         group.MapGet("/monthly-revenue", async (ISender sender, int? year) =>
             Results.Ok(await sender.Send(new GetMonthlyRevenueQuery(year ?? DateTime.UtcNow.Year))));
 
+        // Müştəri hesabatı.
+        group.MapGet("/customers", async (ISender sender) =>
+            Results.Ok(await sender.Send(new GetCustomerReportQuery())));
+
+        // Zədə/itki hesabatı.
+        group.MapGet("/damages", async (ISender sender) =>
+            Results.Ok(await sender.Send(new GetDamageReportQuery())));
+
         return app;
     }
 }

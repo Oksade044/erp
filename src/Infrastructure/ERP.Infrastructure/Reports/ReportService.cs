@@ -141,4 +141,71 @@ public sealed class ReportService(AppDbContext context) : IReportService
 
         return new MonthlyRevenueDto(year, DefaultCurrency, points);
     }
+
+    public async Task<IReadOnlyList<CustomerReportRowDto>> GetCustomerReportAsync(CancellationToken ct = default)
+    {
+        // Sifariş sayı müştəri üzrə.
+        var orderCounts = (await context.Orders
+                .Select(o => o.CustomerId)
+                .ToListAsync(ct))
+            .GroupBy(id => id)
+            .ToDictionary(g => g.Key, g => g.Count());
+
+        // Faktura + ödəniş məbləğləri müştəri üzrə (client tərəfdə decimal cəm).
+        var invoices = await context.Invoices.Include(i => i.Payments)
+            .Select(i => new
+            {
+                i.CustomerId,
+                i.CustomerName,
+                Total = i.TotalAmount.Amount,
+                Paid = i.Payments.Sum(p => p.Amount.Amount)
+            })
+            .ToListAsync(ct);
+
+        return invoices
+            .GroupBy(i => new { i.CustomerId, i.CustomerName })
+            .Select(g =>
+            {
+                var invoiced = g.Sum(x => x.Total);
+                var paid = g.Sum(x => x.Paid);
+                return new CustomerReportRowDto(
+                    CustomerId: g.Key.CustomerId,
+                    CustomerName: g.Key.CustomerName,
+                    OrderCount: orderCounts.GetValueOrDefault(g.Key.CustomerId, 0),
+                    TotalInvoiced: invoiced,
+                    TotalPaid: paid,
+                    Outstanding: invoiced - paid,
+                    Currency: DefaultCurrency);
+            })
+            .OrderByDescending(r => r.TotalInvoiced)
+            .ToList();
+    }
+
+    public async Task<IReadOnlyList<DamageReportRowDto>> GetDamageReportAsync(CancellationToken ct = default)
+    {
+        var orders = await context.Orders
+            .Where(o => o.IsSettled)
+            .Select(o => new
+            {
+                o.OrderNumber,
+                o.CustomerName,
+                Damage = o.DamageCharge != null ? o.DamageCharge.Amount : 0m,
+                Penalty = o.PenaltyCharge != null ? o.PenaltyCharge.Amount : 0m,
+                o.SettlementNotes
+            })
+            .ToListAsync(ct);
+
+        return orders
+            .Where(o => o.Damage > 0 || o.Penalty > 0)
+            .Select(o => new DamageReportRowDto(
+                OrderNumber: o.OrderNumber,
+                CustomerName: o.CustomerName,
+                DamageCharge: o.Damage,
+                PenaltyCharge: o.Penalty,
+                TotalCharges: o.Damage + o.Penalty,
+                Currency: DefaultCurrency,
+                SettlementNotes: o.SettlementNotes))
+            .OrderByDescending(r => r.TotalCharges)
+            .ToList();
+    }
 }
