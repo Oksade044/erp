@@ -1,6 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:ERP.Desktop.ViewModels"
+             xmlns:ctrl="using:ERP.Desktop.Controls"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="850" d:DesignHeight="640"
@@ -9,7 +10,12 @@
 
     <Grid RowDefinitions="Auto,Auto,Auto,Auto,*,Auto" Margin="24">
 
-        <TextBlock Grid.Row="0" Text="Maliyyə — Kassa" FontSize="24" FontWeight="SemiBold" Margin="0,0,0,16" />
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="8" Margin="0,0,0,16">
+            <TextBlock Text="Maliyyə — Kassa" FontSize="24" FontWeight="SemiBold" VerticalAlignment="Center" />
+            <ctrl:InfoHelp Title="Maliyyə — Kassa (pul axını)"
+                           Text="Şirkətin bütün pul mədaxil (gəlir) və məxaric (xərc) əməliyyatları. Hər əməliyyatın kateqoriyası, məbləği, tarixi və üsulu var."
+                           Note="Balans = Mədaxil − Məxaric. Əməkhaqqı ödənişləri buraya avtomatik məxaric kimi düşür." />
+        </StackPanel>
 
         <!-- Xülasə kartları -->
         <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="12" Margin="0,0,0,16">

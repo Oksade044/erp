@@ -1,0 +1,21 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="ERP.Desktop.Controls.InfoHelp"
+             x:Name="Root">
+    <Button Content="ⓘ" FontSize="14" Width="28" Height="28" Padding="0"
+            Background="Transparent" BorderThickness="0" Foreground="#3B5BDB"
+            VerticalAlignment="Center"
+            ToolTip.Tip="Ətraflı məlumat">
+        <Button.Flyout>
+            <Flyout>
+                <StackPanel MaxWidth="440" Spacing="6">
+                    <TextBlock Text="{Binding Title, ElementName=Root}" FontWeight="SemiBold" />
+                    <TextBlock Text="{Binding Text, ElementName=Root}" TextWrapping="Wrap" />
+                    <TextBlock Text="{Binding Note, ElementName=Root}" TextWrapping="Wrap"
+                               Foreground="#5A6072"
+                               IsVisible="{Binding Note, ElementName=Root, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                </StackPanel>
+            </Flyout>
+        </Button.Flyout>
+    </Button>
+</UserControl>

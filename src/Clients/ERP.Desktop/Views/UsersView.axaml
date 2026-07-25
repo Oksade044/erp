@@ -1,6 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:ERP.Desktop.ViewModels"
+             xmlns:ctrl="using:ERP.Desktop.Controls"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="850" d:DesignHeight="620"
@@ -9,7 +10,12 @@
 
     <Grid RowDefinitions="Auto,Auto,*,Auto" Margin="24">
 
-        <TextBlock Grid.Row="0" Text="İstifadəçilər" FontSize="24" FontWeight="SemiBold" Margin="0,0,0,16" />
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="8" Margin="0,0,0,16">
+            <TextBlock Text="İstifadəçilər" FontSize="24" FontWeight="SemiBold" VerticalAlignment="Center" />
+            <ctrl:InfoHelp Title="İstifadəçilər (sistemə giriş)"
+                           Text="Proqrama daxil olan işçilərin hesabları və rolları: Admin, Menecer, Anbardar, Kassir. Rol icazələri müəyyən edir — kim hansı bölməni görür/dəyişir."
+                           Note="Yalnız Admin/Menecer istifadəçi yarada bilər. Həssas sahələr (məs. alış qiyməti) yalnız Admin/Menecerə görünür." />
+        </StackPanel>
 
         <Border Grid.Row="1" Background="#F5F6FA" CornerRadius="8" Padding="16" Margin="0,0,0,16">
             <StackPanel Orientation="Horizontal" Spacing="8">
