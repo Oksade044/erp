@@ -15,20 +15,19 @@ public sealed class RentalOrderRepository(AppDbContext context)
     public async Task<PagedResult<RentalOrder>> SearchAsync(
         string? search, int page, int pageSize, CancellationToken ct = default)
     {
-        var query = Set.AsNoTracking().Include(o => o.Lines).AsQueryable();
+        var query = Set.AsNoTracking().Include(o => o.Lines);
 
+        // Axtarışla: diakritiksiz, sıralanmış (müştəri adı və ya sifariş nömrəsi üzrə).
         if (!string.IsNullOrWhiteSpace(search))
         {
-            var term = search.Trim();
-            query = query.Where(o =>
-                o.OrderNumber.Contains(term) ||
-                o.CustomerName.Contains(term));
+            var all = await query.ToListAsync(ct);
+            return RankedSearch.Page(all, search, page, pageSize,
+                primary: o => o.CustomerName,
+                secondary: o => [o.OrderNumber]);
         }
 
+        // Axtarışsız: ən yeni öndə. OrderNumber tarixlə başlayır (ORD-yyyyMMdd-...) → provider-safe.
         var total = await query.CountAsync(ct);
-
-        // Qeyd: SQLite DateTimeOffset-i ORDER BY-da dəstəkləmir; OrderNumber tarixlə başlayır
-        // (ORD-yyyyMMdd-...) və hər iki provider-də sıralana bilir → ən yeni sifarişlər öndə.
         var items = await query
             .OrderByDescending(o => o.OrderNumber)
             .Skip((page - 1) * pageSize)

@@ -15,20 +15,18 @@ public sealed class PurchaseOrderRepository(AppDbContext context)
     public async Task<PagedResult<PurchaseOrder>> SearchAsync(
         string? search, int page, int pageSize, CancellationToken ct = default)
     {
-        var query = Set.AsNoTracking().Include(p => p.Lines).AsQueryable();
+        var query = Set.AsNoTracking().Include(p => p.Lines);
 
         if (!string.IsNullOrWhiteSpace(search))
         {
-            var term = search.Trim();
-            query = query.Where(p =>
-                p.PurchaseNumber.Contains(term) ||
-                p.SupplierName.Contains(term));
+            var all = await query.ToListAsync(ct);
+            return RankedSearch.Page(all, search, page, pageSize,
+                primary: p => p.SupplierName,
+                secondary: p => [p.PurchaseNumber]);
         }
 
+        // Axtarışsız: ən yeni öndə. PurchaseNumber tarixlə başlayır (ALS-yyyyMMdd-...) → provider-safe.
         var total = await query.CountAsync(ct);
-
-        // SQLite DateTimeOffset-i ORDER BY-da dəstəkləmir; PurchaseNumber tarixlə başlayır
-        // (ALS-yyyyMMdd-...) → hər iki provider-də sıralanır, ən yeni öndə.
         var items = await query
             .OrderByDescending(p => p.PurchaseNumber)
             .Skip((page - 1) * pageSize)

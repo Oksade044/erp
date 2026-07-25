@@ -15,6 +15,9 @@ public partial class PayrollViewModel(ErpApiClient api) : ViewModelBase
     public ObservableCollection<EmployeeDto> AllEmployees { get; } = [];
 
     [ObservableProperty] private string? _search;
+
+    /// <summary>Canlı axtarış — yazıldıqca süzülür (Enter da işləyir).</summary>
+    partial void OnSearchChanged(string? value) => DebounceReload(LoadAsync);
     [ObservableProperty] private bool _isBusy;
     [ObservableProperty] private string? _status;
     [ObservableProperty] private PayrollDto? _selected;

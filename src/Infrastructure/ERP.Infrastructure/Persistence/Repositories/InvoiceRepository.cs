@@ -21,19 +21,17 @@ public sealed class InvoiceRepository(AppDbContext context)
     public async Task<PagedResult<Invoice>> SearchAsync(
         string? search, int page, int pageSize, CancellationToken ct = default)
     {
-        var query = Set.AsNoTracking().Include(i => i.Payments).AsQueryable();
+        var query = Set.AsNoTracking().Include(i => i.Payments);
 
         if (!string.IsNullOrWhiteSpace(search))
         {
-            var term = search.Trim();
-            query = query.Where(i =>
-                i.InvoiceNumber.Contains(term) ||
-                i.OrderNumber.Contains(term) ||
-                i.CustomerName.Contains(term));
+            var all = await query.ToListAsync(ct);
+            return RankedSearch.Page(all, search, page, pageSize,
+                primary: i => i.CustomerName,
+                secondary: i => [i.InvoiceNumber, i.OrderNumber]);
         }
 
         var total = await query.CountAsync(ct);
-
         var items = await query
             .OrderByDescending(i => i.InvoiceNumber)
             .Skip((page - 1) * pageSize)

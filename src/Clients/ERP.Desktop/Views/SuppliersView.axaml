@@ -16,7 +16,11 @@
             <StackPanel Spacing="10">
                 <StackPanel Orientation="Horizontal" Spacing="8">
                     <TextBox Width="240" PlaceholderText="Ad, telefon və ya əlaqədar şəxs üzrə axtar"
-                             Text="{Binding Search}" />
+                             Text="{Binding Search}">
+                        <TextBox.KeyBindings>
+                            <KeyBinding Gesture="Enter" Command="{Binding LoadCommand}" />
+                        </TextBox.KeyBindings>
+                    </TextBox>
                     <Button Content="Axtar" Command="{Binding LoadCommand}" />
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" Spacing="8">

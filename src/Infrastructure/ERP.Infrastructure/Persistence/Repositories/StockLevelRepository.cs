@@ -25,8 +25,10 @@ public sealed class StockLevelRepository(AppDbContext context)
 
         if (!string.IsNullOrWhiteSpace(search))
         {
-            var term = search.Trim();
-            query = query.Where(s => s.ProductName.Contains(term) || s.WarehouseName.Contains(term));
+            var all = await query.ToListAsync(ct);
+            return RankedSearch.Page(all, search, page, pageSize,
+                primary: s => s.ProductName,
+                secondary: s => [s.WarehouseName]);
         }
 
         var total = await query.CountAsync(ct);

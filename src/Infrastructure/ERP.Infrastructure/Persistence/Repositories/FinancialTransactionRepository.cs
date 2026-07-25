@@ -19,11 +19,10 @@ public sealed class FinancialTransactionRepository(AppDbContext context)
 
         if (!string.IsNullOrWhiteSpace(search))
         {
-            var term = search.Trim();
-            query = query.Where(t =>
-                t.TransactionNumber.Contains(term) ||
-                t.Category.Contains(term) ||
-                (t.Description != null && t.Description.Contains(term)));
+            var all = await query.ToListAsync(ct);
+            return RankedSearch.Page(all, search, page, pageSize,
+                primary: t => t.Category,
+                secondary: t => [t.TransactionNumber, t.Description]);
         }
 
         var total = await query.CountAsync(ct);

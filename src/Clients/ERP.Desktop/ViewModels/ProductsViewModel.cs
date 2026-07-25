@@ -2,7 +2,6 @@ using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
-using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -38,27 +37,8 @@ public partial class ProductsViewModel : ViewModelBase
     public string[] TrackingModes { get; } =
         [TrackingModeConverter.BulkDisplay, TrackingModeConverter.IndividualDisplay];
 
-    // ---- Canlı axtarış (yazıldıqca, debounce ilə) ----
-    private CancellationTokenSource? _searchCts;
-
-    partial void OnSearchChanged(string? value)
-    {
-        _searchCts?.Cancel();
-        _searchCts = new CancellationTokenSource();
-        var token = _searchCts.Token;
-        _ = DebouncedSearchAsync(token);
-    }
-
-    private async Task DebouncedSearchAsync(CancellationToken token)
-    {
-        try
-        {
-            await Task.Delay(350, token); // istifadəçi yazmağı dayandıranda axtar
-            if (!token.IsCancellationRequested)
-                await LoadAsync();
-        }
-        catch (TaskCanceledException) { /* növbəti hərf gəldi — köhnə axtarışı ləğv et */ }
-    }
+    // ---- Canlı axtarış (yazıldıqca, ortaq debounce ilə) ----
+    partial void OnSearchChanged(string? value) => DebounceReload(LoadAsync);
 
     // ---- Şəkil ----
     [ObservableProperty] private Bitmap? _selectedImage;

@@ -15,28 +15,9 @@ public sealed class WarehouseRepository(AppDbContext context)
     public async Task<PagedResult<Warehouse>> SearchAsync(
         string? search, int page, int pageSize, CancellationToken ct = default)
     {
-        var query = Set.AsNoTracking().AsQueryable();
-
-        if (!string.IsNullOrWhiteSpace(search))
-        {
-            var term = search.Trim();
-            query = query.Where(w => w.Name.Contains(term) || w.Code.Contains(term));
-        }
-
-        var total = await query.CountAsync(ct);
-
-        var items = await query
-            .OrderBy(w => w.Name)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
-            .ToListAsync(ct);
-
-        return new PagedResult<Warehouse>
-        {
-            Items = items,
-            TotalCount = total,
-            Page = page,
-            PageSize = pageSize
-        };
+        var all = await Set.AsNoTracking().ToListAsync(ct);
+        return RankedSearch.Page(all, search, page, pageSize,
+            primary: w => w.Name,
+            secondary: w => [w.Code]);
     }
 }

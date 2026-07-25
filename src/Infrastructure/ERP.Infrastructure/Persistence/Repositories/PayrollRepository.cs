@@ -22,8 +22,10 @@ public sealed class PayrollRepository(AppDbContext context)
 
         if (!string.IsNullOrWhiteSpace(search))
         {
-            var term = search.Trim();
-            query = query.Where(p => p.EmployeeName.Contains(term) || p.PayrollNumber.Contains(term));
+            var all = await query.ToListAsync(ct);
+            return RankedSearch.Page(all, search, page, pageSize,
+                primary: p => p.EmployeeName,
+                secondary: p => [p.PayrollNumber]);
         }
 
         var total = await query.CountAsync(ct);

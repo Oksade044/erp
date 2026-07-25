@@ -15,32 +15,9 @@ public sealed class EmployeeRepository(AppDbContext context)
     public async Task<PagedResult<Employee>> SearchAsync(
         string? search, int page, int pageSize, CancellationToken ct = default)
     {
-        var query = Set.AsNoTracking().AsQueryable();
-
-        if (!string.IsNullOrWhiteSpace(search))
-        {
-            var term = search.Trim();
-            query = query.Where(e =>
-                e.FullName.Contains(term) ||
-                e.Position.Contains(term) ||
-                e.Phone.Value.Contains(term) ||
-                (e.Department != null && e.Department.Contains(term)));
-        }
-
-        var total = await query.CountAsync(ct);
-
-        var items = await query
-            .OrderBy(e => e.FullName)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
-            .ToListAsync(ct);
-
-        return new PagedResult<Employee>
-        {
-            Items = items,
-            TotalCount = total,
-            Page = page,
-            PageSize = pageSize
-        };
+        var all = await Set.AsNoTracking().ToListAsync(ct);
+        return RankedSearch.Page(all, search, page, pageSize,
+            primary: e => e.FullName,
+            secondary: e => [e.Position, e.Phone.Value, e.Department]);
     }
 }

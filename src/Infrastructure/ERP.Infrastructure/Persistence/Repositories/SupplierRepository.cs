@@ -15,31 +15,9 @@ public sealed class SupplierRepository(AppDbContext context)
     public async Task<PagedResult<Supplier>> SearchAsync(
         string? search, int page, int pageSize, CancellationToken ct = default)
     {
-        var query = Set.AsNoTracking().AsQueryable();
-
-        if (!string.IsNullOrWhiteSpace(search))
-        {
-            var term = search.Trim();
-            query = query.Where(s =>
-                s.Name.Contains(term) ||
-                s.Phone.Value.Contains(term) ||
-                (s.ContactPerson != null && s.ContactPerson.Contains(term)));
-        }
-
-        var total = await query.CountAsync(ct);
-
-        var items = await query
-            .OrderBy(s => s.Name)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
-            .ToListAsync(ct);
-
-        return new PagedResult<Supplier>
-        {
-            Items = items,
-            TotalCount = total,
-            Page = page,
-            PageSize = pageSize
-        };
+        var all = await Set.AsNoTracking().ToListAsync(ct);
+        return RankedSearch.Page(all, search, page, pageSize,
+            primary: s => s.Name,
+            secondary: s => [s.Phone.Value, s.ContactPerson]);
     }
 }

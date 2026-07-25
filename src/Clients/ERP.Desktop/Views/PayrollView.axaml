@@ -12,7 +12,11 @@
         <TextBlock Grid.Row="0" Text="Əməkhaqqı" FontSize="24" FontWeight="SemiBold" Margin="0,0,0,16" />
 
         <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="8" Margin="0,0,0,12">
-            <TextBox Width="200" PlaceholderText="İşçi və ya № üzrə axtar" Text="{Binding Search}" />
+            <TextBox Width="200" PlaceholderText="İşçi və ya № üzrə axtar" Text="{Binding Search}">
+                        <TextBox.KeyBindings>
+                            <KeyBinding Gesture="Enter" Command="{Binding LoadCommand}" />
+                        </TextBox.KeyBindings>
+                    </TextBox>
             <Button Content="Axtar" Command="{Binding LoadCommand}" />
             <Button Content="💸 Ödə" Command="{Binding PayCommand}"
                     Background="#2F9E44" Foreground="White" />

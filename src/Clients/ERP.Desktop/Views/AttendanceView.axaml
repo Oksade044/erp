@@ -15,7 +15,11 @@
         <Border Grid.Row="1" Background="#F5F6FA" CornerRadius="8" Padding="16" Margin="0,0,0,16">
             <StackPanel Spacing="10">
                 <StackPanel Orientation="Horizontal" Spacing="8">
-                    <TextBox Width="240" PlaceholderText="İşçi adı üzrə axtar" Text="{Binding Search}" />
+                    <TextBox Width="240" PlaceholderText="İşçi adı üzrə axtar" Text="{Binding Search}">
+                        <TextBox.KeyBindings>
+                            <KeyBinding Gesture="Enter" Command="{Binding LoadCommand}" />
+                        </TextBox.KeyBindings>
+                    </TextBox>
                     <Button Content="Axtar" Command="{Binding LoadCommand}" />
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" Spacing="8">

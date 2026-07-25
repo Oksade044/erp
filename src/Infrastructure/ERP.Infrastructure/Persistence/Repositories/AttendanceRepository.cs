@@ -22,8 +22,9 @@ public sealed class AttendanceRepository(AppDbContext context)
 
         if (!string.IsNullOrWhiteSpace(search))
         {
-            var term = search.Trim();
-            query = query.Where(a => a.EmployeeName.Contains(term));
+            var all = await query.ToListAsync(ct);
+            return RankedSearch.Page(all, search, page, pageSize,
+                primary: a => a.EmployeeName);
         }
 
         var total = await query.CountAsync(ct);
