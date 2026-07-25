@@ -15,4 +15,6 @@ public sealed record CreateProductRequest(
     int StockQuantity = 0,
     int MinStockQuantity = 0,
     string? Category = null,
-    string? Description = null);
+    string? Description = null,
+    // Seçilibsə, ilkin stok bu anbara yazılır (StockLevel yaradılır).
+    Guid? WarehouseId = null);

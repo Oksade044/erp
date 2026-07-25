@@ -9,6 +9,7 @@ using CommunityToolkit.Mvvm.Input;
 using ERP.Desktop.Converters;
 using ERP.Desktop.Services;
 using ERP.Shared.Contracts.Products;
+using ERP.Shared.Contracts.Warehouses;
 
 namespace ERP.Desktop.ViewModels;
 
@@ -99,6 +100,10 @@ public partial class ProductsViewModel : ViewModelBase
     [ObservableProperty] private int _newMinStock;
     [ObservableProperty] private string? _newCategory;
 
+    /// <summary>Məhsulun ilkin stokunun yazılacağı anbar (seçim — məcburi deyil).</summary>
+    public ObservableCollection<WarehouseDto> Warehouses { get; } = [];
+    [ObservableProperty] private WarehouseDto? _newWarehouse;
+
     // ---- Redaktə forması ----
     [ObservableProperty] private bool _isEditing;
     [ObservableProperty] private string? _editName;
@@ -129,6 +134,14 @@ public partial class ProductsViewModel : ViewModelBase
             if (result is not null)
                 foreach (var p in result.Items) Products.Add(p);
             Status = $"{Products.Count} məhsul";
+
+            // Anbar siyahısını bir dəfə yüklə (yeni məhsul formasında seçim üçün).
+            if (Warehouses.Count == 0)
+            {
+                var whs = await _api.GetWarehousesAsync(null);
+                if (whs is not null)
+                    foreach (var w in whs.Items) Warehouses.Add(w);
+            }
         }
         catch (Exception ex)
         {
@@ -158,15 +171,19 @@ public partial class ProductsViewModel : ViewModelBase
                 SalePrice: CanViewCost ? NewSalePrice : null,
                 StockQuantity: NewStock,
                 MinStockQuantity: NewMinStock,
-                Category: NewCategory));
+                Category: NewCategory,
+                WarehouseId: NewWarehouse?.Id));
 
             if (ok)
             {
-                Status = "Məhsul əlavə olundu (SKU avtomatik təyin edildi).";
+                Status = NewWarehouse is not null
+                    ? $"Məhsul əlavə olundu — ilkin stok '{NewWarehouse.Name}' anbarına yazıldı."
+                    : "Məhsul əlavə olundu (SKU avtomatik təyin edildi).";
                 NewName = NewCategory = null;
                 NewRentalPrice = 0; NewStock = 0; NewMinStock = 0;
                 NewPurchasePrice = NewSalePrice = null;
                 NewTrackingMode = TrackingModeConverter.BulkDisplay;
+                NewWarehouse = null;
                 await LoadAsync();
             }
             else Status = error ?? "Əlavə edilmədi.";

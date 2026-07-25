@@ -109,6 +109,16 @@
                             <TextBlock Text="Kateqoriya" FontSize="12" Foreground="#5A6072" />
                             <TextBox PlaceholderText="Məs: Mebel / İşıqlandırma" Text="{Binding NewCategory}" />
                         </StackPanel>
+                        <StackPanel Width="200" Margin="0,0,12,10">
+                            <TextBlock Text="Anbar (ilkin stok üçün)" FontSize="12" Foreground="#5A6072" />
+                            <ComboBox ItemsSource="{Binding Warehouses}" SelectedItem="{Binding NewWarehouse}"
+                                      HorizontalAlignment="Stretch"
+                                      ToolTip.Tip="Seçilsə, yuxarıdakı 'Anbarda mövcud say' bu anbara yazılır. Boş buraxıla bilər.">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate><TextBlock Text="{Binding Name}" /></DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </StackPanel>
                     </WrapPanel>
                     <Button Content="+ Əlavə et" Command="{Binding AddCommand}"
                             Background="#3B5BDB" Foreground="White" HorizontalAlignment="Left" />

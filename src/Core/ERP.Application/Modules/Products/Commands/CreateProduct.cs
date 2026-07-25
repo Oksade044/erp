@@ -28,12 +28,23 @@ public sealed class CreateProductValidator : AbstractValidator<CreateProductComm
 
 public sealed class CreateProductHandler(
     IProductRepository products,
+    IWarehouseRepository warehouses,
+    IStockLevelRepository stockLevels,
     IUnitOfWork unitOfWork)
     : IRequestHandler<CreateProductCommand, Result<Guid>>
 {
     public async Task<Result<Guid>> Handle(CreateProductCommand request, CancellationToken ct)
     {
         var dto = request.Request;
+
+        // Anbar seçilibsə, mövcudluğunu əvvəlcədən yoxla (ilkin stok ora yazılacaq).
+        Domain.Modules.Warehouses.Warehouse? warehouse = null;
+        if (dto.WarehouseId is { } wid)
+        {
+            warehouse = await warehouses.GetByIdAsync(wid, ct);
+            if (warehouse is null)
+                return Result.Failure<Guid>($"Anbar tapılmadı: {wid}");
+        }
 
         // SKU verilməyibsə avtomatik generasiya et (PRD-000001); verilibsə normalizə + unikallıq yoxla.
         var skuRaw = string.IsNullOrWhiteSpace(dto.Sku)
@@ -52,6 +63,16 @@ public sealed class CreateProductHandler(
             dto.Category, dto.Description, purchase, sale, dto.MinStockQuantity);
 
         await products.AddAsync(product, ct);
+
+        // Anbar seçilibsə, ilkin stoku o anbarın StockLevel-inə yaz (bir tranzaksiyada).
+        if (warehouse is not null)
+        {
+            var level = Domain.Modules.Warehouses.StockLevel.Create(
+                product.Id, product.Name, warehouse.Id, warehouse.Name,
+                dto.StockQuantity, dto.MinStockQuantity);
+            await stockLevels.AddAsync(level, ct);
+        }
+
         await unitOfWork.SaveChangesAsync(ct);
 
         return Result.Success(product.Id);
