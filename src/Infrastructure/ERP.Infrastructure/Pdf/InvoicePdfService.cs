@@ -11,7 +11,7 @@ namespace ERP.Infrastructure.Pdf;
 /// </summary>
 public sealed class InvoicePdfService : IInvoicePdfService
 {
-    public byte[] Generate(InvoiceDto inv)
+    public byte[] Generate(InvoiceDto inv, IReadOnlyList<InvoicePdfLine> lines)
     {
         var document = Document.Create(container =>
         {
@@ -47,6 +47,44 @@ public sealed class InvoicePdfService : IInvoicePdfService
                     });
 
                     col.Item().PaddingTop(10).LineHorizontal(1).LineColor(Colors.Grey.Lighten2);
+
+                    // Məhsullar cədvəli (şəkil + ad + SKU + say + qiymət + məbləğ)
+                    if (lines.Count > 0)
+                    {
+                        col.Item().PaddingTop(10).Text("Məhsullar").SemiBold().FontSize(12);
+                        col.Item().Table(table =>
+                        {
+                            table.ColumnsDefinition(c =>
+                            {
+                                c.ConstantColumn(52);   // şəkil
+                                c.RelativeColumn(3);    // ad
+                                c.RelativeColumn(2);    // sku
+                                c.RelativeColumn(1);    // say
+                                c.RelativeColumn(2);    // qiymət
+                                c.RelativeColumn(2);    // məbləğ
+                            });
+
+                            table.Header(header =>
+                            {
+                                foreach (var h in new[] { "Şəkil", "Ad", "SKU", "Say", "Qiymət", "Məbləğ" })
+                                    header.Cell().Background(Colors.Grey.Lighten3).Padding(5).Text(h).SemiBold();
+                            });
+
+                            foreach (var l in lines)
+                            {
+                                if (l.ImageBytes is { Length: > 0 } bytes)
+                                    table.Cell().Padding(3).Height(44).AlignMiddle().Image(bytes).FitArea();
+                                else
+                                    table.Cell().Padding(5).AlignMiddle().AlignCenter().Text("—").FontColor(Colors.Grey.Medium);
+
+                                table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Padding(5).AlignMiddle().Text(l.ProductName);
+                                table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Padding(5).AlignMiddle().Text(l.Sku);
+                                table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Padding(5).AlignMiddle().Text(l.Quantity.ToString());
+                                table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Padding(5).AlignMiddle().Text($"{l.UnitPrice:0.00} {l.Currency}");
+                                table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Padding(5).AlignMiddle().Text($"{l.LineTotal:0.00} {l.Currency}");
+                            }
+                        });
+                    }
 
                     // Məbləğ xülasəsi
                     col.Item().PaddingTop(10).Row(row =>
