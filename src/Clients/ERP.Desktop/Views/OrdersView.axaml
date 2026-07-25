@@ -9,28 +9,54 @@
 
     <Grid RowDefinitions="Auto,Auto,Auto,Auto,*,Auto" Margin="24">
 
-        <TextBlock Grid.Row="0" Text="İcarə Sifarişləri" FontSize="24"
-                   FontWeight="SemiBold" Margin="0,0,0,16" />
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="8" Margin="0,0,0,16">
+            <TextBlock Text="İcarə Sifarişləri" FontSize="24" FontWeight="SemiBold" VerticalAlignment="Center" />
+            <Button Content="ⓘ" FontSize="14" Width="28" Height="28" Padding="0" VerticalAlignment="Center"
+                    Background="Transparent" BorderThickness="0" Foreground="#3B5BDB"
+                    ToolTip.Tip="Sifariş axını və düymələr haqqında ətraflı">
+                <Button.Flyout>
+                    <Flyout>
+                        <StackPanel MaxWidth="460" Spacing="6">
+                            <TextBlock Text="Sifariş həyat dövrü (status axını)" FontWeight="SemiBold" />
+                            <TextBlock TextWrapping="Wrap" Text="Qaralama → Təsdiqlənmiş → Təhvil verilmiş → Qaytarılmış. İstənilən vaxt (təhvildən əvvəl) Ləğv edilə bilər." />
+                            <TextBlock TextWrapping="Wrap"><Run Text="✓ Təsdiqlə:" FontWeight="SemiBold" /><Run Text=" Qaralama → Təsdiqlənmiş. Avadanlığı bu tarixlərə REZERV edir (ikiqat bron yoxlanılır). Geri: Ləğv et." /></TextBlock>
+                            <TextBlock TextWrapping="Wrap"><Run Text="🚚 Təhvil ver:" FontWeight="SemiBold" /><Run Text=" Təsdiqlənmiş → Təhvil verilmiş. Avadanlıq müştəriyə verildi. Geri qaytarıla bilməz (yalnız Qaytar)." /></TextBlock>
+                            <TextBlock TextWrapping="Wrap"><Run Text="↩ Qaytar:" FontWeight="SemiBold" /><Run Text=" Təhvil verilmiş → Qaytarılmış. Avadanlıq geri alındı, rezerv boşalır. Sonra depozit hesablaşması edilə bilər." /></TextBlock>
+                            <TextBlock TextWrapping="Wrap"><Run Text="✕ Ləğv et:" FontWeight="SemiBold" /><Run Text=" Sifarişi ləğv edir, rezervi boşaldır. Təhvil verilmiş sifariş ləğv EDİLƏ BİLMƏZ." /></TextBlock>
+                            <TextBlock TextWrapping="Wrap"><Run Text="💰 Faktura yarat:" FontWeight="SemiBold" /><Run Text=" Bu sifariş üçün faktura açır. Ödəniş və PDF qəbz 'Fakturalar' bölməsindədir." /></TextBlock>
+                            <TextBlock TextWrapping="Wrap" Foreground="#5A6072" Text="Depozit: təhvildən əvvəl təyin et. Hesablaşma (zədə/cərimə) yalnız qaytarıldıqdan sonra." />
+                        </StackPanel>
+                    </Flyout>
+                </Button.Flyout>
+            </Button>
+        </StackPanel>
 
         <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="8" Margin="0,0,0,16">
-            <TextBox Width="200" PlaceholderText="Sifariş № və ya müştəri" Text="{Binding Search}">
+            <TextBox Width="200" PlaceholderText="Sifariş № və ya müştəri (yazdıqca süzülür)" Text="{Binding Search}"
+                     ToolTip.Tip="Müştəri adı və ya sifariş nömrəsi üzrə axtar. Yazdıqca süzülür, Enter də işləyir.">
                         <TextBox.KeyBindings>
                             <KeyBinding Gesture="Enter" Command="{Binding LoadCommand}" />
                         </TextBox.KeyBindings>
                     </TextBox>
-            <Button Content="Axtar" Command="{Binding LoadCommand}" />
+            <Button Content="🔍 Axtar" Command="{Binding LoadCommand}" ToolTip.Tip="Axtarışı işə salır (Enter ilə eynidir)" />
             <Button Content="➕ Yeni Sifariş" Command="{Binding ToggleNewOrderCommand}"
-                    Background="#3B5BDB" Foreground="White" />
+                    Background="#3B5BDB" Foreground="White"
+                    ToolTip.Tip="Yeni icarə sifarişi forması açır (müştəri, tarixlər, məhsul sətirləri)" />
             <Button Content="✓ Təsdiqlə" Command="{Binding ConfirmCommand}"
-                    Background="#2F9E44" Foreground="White" />
+                    Background="#2F9E44" Foreground="White"
+                    ToolTip.Tip="Seçilmiş sifarişi təsdiqləyir: Qaralama → Təsdiqlənmiş. Avadanlığı rezerv edir (ikiqat bron yoxlanılır)." />
             <Button Content="🚚 Təhvil" Command="{Binding DeliverCommand}"
-                    Background="#1971C2" Foreground="White" />
+                    Background="#1971C2" Foreground="White"
+                    ToolTip.Tip="Avadanlığı müştəriyə təhvil verir: Təsdiqlənmiş → Təhvil verilmiş." />
             <Button Content="↩ Qaytar" Command="{Binding ReturnCommand}"
-                    Background="#7048E8" Foreground="White" />
+                    Background="#7048E8" Foreground="White"
+                    ToolTip.Tip="Avadanlığı geri qəbul edir: Təhvil verilmiş → Qaytarılmış. Rezerv boşalır." />
             <Button Content="✕ Ləğv" Command="{Binding CancelCommand}"
-                    Background="#E03131" Foreground="White" />
+                    Background="#E03131" Foreground="White"
+                    ToolTip.Tip="Sifarişi ləğv edir və rezervi boşaldır. Təhvil verilmiş sifariş ləğv edilə bilməz." />
             <Button Content="💰 Faktura" Command="{Binding CreateInvoiceCommand}"
-                    Background="#F08C00" Foreground="White" />
+                    Background="#F08C00" Foreground="White"
+                    ToolTip.Tip="Bu sifariş üçün faktura yaradır. Ödəniş və PDF 'Fakturalar' bölməsindədir." />
         </StackPanel>
 
         <!-- Yeni sifariş forması -->
@@ -92,17 +118,22 @@
         <!-- Depozit & qaytarma hesablaşması (seçilmiş sifariş üçün) -->
         <Border Grid.Row="3" Background="#FFF9DB" CornerRadius="8" Padding="12" Margin="0,0,0,12">
             <StackPanel Orientation="Horizontal" Spacing="8">
-                <TextBlock Text="Depozit:" VerticalAlignment="Center" />
-                <TextBox Width="100" Text="{Binding DepositAmount}" />
-                <Button Content="Təyin et" Command="{Binding SetDepositCommand}" />
+                <TextBlock Text="Depozit (AZN):" VerticalAlignment="Center"
+                           ToolTip.Tip="Müştəridən alınan girov məbləği. Təhvildən əvvəl təyin edilir." />
+                <TextBox Width="100" PlaceholderText="Məs: 200" Text="{Binding DepositAmount}" />
+                <Button Content="Depoziti təyin et" Command="{Binding SetDepositCommand}"
+                        ToolTip.Tip="Seçilmiş sifarişə depozit məbləğini yazır (qaytarılmadan/ləğv olunmadan əvvəl)" />
                 <Rectangle Width="1" Fill="#D0D0D0" Margin="6,0" />
-                <TextBlock Text="Hesablaşma — Zədə:" VerticalAlignment="Center" />
-                <TextBox Width="90" Text="{Binding DamageCharge}" />
-                <TextBlock Text="Cərimə:" VerticalAlignment="Center" />
-                <TextBox Width="90" Text="{Binding PenaltyCharge}" />
-                <TextBox Width="150" PlaceholderText="Qeyd" Text="{Binding SettlementNotes}" />
+                <TextBlock Text="Zədə (AZN):" VerticalAlignment="Center"
+                           ToolTip.Tip="Qaytarılan avadanlıqda zədə üçün tutulan məbləğ" />
+                <TextBox Width="90" PlaceholderText="0" Text="{Binding DamageCharge}" />
+                <TextBlock Text="Cərimə (AZN):" VerticalAlignment="Center"
+                           ToolTip.Tip="Gecikmə və ya digər səbəbdən cərimə məbləği" />
+                <TextBox Width="90" PlaceholderText="0" Text="{Binding PenaltyCharge}" />
+                <TextBox Width="150" PlaceholderText="Hesablaşma qeydi" Text="{Binding SettlementNotes}" />
                 <Button Content="Hesablaş" Command="{Binding SettleCommand}"
-                        Background="#7048E8" Foreground="White" />
+                        Background="#7048E8" Foreground="White"
+                        ToolTip.Tip="Depozitdən zədə+cərimə çıxılır, qalıq müştəriyə qaytarılır. Yalnız qaytarıldıqdan sonra." />
             </StackPanel>
         </Border>
 
@@ -115,6 +146,17 @@
                 <DataGridTextColumn Header="Başlama" Binding="{Binding StartDate}" Width="Auto" />
                 <DataGridTextColumn Header="Bitmə" Binding="{Binding EndDate}" Width="Auto" />
                 <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="Auto" />
+                <DataGridTemplateColumn Header="Yaradan" Width="Auto">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <StackPanel Margin="8,0" VerticalAlignment="Center"
+                                        ToolTip.Tip="Bu sifarişi yaradan istifadəçi (girişdən avtomatik)">
+                                <TextBlock Text="{Binding CreatedByName}" />
+                                <TextBlock Text="{Binding CreatedByRole}" Foreground="#8A90A6" FontSize="11" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
                 <DataGridTextColumn Header="Məbləğ" Binding="{Binding Total}" Width="Auto" />
                 <DataGridTextColumn Header="Depozit" Binding="{Binding Deposit}" Width="Auto" />
                 <DataGridTextColumn Header="Tutulma" Binding="{Binding TotalCharges}" Width="Auto" />

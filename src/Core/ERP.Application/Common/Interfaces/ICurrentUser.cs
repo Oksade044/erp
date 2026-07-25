@@ -8,6 +8,13 @@ public interface ICurrentUser
 {
     string? UserId { get; }
     string? UserName { get; }
+
+    /// <summary>İstifadəçinin tam adı (JWT "fullName" iddiası) — "kim yaradıb" üçün.</summary>
+    string? FullName { get; }
+
+    /// <summary>İstifadəçinin rolu (Admin/Menecer/Anbardar/Kassir).</summary>
+    string? Role { get; }
+
     bool IsAuthenticated { get; }
     bool HasPermission(string permission);
 }

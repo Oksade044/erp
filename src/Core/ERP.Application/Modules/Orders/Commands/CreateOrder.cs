@@ -32,6 +32,7 @@ public sealed class CreateOrderHandler(
     IRentalOrderRepository orders,
     ICustomerRepository customers,
     IProductRepository products,
+    ICurrentUser currentUser,
     IUnitOfWork unitOfWork)
     : IRequestHandler<CreateOrderCommand, Result<Guid>>
 {
@@ -44,7 +45,10 @@ public sealed class CreateOrderHandler(
             return Result.Failure<Guid>($"Müştəri tapılmadı: {dto.CustomerId}");
 
         var orderNumber = $"ORD-{DateTime.UtcNow:yyyyMMdd}-{Guid.NewGuid().ToString("N")[..6].ToUpperInvariant()}";
-        var order = RentalOrder.Create(orderNumber, customer.Id, customer.Name, dto.StartDate, dto.EndDate, dto.Notes);
+        // Sifarişi yaradan = daxil olmuş istifadəçi (JWT-dən, spoofing olmaz).
+        var order = RentalOrder.Create(orderNumber, customer.Id, customer.Name, dto.StartDate, dto.EndDate, dto.Notes,
+            createdByName: currentUser.FullName ?? currentUser.UserName,
+            createdByRole: currentUser.Role);
 
         foreach (var lineDto in dto.Lines)
         {

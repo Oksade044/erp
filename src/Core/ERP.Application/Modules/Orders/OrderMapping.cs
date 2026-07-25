@@ -24,6 +24,8 @@ public static class OrderMapping
         DepositRefund: o.DepositRefund.Amount,
         IsSettled: o.IsSettled,
         SettlementNotes: o.SettlementNotes,
+        CreatedByName: o.CreatedByName,
+        CreatedByRole: o.CreatedByRole,
         Lines: o.Lines.Select(l => new OrderLineDto(
             ProductId: l.ProductId,
             ProductName: l.ProductName,

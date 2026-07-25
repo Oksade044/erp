@@ -19,6 +19,8 @@ public sealed record OrderDto(
     decimal DepositRefund,
     bool IsSettled,
     string? SettlementNotes,
+    string? CreatedByName,
+    string? CreatedByRole,
     IReadOnlyList<OrderLineDto> Lines);
 
 public sealed record OrderLineDto(

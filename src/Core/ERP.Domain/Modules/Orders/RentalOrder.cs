@@ -38,6 +38,14 @@ public class RentalOrder : BaseEntity, IAggregateRoot
     public string? SettlementNotes { get; private set; }
     public bool IsSettled { get; private set; }
 
+    // --- Sifarişi yaradan (login-dən avtomatik snapshot — TDD §20 audit) ---
+
+    /// <summary>Sifarişi yaradan istifadəçinin tam adı (yaradılan anda snapshot).</summary>
+    public string? CreatedByName { get; private set; }
+
+    /// <summary>Sifarişi yaradan istifadəçinin rolu (Admin/Menecer/...).</summary>
+    public string? CreatedByRole { get; private set; }
+
     public IReadOnlyList<OrderLine> Lines => _lines.AsReadOnly();
 
     /// <summary>Sifarişin ümumi məbləği (bütün sətirlərin cəmi).</summary>
@@ -80,7 +88,9 @@ public class RentalOrder : BaseEntity, IAggregateRoot
         string customerName,
         DateOnly startDate,
         DateOnly endDate,
-        string? notes = null)
+        string? notes = null,
+        string? createdByName = null,
+        string? createdByRole = null)
     {
         if (string.IsNullOrWhiteSpace(orderNumber))
             throw new DomainException("Sifariş nömrəsi tələb olunur.");
@@ -93,7 +103,9 @@ public class RentalOrder : BaseEntity, IAggregateRoot
 
         return new RentalOrder(orderNumber, customerId, customerName.Trim(), startDate, endDate)
         {
-            Notes = notes?.Trim()
+            Notes = notes?.Trim(),
+            CreatedByName = string.IsNullOrWhiteSpace(createdByName) ? null : createdByName.Trim(),
+            CreatedByRole = string.IsNullOrWhiteSpace(createdByRole) ? null : createdByRole.Trim()
         };
     }
 

@@ -13,6 +13,8 @@ public sealed class HttpCurrentUser(IHttpContextAccessor accessor) : ICurrentUse
 
     public string? UserId => User?.FindFirstValue(ClaimTypes.NameIdentifier);
     public string? UserName => User?.Identity?.Name;
+    public string? FullName => User?.FindFirstValue("fullName");
+    public string? Role => User?.FindFirstValue(ClaimTypes.Role);
     public bool IsAuthenticated => User?.Identity?.IsAuthenticated ?? false;
 
     public bool HasPermission(string permission) =>

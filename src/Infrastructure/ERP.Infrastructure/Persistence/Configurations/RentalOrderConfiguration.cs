@@ -38,6 +38,9 @@ public sealed class RentalOrderConfiguration : IEntityTypeConfiguration<RentalOr
             .OnDelete(DeleteBehavior.Cascade);
         builder.Navigation(o => o.Lines).UsePropertyAccessMode(PropertyAccessMode.Field);
 
+        builder.Property(o => o.CreatedByName).HasMaxLength(200);
+        builder.Property(o => o.CreatedByRole).HasMaxLength(50);
+
         builder.Property(o => o.SettlementNotes).HasMaxLength(2000);
         builder.Property(o => o.IsSettled).IsRequired();
 
