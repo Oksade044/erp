@@ -1,6 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:ERP.Desktop.ViewModels"
+             xmlns:ctrl="using:ERP.Desktop.Controls"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="850" d:DesignHeight="640"
@@ -11,6 +12,9 @@
 
         <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12" Margin="0,0,0,16">
             <TextBlock Text="Hesabatlar" FontSize="24" FontWeight="SemiBold" VerticalAlignment="Center" />
+            <ctrl:InfoHelp Title="Hesabatlar"
+                           Text="Müştəri hesabatı (hər müştərinin sifariş sayı, fakturalanmış/ödənilmiş/qalıq borc) və zədə/itki hesabatı (hesablaşmada zədə/cərimə tutulan sifarişlər)."
+                           Note="Rəqəmlər real vaxtda hesablanır; ⟳ Yenilə ilə təzələyin." />
             <Button Content="⟳ Yenilə" Command="{Binding LoadCommand}" VerticalAlignment="Center" />
         </StackPanel>
 
