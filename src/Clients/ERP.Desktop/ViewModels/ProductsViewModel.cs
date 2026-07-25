@@ -107,6 +107,13 @@ public partial class ProductsViewModel : ViewModelBase
     /// <summary>Mövcud kateqoriyalar — məhsul formasında seçim/yeni yazmaq üçün.</summary>
     public ObservableCollection<string> CategoryNames { get; } = [];
 
+    /// <summary>Yeni məhsul üçün seçilmiş şəkil faylı (yaradılan kimi yüklənir). Boş ola bilər.</summary>
+    [ObservableProperty] private string? _newImagePath;
+
+    /// <summary>Seçilmiş şəklin adı (formada göstərmək üçün).</summary>
+    public string? NewImageName => string.IsNullOrEmpty(NewImagePath) ? null : Path.GetFileName(NewImagePath);
+    partial void OnNewImagePathChanged(string? value) => OnPropertyChanged(nameof(NewImageName));
+
     // ---- Redaktə forması ----
     [ObservableProperty] private bool _isEditing;
     [ObservableProperty] private string? _editName;
@@ -171,7 +178,7 @@ public partial class ProductsViewModel : ViewModelBase
         IsBusy = true;
         try
         {
-            var (ok, error) = await _api.CreateProductAsync(new CreateProductRequest(
+            var (ok, id, error) = await _api.CreateProductAsync(new CreateProductRequest(
                 Name: NewName!,
                 RentalPrice: NewRentalPrice,
                 TrackingMode: ToTrackingValue(NewTrackingMode),
@@ -185,14 +192,24 @@ public partial class ProductsViewModel : ViewModelBase
 
             if (ok)
             {
-                Status = NewWarehouse is not null
+                // Şəkil seçilibsə, yeni məhsula yüklə.
+                var imageNote = "";
+                if (id is { } newId && !string.IsNullOrEmpty(NewImagePath))
+                {
+                    var (imgOk, imgErr) = await _api.UploadProductImageAsync(newId, NewImagePath);
+                    imageNote = imgOk ? " + şəkil yükləndi" : $" (şəkil yüklənmədi: {imgErr})";
+                }
+
+                Status = (NewWarehouse is not null
                     ? $"Məhsul əlavə olundu — ilkin stok '{NewWarehouse.Name}' anbarına yazıldı."
-                    : "Məhsul əlavə olundu (SKU avtomatik təyin edildi).";
+                    : "Məhsul əlavə olundu (SKU avtomatik təyin edildi).") + imageNote;
+
                 NewName = NewCategory = null;
                 NewRentalPrice = 0; NewStock = 0; NewMinStock = 0;
                 NewPurchasePrice = NewSalePrice = null;
                 NewTrackingMode = TrackingModeConverter.BulkDisplay;
                 NewWarehouse = null;
+                NewImagePath = null;
                 await LoadAsync();
             }
             else Status = error ?? "Əlavə edilmədi.";

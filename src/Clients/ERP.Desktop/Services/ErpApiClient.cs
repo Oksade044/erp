@@ -85,10 +85,24 @@ public sealed class ErpApiClient(HttpClient http)
         http.GetFromJsonAsync<PagedResult<ProductDto>>(
             $"/api/v1/products?search={Uri.EscapeDataString(search ?? "")}", JsonOpts, ct);
 
-    public async Task<(bool ok, string? error)> CreateProductAsync(CreateProductRequest request, CancellationToken ct = default)
+    /// <summary>Məhsul yaradır və uğurda yeni məhsulun Id-sini qaytarır (şəkil yükləmək üçün lazımdır).</summary>
+    public async Task<(bool ok, Guid? id, string? error)> CreateProductAsync(CreateProductRequest request, CancellationToken ct = default)
     {
         var resp = await http.PostAsJsonAsync("/api/v1/products", request, JsonOpts, ct);
-        return await ReadResultAsync(resp, ct);
+        if (resp.IsSuccessStatusCode)
+        {
+            try
+            {
+                var doc = await resp.Content.ReadFromJsonAsync<JsonElement>(ct);
+                if (doc.TryGetProperty("id", out var idEl) && idEl.TryGetGuid(out var id))
+                    return (true, id, null);
+            }
+            catch { /* struktursuz cavab — yenə uğur sayılır */ }
+            return (true, null, null);
+        }
+
+        var (_, error) = await ReadResultAsync(resp, ct);
+        return (false, null, error);
     }
 
     public async Task<(bool ok, string? error)> UpdateProductAsync(Guid id, UpdateProductRequest request, CancellationToken ct = default)

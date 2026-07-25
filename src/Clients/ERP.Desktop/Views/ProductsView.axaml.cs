@@ -39,4 +39,30 @@ public partial class ProductsView : UserControl
             vm.Status = $"Xəta: {ex.Message}";
         }
     }
+
+    /// <summary>Yeni məhsul formasında şəkil seçir (məhsul yaradılanda avtomatik yüklənəcək).</summary>
+    private async void OnPickNewImageClick(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is not ProductsViewModel vm) return;
+        try
+        {
+            var top = TopLevel.GetTopLevel(this);
+            if (top is null) return;
+
+            var files = await top.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+            {
+                Title = "Məhsul şəkli seçin",
+                AllowMultiple = false,
+                FileTypeFilter = [new FilePickerFileType("Şəkillər") { Patterns = ["*.png", "*.jpg", "*.jpeg", "*.webp", "*.gif"] }]
+            });
+
+            var path = files.FirstOrDefault()?.TryGetLocalPath();
+            if (!string.IsNullOrEmpty(path))
+                vm.NewImagePath = path;
+        }
+        catch (System.Exception ex)
+        {
+            vm.Status = $"Xəta: {ex.Message}";
+        }
+    }
 }

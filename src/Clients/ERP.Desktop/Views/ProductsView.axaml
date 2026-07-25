@@ -127,6 +127,17 @@
                                 </ComboBox.ItemTemplate>
                             </ComboBox>
                         </StackPanel>
+                        <StackPanel Width="220" Margin="0,0,12,10">
+                            <TextBlock Text="Şəkil (opsional)" FontSize="12" Foreground="#5A6072" />
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <Button Content="📷 Şəkil seç" Click="OnPickNewImageClick"
+                                        ToolTip.Tip="Məhsul üçün şəkil seçin — məhsul əlavə olunanda avtomatik yüklənir." />
+                                <TextBlock Text="{Binding NewImageName}" Foreground="#2B8A3E" FontSize="12"
+                                           VerticalAlignment="Center" TextTrimming="CharacterEllipsis" MaxWidth="110" />
+                                <TextBlock Text="seçilməyib" Foreground="#8A90A6" FontSize="12" VerticalAlignment="Center"
+                                           IsVisible="{Binding NewImageName, Converter={x:Static ObjectConverters.IsNull}}" />
+                            </StackPanel>
+                        </StackPanel>
                     </WrapPanel>
                     <Button Content="+ Əlavə et" Command="{Binding AddCommand}"
                             Background="#3B5BDB" Foreground="White" HorizontalAlignment="Left" />
