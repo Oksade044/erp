@@ -11,54 +11,103 @@
 
         <DockPanel Grid.Row="0" Margin="0,0,0,16">
             <TextBlock Text="{Binding LiveStatus}" DockPanel.Dock="Right" VerticalAlignment="Center"
-                       FontSize="12" Foreground="#2B8A3E" />
-            <TextBlock Text="Stok İdarəetməsi" FontSize="24" FontWeight="SemiBold" />
+                       FontSize="12" Foreground="#2B8A3E"
+                       ToolTip.Tip="Canlı bağlantı: stok dəyişiklikləri dərhal yenilənir (SignalR)" />
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <TextBlock Text="Anbar Stok İdarəetməsi" FontSize="24" FontWeight="SemiBold" VerticalAlignment="Center" />
+                <Button Content="ⓘ" FontSize="14" Width="28" Height="28" Padding="0" VerticalAlignment="Center"
+                        Background="Transparent" BorderThickness="0" Foreground="#3B5BDB"
+                        ToolTip.Tip="Bu ekran nə edir?">
+                    <Button.Flyout>
+                        <Flyout>
+                            <StackPanel MaxWidth="430" Spacing="6">
+                                <TextBlock Text="Anbar üzrə stok" FontWeight="SemiBold" />
+                                <TextBlock TextWrapping="Wrap" Text="Hər məhsulun HANSI anbarda NEÇƏ ədəd olduğunu göstərir. Bir məhsul müxtəlif anbarlarda ola bilər." />
+                                <TextBlock TextWrapping="Wrap" Foreground="#5A6072" Text="• Stok təyin et: seçilmiş məhsul üçün anbardakı sayı və minimum həddi yazır.&#10;• Transfer: məhsulu bir anbardan digərinə köçürür.&#10;• Minimum həd: bu saydan aşağı düşəndə 'aşağı stok' xəbərdarlığı verilir." />
+                            </StackPanel>
+                        </Flyout>
+                    </Button.Flyout>
+                </Button>
+            </StackPanel>
         </DockPanel>
 
         <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="8" Margin="0,0,0,12">
-            <TextBox Width="200" PlaceholderText="Məhsul və ya anbar üzrə axtar" Text="{Binding Search}">
+            <TextBox Width="240" PlaceholderText="Məhsul və ya anbar adı üzrə axtar (yazdıqca süzülür)" Text="{Binding Search}"
+                     ToolTip.Tip="Yazdıqca süzülür, Enter də işləyir">
                         <TextBox.KeyBindings>
                             <KeyBinding Gesture="Enter" Command="{Binding LoadCommand}" />
                         </TextBox.KeyBindings>
                     </TextBox>
-            <CheckBox Content="Yalnız aşağı stok" IsChecked="{Binding LowOnly}" VerticalAlignment="Center" />
-            <Button Content="Axtar / Yenilə" Command="{Binding LoadCommand}" />
+            <CheckBox Content="Yalnız az qalanlar" IsChecked="{Binding LowOnly}" VerticalAlignment="Center"
+                      ToolTip.Tip="Yalnız minimum həddən aşağı düşmüş stokları göstərir" />
+            <Button Content="🔍 Axtar / Yenilə" Command="{Binding LoadCommand}" ToolTip.Tip="Siyahını yeniləyir" />
         </StackPanel>
 
         <!-- Stok təyini (adjust) -->
         <Border Grid.Row="2" Background="#F5F6FA" CornerRadius="8" Padding="16" Margin="0,0,0,10">
-            <StackPanel Orientation="Horizontal" Spacing="8">
-                <TextBlock Text="Stok təyin et:" VerticalAlignment="Center" FontWeight="SemiBold" />
-                <ComboBox ItemsSource="{Binding AllProducts}" SelectedItem="{Binding AdjProduct}" Width="180">
-                    <ComboBox.ItemTemplate><DataTemplate><TextBlock Text="{Binding Name}" /></DataTemplate></ComboBox.ItemTemplate>
-                </ComboBox>
-                <ComboBox ItemsSource="{Binding AllWarehouses}" SelectedItem="{Binding AdjWarehouse}" Width="150">
-                    <ComboBox.ItemTemplate><DataTemplate><TextBlock Text="{Binding Name}" /></DataTemplate></ComboBox.ItemTemplate>
-                </ComboBox>
-                <TextBox Width="90" PlaceholderText="Miqdar" Text="{Binding AdjQuantity}" />
-                <TextBox Width="90" PlaceholderText="Min. həd" Text="{Binding AdjMinQuantity}" />
-                <Button Content="Təyin et" Command="{Binding AdjustCommand}"
-                        Background="#3B5BDB" Foreground="White" />
+            <StackPanel Spacing="6">
+                <TextBlock Text="Stok təyin et (anbardakı sayı yaz)" FontWeight="SemiBold"
+                           ToolTip.Tip="Seçilmiş məhsulun seçilmiş anbardakı mövcud sayını və minimum həddini təyin edir" />
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <StackPanel Width="190">
+                        <TextBlock Text="Məhsul" FontSize="12" Foreground="#5A6072" />
+                        <ComboBox ItemsSource="{Binding AllProducts}" SelectedItem="{Binding AdjProduct}" HorizontalAlignment="Stretch">
+                            <ComboBox.ItemTemplate><DataTemplate><TextBlock Text="{Binding Name}" /></DataTemplate></ComboBox.ItemTemplate>
+                        </ComboBox>
+                    </StackPanel>
+                    <StackPanel Width="160">
+                        <TextBlock Text="Anbar" FontSize="12" Foreground="#5A6072" />
+                        <ComboBox ItemsSource="{Binding AllWarehouses}" SelectedItem="{Binding AdjWarehouse}" HorizontalAlignment="Stretch">
+                            <ComboBox.ItemTemplate><DataTemplate><TextBlock Text="{Binding Name}" /></DataTemplate></ComboBox.ItemTemplate>
+                        </ComboBox>
+                    </StackPanel>
+                    <StackPanel Width="110">
+                        <TextBlock Text="Mövcud say" FontSize="12" Foreground="#5A6072" />
+                        <TextBox PlaceholderText="Məs: 30" Text="{Binding AdjQuantity}" />
+                    </StackPanel>
+                    <StackPanel Width="120">
+                        <TextBlock Text="Minimum həd" FontSize="12" Foreground="#5A6072" />
+                        <TextBox PlaceholderText="Məs: 5" Text="{Binding AdjMinQuantity}"
+                                 ToolTip.Tip="Bu saydan aşağı düşəndə xəbərdarlıq verilir" />
+                    </StackPanel>
+                    <Button Content="Təyin et" Command="{Binding AdjustCommand}"
+                            Background="#3B5BDB" Foreground="White" VerticalAlignment="Bottom" />
+                </StackPanel>
             </StackPanel>
         </Border>
 
         <!-- Transfer -->
         <Border Grid.Row="3" Background="#F5F6FA" CornerRadius="8" Padding="16" Margin="0,0,0,16">
-            <StackPanel Orientation="Horizontal" Spacing="8">
-                <TextBlock Text="Transfer:" VerticalAlignment="Center" FontWeight="SemiBold" />
-                <ComboBox ItemsSource="{Binding AllProducts}" SelectedItem="{Binding TrProduct}" Width="170">
-                    <ComboBox.ItemTemplate><DataTemplate><TextBlock Text="{Binding Name}" /></DataTemplate></ComboBox.ItemTemplate>
-                </ComboBox>
-                <ComboBox ItemsSource="{Binding AllWarehouses}" SelectedItem="{Binding TrFrom}" Width="140">
-                    <ComboBox.ItemTemplate><DataTemplate><TextBlock Text="{Binding Name}" /></DataTemplate></ComboBox.ItemTemplate>
-                </ComboBox>
-                <TextBlock Text="→" VerticalAlignment="Center" />
-                <ComboBox ItemsSource="{Binding AllWarehouses}" SelectedItem="{Binding TrTo}" Width="140">
-                    <ComboBox.ItemTemplate><DataTemplate><TextBlock Text="{Binding Name}" /></DataTemplate></ComboBox.ItemTemplate>
-                </ComboBox>
-                <TextBox Width="90" PlaceholderText="Miqdar" Text="{Binding TrQuantity}" />
-                <Button Content="🔀 Köçür" Command="{Binding TransferCommand}"
-                        Background="#2F9E44" Foreground="White" />
+            <StackPanel Spacing="6">
+                <TextBlock Text="Anbarlar arası transfer (məhsulu köçür)" FontWeight="SemiBold"
+                           ToolTip.Tip="Məhsulu bir anbardan çıxarıb digərinə əlavə edir" />
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <StackPanel Width="180">
+                        <TextBlock Text="Məhsul" FontSize="12" Foreground="#5A6072" />
+                        <ComboBox ItemsSource="{Binding AllProducts}" SelectedItem="{Binding TrProduct}" HorizontalAlignment="Stretch">
+                            <ComboBox.ItemTemplate><DataTemplate><TextBlock Text="{Binding Name}" /></DataTemplate></ComboBox.ItemTemplate>
+                        </ComboBox>
+                    </StackPanel>
+                    <StackPanel Width="150">
+                        <TextBlock Text="Haradan (mənbə anbar)" FontSize="12" Foreground="#5A6072" />
+                        <ComboBox ItemsSource="{Binding AllWarehouses}" SelectedItem="{Binding TrFrom}" HorizontalAlignment="Stretch">
+                            <ComboBox.ItemTemplate><DataTemplate><TextBlock Text="{Binding Name}" /></DataTemplate></ComboBox.ItemTemplate>
+                        </ComboBox>
+                    </StackPanel>
+                    <TextBlock Text="→" VerticalAlignment="Bottom" Margin="0,0,0,6" />
+                    <StackPanel Width="150">
+                        <TextBlock Text="Haraya (təyinat anbar)" FontSize="12" Foreground="#5A6072" />
+                        <ComboBox ItemsSource="{Binding AllWarehouses}" SelectedItem="{Binding TrTo}" HorizontalAlignment="Stretch">
+                            <ComboBox.ItemTemplate><DataTemplate><TextBlock Text="{Binding Name}" /></DataTemplate></ComboBox.ItemTemplate>
+                        </ComboBox>
+                    </StackPanel>
+                    <StackPanel Width="100">
+                        <TextBlock Text="Köçürülən say" FontSize="12" Foreground="#5A6072" />
+                        <TextBox PlaceholderText="Məs: 10" Text="{Binding TrQuantity}" />
+                    </StackPanel>
+                    <Button Content="🔀 Köçür" Command="{Binding TransferCommand}"
+                            Background="#2F9E44" Foreground="White" VerticalAlignment="Bottom" />
+                </StackPanel>
             </StackPanel>
         </Border>
 
@@ -68,9 +117,16 @@
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Məhsul" Binding="{Binding ProductName}" Width="2*" />
                 <DataGridTextColumn Header="Anbar" Binding="{Binding WarehouseName}" Width="*" />
-                <DataGridTextColumn Header="Miqdar" Binding="{Binding Quantity}" Width="Auto" />
-                <DataGridTextColumn Header="Min. həd" Binding="{Binding MinQuantity}" Width="Auto" />
-                <DataGridCheckBoxColumn Header="Aşağı?" Binding="{Binding IsLow}" Width="Auto" />
+                <DataGridTextColumn Header="Mövcud say" Binding="{Binding Quantity}" Width="Auto" />
+                <DataGridTextColumn Header="Minimum həd" Binding="{Binding MinQuantity}" Width="Auto" />
+                <DataGridTemplateColumn Header="Vəziyyət" Width="Auto">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="⚠ Az qalıb" Foreground="#E03131" FontWeight="SemiBold"
+                                       Margin="8,0" VerticalAlignment="Center" IsVisible="{Binding IsLow}" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
             </DataGrid.Columns>
         </DataGrid>
 

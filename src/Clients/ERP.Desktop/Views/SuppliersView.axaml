@@ -9,29 +9,61 @@
 
     <Grid RowDefinitions="Auto,Auto,*,Auto" Margin="24">
 
-        <TextBlock Grid.Row="0" Text="Təchizatçılar" FontSize="24" FontWeight="SemiBold" Margin="0,0,0,16" />
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="8" Margin="0,0,0,16">
+            <TextBlock Text="Təchizatçılar" FontSize="24" FontWeight="SemiBold" VerticalAlignment="Center" />
+            <Button Content="ⓘ" FontSize="14" Width="28" Height="28" Padding="0" VerticalAlignment="Center"
+                    Background="Transparent" BorderThickness="0" Foreground="#3B5BDB"
+                    ToolTip.Tip="Bu modul nə üçündür?">
+                <Button.Flyout>
+                    <Flyout>
+                        <StackPanel MaxWidth="400" Spacing="6">
+                            <TextBlock Text="Təchizatçılar nədir?" FontWeight="SemiBold" />
+                            <TextBlock TextWrapping="Wrap" Text="Təchizatçı — şirkətin avadanlıq və material ALDIĞI firma və ya şəxsdir (məs. mebel istehsalçısı, işıq avadanlığı satıcısı, parça təchizatçısı)." />
+                            <TextBlock TextWrapping="Wrap" Foreground="#5A6072" Text="Burada təchizatçılar qeyd olunur; 'Alışlar' bölməsində onlardan mal alışı edilir və anbar doldurulur. Müştəri ilə qarışdırmayın — müştəri sizdən icarə götürür, təchizatçı sizə mal satır." />
+                        </StackPanel>
+                    </Flyout>
+                </Button.Flyout>
+            </Button>
+        </StackPanel>
 
         <!-- Axtarış + yeni təchizatçı forması -->
         <Border Grid.Row="1" Background="#F5F6FA" CornerRadius="8" Padding="16" Margin="0,0,0,16">
             <StackPanel Spacing="10">
                 <StackPanel Orientation="Horizontal" Spacing="8">
-                    <TextBox Width="240" PlaceholderText="Ad, telefon və ya əlaqədar şəxs üzrə axtar"
-                             Text="{Binding Search}">
+                    <TextBox Width="280" PlaceholderText="Ad, telefon və ya əlaqədar şəxs üzrə axtar (yazdıqca süzülür)"
+                             Text="{Binding Search}"
+                             ToolTip.Tip="Yazdıqca nəticələr süzülür, Enter də işləyir">
                         <TextBox.KeyBindings>
                             <KeyBinding Gesture="Enter" Command="{Binding LoadCommand}" />
                         </TextBox.KeyBindings>
                     </TextBox>
-                    <Button Content="Axtar" Command="{Binding LoadCommand}" />
+                    <Button Content="🔍 Axtar" Command="{Binding LoadCommand}" ToolTip.Tip="Axtarışı işə salır (Enter ilə eynidir)" />
                 </StackPanel>
-                <StackPanel Orientation="Horizontal" Spacing="8">
-                    <TextBox Width="180" PlaceholderText="Ad *" Text="{Binding NewName}" />
-                    <TextBox Width="140" PlaceholderText="Telefon *" Text="{Binding NewPhone}" />
-                    <TextBox Width="150" PlaceholderText="Əlaqədar şəxs" Text="{Binding NewContactPerson}" />
-                    <TextBox Width="160" PlaceholderText="E-poçt" Text="{Binding NewEmail}" />
-                    <TextBox Width="120" PlaceholderText="Şəhər" Text="{Binding NewCity}" />
-                    <Button Content="+ Əlavə et" Command="{Binding AddCommand}"
-                            Background="#3B5BDB" Foreground="White" />
-                </StackPanel>
+                <TextBlock Text="Yeni təchizatçı əlavə et" FontWeight="SemiBold" Margin="0,4,0,0" />
+                <WrapPanel>
+                    <StackPanel Width="200" Margin="0,0,12,8">
+                        <TextBlock Text="Firma / şəxs adı *" FontSize="12" Foreground="#5A6072" />
+                        <TextBox PlaceholderText="Məs: Bakı Mebel MMC" Text="{Binding NewName}" />
+                    </StackPanel>
+                    <StackPanel Width="150" Margin="0,0,12,8">
+                        <TextBlock Text="Telefon *" FontSize="12" Foreground="#5A6072" />
+                        <TextBox PlaceholderText="0501234567" Text="{Binding NewPhone}" />
+                    </StackPanel>
+                    <StackPanel Width="170" Margin="0,0,12,8">
+                        <TextBlock Text="Əlaqədar şəxs" FontSize="12" Foreground="#5A6072" />
+                        <TextBox PlaceholderText="Məs: Əli Məmmədov" Text="{Binding NewContactPerson}" />
+                    </StackPanel>
+                    <StackPanel Width="180" Margin="0,0,12,8">
+                        <TextBlock Text="E-poçt" FontSize="12" Foreground="#5A6072" />
+                        <TextBox PlaceholderText="ornek@firma.az" Text="{Binding NewEmail}" />
+                    </StackPanel>
+                    <StackPanel Width="130" Margin="0,0,12,8">
+                        <TextBlock Text="Şəhər" FontSize="12" Foreground="#5A6072" />
+                        <TextBox PlaceholderText="Bakı" Text="{Binding NewCity}" />
+                    </StackPanel>
+                </WrapPanel>
+                <Button Content="+ Əlavə et" Command="{Binding AddCommand}"
+                        Background="#3B5BDB" Foreground="White" HorizontalAlignment="Left" />
             </StackPanel>
         </Border>
 

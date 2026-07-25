@@ -9,33 +9,75 @@
 
     <Grid RowDefinitions="Auto,Auto,Auto,*,Auto" Margin="24">
 
-        <TextBlock Grid.Row="0" Text="Əməkhaqqı" FontSize="24" FontWeight="SemiBold" Margin="0,0,0,16" />
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="8" Margin="0,0,0,16">
+            <TextBlock Text="Əməkhaqqı" FontSize="24" FontWeight="SemiBold" VerticalAlignment="Center" />
+            <Button Content="ⓘ" FontSize="14" Width="28" Height="28" Padding="0" VerticalAlignment="Center"
+                    Background="Transparent" BorderThickness="0" Foreground="#3B5BDB"
+                    ToolTip.Tip="Əməkhaqqı necə hesablanır?">
+                <Button.Flyout>
+                    <Flyout>
+                        <StackPanel MaxWidth="420" Spacing="6">
+                            <TextBlock Text="Əməkhaqqı hesablanması" FontWeight="SemiBold" />
+                            <TextBlock TextWrapping="Wrap" Text="İşçi seçilir, il/ay göstərilir. Əsas maaş işçinin kartındakı maaşdan avtomatik götürülür." />
+                            <TextBlock TextWrapping="Wrap" FontWeight="SemiBold"
+                                       Text="Son (net) maaş = Əsas maaş + Bonus − Tutulma" />
+                            <TextBlock TextWrapping="Wrap" Foreground="#5A6072" Text="• Bonus — mükafat/əlavə ödəniş.&#10;• Tutulma — kəsinti (cərimə, avans və s.).&#10;Hər işçiyə bir ay üçün yalnız bir hesablama olur. 'Ödə' düyməsi maaşı ödənilmiş edir və avtomatik Maliyyəyə məxaric yazır." />
+                        </StackPanel>
+                    </Flyout>
+                </Button.Flyout>
+            </Button>
+        </StackPanel>
 
         <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="8" Margin="0,0,0,12">
-            <TextBox Width="200" PlaceholderText="İşçi və ya № üzrə axtar" Text="{Binding Search}">
+            <TextBox Width="220" PlaceholderText="İşçi adı və ya № üzrə axtar (yazdıqca süzülür)" Text="{Binding Search}"
+                     ToolTip.Tip="Yazdıqca süzülür, Enter də işləyir">
                         <TextBox.KeyBindings>
                             <KeyBinding Gesture="Enter" Command="{Binding LoadCommand}" />
                         </TextBox.KeyBindings>
                     </TextBox>
-            <Button Content="Axtar" Command="{Binding LoadCommand}" />
+            <Button Content="🔍 Axtar" Command="{Binding LoadCommand}" ToolTip.Tip="Axtarışı işə salır (Enter ilə eynidir)" />
             <Button Content="💸 Ödə" Command="{Binding PayCommand}"
-                    Background="#2F9E44" Foreground="White" />
+                    Background="#2F9E44" Foreground="White"
+                    ToolTip.Tip="Seçilmiş hesablamanı 'Ödənilmiş' edir və Maliyyəyə avtomatik məxaric (Əməkhaqqı) yazır" />
         </StackPanel>
 
         <!-- Yeni hesablama forması -->
         <Border Grid.Row="2" Background="#F5F6FA" CornerRadius="8" Padding="16" Margin="0,0,0,16">
-            <StackPanel Orientation="Horizontal" Spacing="8">
-                <ComboBox ItemsSource="{Binding AllEmployees}" SelectedItem="{Binding NewEmployee}" Width="200">
-                    <ComboBox.ItemTemplate>
-                        <DataTemplate><TextBlock Text="{Binding FullName}" /></DataTemplate>
-                    </ComboBox.ItemTemplate>
-                </ComboBox>
-                <TextBox Width="70" PlaceholderText="İl" Text="{Binding NewYear}" />
-                <TextBox Width="60" PlaceholderText="Ay" Text="{Binding NewMonth}" />
-                <TextBox Width="100" PlaceholderText="Bonus" Text="{Binding NewBonus}" />
-                <TextBox Width="100" PlaceholderText="Tutulma" Text="{Binding NewDeduction}" />
+            <StackPanel Spacing="8">
+                <TextBlock Text="Yeni əməkhaqqı hesabla" FontWeight="SemiBold" />
+                <TextBlock Text="Əsas maaş işçinin kartından avtomatik götürülür. Son maaş = Əsas + Bonus − Tutulma."
+                           Foreground="#8A90A6" FontSize="12" />
+                <WrapPanel>
+                    <StackPanel Width="210" Margin="0,0,12,8">
+                        <TextBlock Text="İşçi *" FontSize="12" Foreground="#5A6072" />
+                        <ComboBox ItemsSource="{Binding AllEmployees}" SelectedItem="{Binding NewEmployee}"
+                                  HorizontalAlignment="Stretch">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate><TextBlock Text="{Binding FullName}" /></DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                    </StackPanel>
+                    <StackPanel Width="90" Margin="0,0,12,8">
+                        <TextBlock Text="İl" FontSize="12" Foreground="#5A6072" />
+                        <TextBox PlaceholderText="2026" Text="{Binding NewYear}" />
+                    </StackPanel>
+                    <StackPanel Width="80" Margin="0,0,12,8">
+                        <TextBlock Text="Ay (1-12)" FontSize="12" Foreground="#5A6072" />
+                        <TextBox PlaceholderText="7" Text="{Binding NewMonth}" />
+                    </StackPanel>
+                    <StackPanel Width="130" Margin="0,0,12,8">
+                        <TextBlock Text="Bonus / mükafat (AZN)" FontSize="12" Foreground="#5A6072" />
+                        <TextBox PlaceholderText="0" Text="{Binding NewBonus}"
+                                 ToolTip.Tip="Əlavə ödəniş/mükafat. Yoxdursa 0 buraxın." />
+                    </StackPanel>
+                    <StackPanel Width="150" Margin="0,0,12,8">
+                        <TextBlock Text="Tutulma (kəsinti/cərimə)" FontSize="12" Foreground="#5A6072" />
+                        <TextBox PlaceholderText="0" Text="{Binding NewDeduction}"
+                                 ToolTip.Tip="Maaşdan çıxılan məbləğ (cərimə, avans və s.). Yoxdursa 0 buraxın." />
+                    </StackPanel>
+                </WrapPanel>
                 <Button Content="+ Hesabla" Command="{Binding AddCommand}"
-                        Background="#3B5BDB" Foreground="White" />
+                        Background="#3B5BDB" Foreground="White" HorizontalAlignment="Left" />
             </StackPanel>
         </Border>
 
@@ -48,10 +90,10 @@
                 <DataGridTextColumn Header="İşçi" Binding="{Binding EmployeeName}" Width="2*" />
                 <DataGridTextColumn Header="İl" Binding="{Binding Year}" Width="Auto" />
                 <DataGridTextColumn Header="Ay" Binding="{Binding Month}" Width="Auto" />
-                <DataGridTextColumn Header="Baza" Binding="{Binding BaseSalary}" Width="*" />
+                <DataGridTextColumn Header="Əsas maaş" Binding="{Binding BaseSalary}" Width="*" />
                 <DataGridTextColumn Header="Bonus" Binding="{Binding Bonus}" Width="*" />
                 <DataGridTextColumn Header="Tutulma" Binding="{Binding Deduction}" Width="*" />
-                <DataGridTextColumn Header="Net" Binding="{Binding NetSalary}" Width="*" />
+                <DataGridTextColumn Header="Son maaş (net)" Binding="{Binding NetSalary}" Width="*" />
                 <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="Auto" />
                 <DataGridTextColumn Header="Ödəniş tarixi" Binding="{Binding PaidDate}" Width="Auto" />
             </DataGrid.Columns>
