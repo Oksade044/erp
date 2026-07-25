@@ -8,9 +8,13 @@ public sealed record ProductDto(
     string? Category,
     string? Description,
     decimal RentalPrice,
+    decimal? PurchasePrice,
+    decimal? SalePrice,
     string Currency,
     string TrackingMode,
     int StockQuantity,
+    int MinStockQuantity,
+    bool IsLowStock,
     bool IsActive,
     bool HasImage,
     DateTimeOffset CreatedAt);

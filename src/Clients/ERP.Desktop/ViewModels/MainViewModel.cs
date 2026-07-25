@@ -47,7 +47,7 @@ public partial class MainViewModel : ViewModelBase
 
         _dashboard = new DashboardViewModel(api);
         _customers = new CustomersViewModel(api);
-        _products = new ProductsViewModel(api);
+        _products = new ProductsViewModel(api, canViewCost: auth.Permissions.Contains("products.viewcost"));
         _orders = new OrdersViewModel(api);
         _invoices = new InvoicesViewModel(api);
         _suppliers = new SuppliersViewModel(api);

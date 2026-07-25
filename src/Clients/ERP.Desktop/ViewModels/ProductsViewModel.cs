@@ -2,18 +2,31 @@ using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using ERP.Desktop.Converters;
 using ERP.Desktop.Services;
 using ERP.Shared.Contracts.Products;
 
 namespace ERP.Desktop.ViewModels;
 
-/// <summary>Məhsullar ekranı — icarə avadanlığı kataloqu, siyahı, axtarış, əlavə və şəkil (TDD §24).</summary>
-public partial class ProductsViewModel(ErpApiClient api) : ViewModelBase
+/// <summary>Məhsullar ekranı — icarə avadanlığı kataloqu, siyahı, canlı axtarış, əlavə/redaktə və şəkil (TDD §24).</summary>
+public partial class ProductsViewModel : ViewModelBase
 {
+    private readonly ErpApiClient _api;
+
+    /// <summary>Alış/satış (həssas) qiymətləri görmək icazəsi — yalnız Admin/Menecer (products.viewcost).</summary>
+    public bool CanViewCost { get; }
+
+    public ProductsViewModel(ErpApiClient api, bool canViewCost = false)
+    {
+        _api = api;
+        CanViewCost = canViewCost;
+    }
+
     public ObservableCollection<ProductDto> Products { get; } = [];
 
     [ObservableProperty] private string? _search;
@@ -21,10 +34,35 @@ public partial class ProductsViewModel(ErpApiClient api) : ViewModelBase
     [ObservableProperty] private string? _status;
     [ObservableProperty] private ProductDto? _selected;
 
-    /// <summary>Seçilmiş məhsulun şəkli (API-dən yüklənir; hamıya görünür).</summary>
+    /// <summary>İzləmə rejimi seçimləri — istifadəçi üçün aydın adlar.</summary>
+    public string[] TrackingModes { get; } =
+        [TrackingModeConverter.BulkDisplay, TrackingModeConverter.IndividualDisplay];
+
+    // ---- Canlı axtarış (yazıldıqca, debounce ilə) ----
+    private CancellationTokenSource? _searchCts;
+
+    partial void OnSearchChanged(string? value)
+    {
+        _searchCts?.Cancel();
+        _searchCts = new CancellationTokenSource();
+        var token = _searchCts.Token;
+        _ = DebouncedSearchAsync(token);
+    }
+
+    private async Task DebouncedSearchAsync(CancellationToken token)
+    {
+        try
+        {
+            await Task.Delay(350, token); // istifadəçi yazmağı dayandıranda axtar
+            if (!token.IsCancellationRequested)
+                await LoadAsync();
+        }
+        catch (TaskCanceledException) { /* növbəti hərf gəldi — köhnə axtarışı ləğv et */ }
+    }
+
+    // ---- Şəkil ----
     [ObservableProperty] private Bitmap? _selectedImage;
 
-    /// <summary>Seçim dəyişəndə şəkli API-dən yüklə.</summary>
     partial void OnSelectedChanged(ProductDto? value) => _ = LoadSelectedImageAsync(value);
 
     private async Task LoadSelectedImageAsync(ProductDto? product)
@@ -33,7 +71,7 @@ public partial class ProductsViewModel(ErpApiClient api) : ViewModelBase
         if (product is null || !product.HasImage) return;
         try
         {
-            var bytes = await api.GetProductImageBytesAsync(product.Id);
+            var bytes = await _api.GetProductImageBytesAsync(product.Id);
             if (bytes is not null)
             {
                 using var ms = new MemoryStream(bytes);
@@ -50,29 +88,54 @@ public partial class ProductsViewModel(ErpApiClient api) : ViewModelBase
         IsBusy = true;
         try
         {
-            var (ok, error) = await api.UploadProductImageAsync(Selected.Id, filePath);
-            if (ok)
+            var (ok, error) = await _api.UploadProductImageAsync(Selected.Id, filePath);
+            if (!ok) { Status = error ?? "Şəkil yüklənmədi."; return; }
+
+            // Şəkli fayldan indi göstər — LoadAsync() siyahını təmizləyir və Selected-i sıfırlayır.
+            try
             {
-                Status = "Şəkil yükləndi (bütün istifadəçilər görəcək).";
-                await LoadAsync();
-                var id = Selected.Id;
-                using var fs = File.OpenRead(filePath);
+                await using var fs = File.OpenRead(filePath);
                 SelectedImage = new Bitmap(fs);
             }
-            else Status = error ?? "Şəkil yüklənmədi.";
+            catch { /* şəkil göstərilə bilmədi — yükləmə yenə uğurludur */ }
+
+            Status = "Şəkil yükləndi (bütün istifadəçilər görəcək).";
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            Status = $"Şəkil yüklənmədi: {ex.Message}";
         }
         finally { IsBusy = false; }
     }
 
-    // Yeni məhsul forması
-    [ObservableProperty] private string? _newSku;
+    // ---- Yeni məhsul forması (SKU avtomatik — istifadəçi yazmır) ----
     [ObservableProperty] private string? _newName;
     [ObservableProperty] private decimal _newRentalPrice;
-    [ObservableProperty] private string _newTrackingMode = "Toplu";
+    [ObservableProperty] private decimal? _newPurchasePrice;
+    [ObservableProperty] private decimal? _newSalePrice;
+    [ObservableProperty] private string _newTrackingMode = TrackingModeConverter.BulkDisplay;
     [ObservableProperty] private int _newStock;
+    [ObservableProperty] private int _newMinStock;
     [ObservableProperty] private string? _newCategory;
 
-    public string[] TrackingModes { get; } = ["Toplu", "Nüsxə"];
+    // ---- Redaktə forması ----
+    [ObservableProperty] private bool _isEditing;
+    [ObservableProperty] private string? _editName;
+    [ObservableProperty] private decimal _editRentalPrice;
+    [ObservableProperty] private decimal? _editPurchasePrice;
+    [ObservableProperty] private decimal? _editSalePrice;
+    [ObservableProperty] private string _editTrackingMode = TrackingModeConverter.BulkDisplay;
+    [ObservableProperty] private int _editStock;
+    [ObservableProperty] private int _editMinStock;
+    [ObservableProperty] private string? _editCategory;
+    [ObservableProperty] private bool _editIsActive = true;
+
+    private static string ToTrackingValue(string? display) =>
+        display == TrackingModeConverter.IndividualDisplay ? "Nüsxə" : "Toplu";
+
+    private static string ToTrackingDisplay(string? value) =>
+        value == "Nüsxə" ? TrackingModeConverter.IndividualDisplay : TrackingModeConverter.BulkDisplay;
 
     [RelayCommand]
     private async Task LoadAsync()
@@ -81,13 +144,13 @@ public partial class ProductsViewModel(ErpApiClient api) : ViewModelBase
         Status = "Yüklənir...";
         try
         {
-            var result = await api.GetProductsAsync(Search);
+            var result = await _api.GetProductsAsync(Search);
             Products.Clear();
             if (result is not null)
                 foreach (var p in result.Items) Products.Add(p);
             Status = $"{Products.Count} məhsul";
         }
-        catch (System.Exception ex)
+        catch (Exception ex)
         {
             Status = $"Xəta: {ex.Message}";
         }
@@ -97,24 +160,33 @@ public partial class ProductsViewModel(ErpApiClient api) : ViewModelBase
     [RelayCommand]
     private async Task AddAsync()
     {
-        if (string.IsNullOrWhiteSpace(NewSku) || string.IsNullOrWhiteSpace(NewName))
+        if (string.IsNullOrWhiteSpace(NewName))
         {
-            Status = "SKU və ad tələb olunur.";
+            Status = "Məhsulun adı tələb olunur.";
             return;
         }
 
         IsBusy = true;
         try
         {
-            var (ok, error) = await api.CreateProductAsync(new CreateProductRequest(
-                Sku: NewSku!, Name: NewName!, RentalPrice: NewRentalPrice,
-                TrackingMode: NewTrackingMode, StockQuantity: NewStock, Category: NewCategory));
+            var (ok, error) = await _api.CreateProductAsync(new CreateProductRequest(
+                Name: NewName!,
+                RentalPrice: NewRentalPrice,
+                TrackingMode: ToTrackingValue(NewTrackingMode),
+                Sku: null, // server avtomatik PRD-000001 generasiya edir
+                PurchasePrice: CanViewCost ? NewPurchasePrice : null,
+                SalePrice: CanViewCost ? NewSalePrice : null,
+                StockQuantity: NewStock,
+                MinStockQuantity: NewMinStock,
+                Category: NewCategory));
 
             if (ok)
             {
-                Status = "Məhsul əlavə olundu.";
-                NewSku = NewName = NewCategory = null;
-                NewRentalPrice = 0; NewStock = 0;
+                Status = "Məhsul əlavə olundu (SKU avtomatik təyin edildi).";
+                NewName = NewCategory = null;
+                NewRentalPrice = 0; NewStock = 0; NewMinStock = 0;
+                NewPurchasePrice = NewSalePrice = null;
+                NewTrackingMode = TrackingModeConverter.BulkDisplay;
                 await LoadAsync();
             }
             else Status = error ?? "Əlavə edilmədi.";
@@ -122,10 +194,66 @@ public partial class ProductsViewModel(ErpApiClient api) : ViewModelBase
         finally { IsBusy = false; }
     }
 
+    /// <summary>Seçilmiş məhsulun məlumatlarını redaktə formasına yükləyir.</summary>
+    [RelayCommand]
+    private void BeginEdit()
+    {
+        if (Selected is null) { Status = "Redaktə üçün məhsul seçin."; return; }
+        EditName = Selected.Name;
+        EditRentalPrice = Selected.RentalPrice;
+        EditPurchasePrice = Selected.PurchasePrice;
+        EditSalePrice = Selected.SalePrice;
+        EditTrackingMode = ToTrackingDisplay(Selected.TrackingMode);
+        EditStock = Selected.StockQuantity;
+        EditMinStock = Selected.MinStockQuantity;
+        EditCategory = Selected.Category;
+        EditIsActive = Selected.IsActive;
+        IsEditing = true;
+        Status = $"Redaktə: {Selected.Sku} — {Selected.Name}";
+    }
+
+    [RelayCommand]
+    private void CancelEdit() => IsEditing = false;
+
+    [RelayCommand]
+    private async Task SaveEditAsync()
+    {
+        if (Selected is null) { IsEditing = false; return; }
+        if (string.IsNullOrWhiteSpace(EditName))
+        {
+            Status = "Məhsulun adı tələb olunur.";
+            return;
+        }
+
+        IsBusy = true;
+        try
+        {
+            var (ok, error) = await _api.UpdateProductAsync(Selected.Id, new UpdateProductRequest(
+                Name: EditName!,
+                RentalPrice: EditRentalPrice,
+                TrackingMode: ToTrackingValue(EditTrackingMode),
+                PurchasePrice: CanViewCost ? EditPurchasePrice : Selected.PurchasePrice,
+                SalePrice: CanViewCost ? EditSalePrice : Selected.SalePrice,
+                StockQuantity: EditStock,
+                MinStockQuantity: EditMinStock,
+                Category: EditCategory,
+                IsActive: EditIsActive));
+
+            if (ok)
+            {
+                Status = "Məhsul yeniləndi.";
+                IsEditing = false;
+                await LoadAsync();
+            }
+            else Status = error ?? "Yenilənmədi.";
+        }
+        finally { IsBusy = false; }
+    }
+
     [RelayCommand]
     private async Task ExportExcelAsync()
     {
-        var bytes = await api.ExportProductsExcelAsync();
+        var bytes = await _api.ExportProductsExcelAsync();
         if (bytes is null) { Status = "İxrac alınmadı."; return; }
 
         var path = Path.Combine(Path.GetTempPath(), $"mehsullar-{DateTime.Now:yyyyMMdd-HHmmss}.xlsx");
@@ -139,7 +267,7 @@ public partial class ProductsViewModel(ErpApiClient api) : ViewModelBase
     {
         if (Selected is null) { Status = "Məhsul seçin."; return; }
 
-        var bytes = await api.GetProductQrAsync(Selected.Id);
+        var bytes = await _api.GetProductQrAsync(Selected.Id);
         if (bytes is null) { Status = "QR alınmadı."; return; }
 
         var path = Path.Combine(Path.GetTempPath(), $"qr-{Selected.Sku}.png");

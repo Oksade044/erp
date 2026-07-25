@@ -14,9 +14,13 @@ public static class ProductMapping
         Category: p.Category,
         Description: p.Description,
         RentalPrice: p.RentalPrice.Amount,
+        PurchasePrice: p.PurchasePrice?.Amount,
+        SalePrice: p.SalePrice?.Amount,
         Currency: p.RentalPrice.Currency,
         TrackingMode: p.TrackingMode.ToString(),
         StockQuantity: p.StockQuantity,
+        MinStockQuantity: p.MinStockQuantity,
+        IsLowStock: p.IsLowStock,
         IsActive: p.IsActive,
         HasImage: !string.IsNullOrWhiteSpace(p.ImagePath),
         CreatedAt: p.CreatedAt);

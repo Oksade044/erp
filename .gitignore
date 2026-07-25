@@ -20,3 +20,6 @@ logs/
 # Environment / secrets
 *.env
 appsettings.*.Local.json
+
+# Runtime file storage (product images, uploads)
+src/Api/ERP.Api/storage/

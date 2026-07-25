@@ -14,22 +14,29 @@ public partial class ProductsView : UserControl
     private async void OnUploadImageClick(object? sender, RoutedEventArgs e)
     {
         if (DataContext is not ProductsViewModel vm) return;
-
-        var top = TopLevel.GetTopLevel(this);
-        if (top is null) return;
-
-        var files = await top.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+        try
         {
-            Title = "Məhsul şəkli seçin",
-            AllowMultiple = false,
-            FileTypeFilter = [new FilePickerFileType("Şəkillər") { Patterns = ["*.png", "*.jpg", "*.jpeg", "*.webp", "*.gif"] }]
-        });
+            var top = TopLevel.GetTopLevel(this);
+            if (top is null) return;
 
-        var file = files.FirstOrDefault();
-        if (file is null) return;
+            var files = await top.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+            {
+                Title = "Məhsul şəkli seçin",
+                AllowMultiple = false,
+                FileTypeFilter = [new FilePickerFileType("Şəkillər") { Patterns = ["*.png", "*.jpg", "*.jpeg", "*.webp", "*.gif"] }]
+            });
 
-        var path = file.TryGetLocalPath();
-        if (!string.IsNullOrEmpty(path))
-            await vm.UploadImageAsync(path);
+            var file = files.FirstOrDefault();
+            if (file is null) return;
+
+            var path = file.TryGetLocalPath();
+            if (!string.IsNullOrEmpty(path))
+                await vm.UploadImageAsync(path);
+        }
+        catch (System.Exception ex)
+        {
+            // async void — tutulmayan exception bütün proqramı çökdürər. Statusda göstər.
+            vm.Status = $"Xəta: {ex.Message}";
+        }
     }
 }

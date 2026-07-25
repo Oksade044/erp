@@ -19,6 +19,9 @@ public sealed class UpdateProductValidator : AbstractValidator<UpdateProductComm
         RuleFor(x => x.Request.TrackingMode).NotEmpty();
         RuleFor(x => x.Request.RentalPrice).GreaterThanOrEqualTo(0);
         RuleFor(x => x.Request.StockQuantity).GreaterThanOrEqualTo(0);
+        RuleFor(x => x.Request.MinStockQuantity).GreaterThanOrEqualTo(0);
+        RuleFor(x => x.Request.PurchasePrice).GreaterThanOrEqualTo(0).When(x => x.Request.PurchasePrice.HasValue);
+        RuleFor(x => x.Request.SalePrice).GreaterThanOrEqualTo(0).When(x => x.Request.SalePrice.HasValue);
     }
 }
 
@@ -37,8 +40,11 @@ public sealed class UpdateProductHandler(
 
         product.Rename(dto.Name);
         product.ChangePrice(Money.Create(dto.RentalPrice, dto.Currency));
+        product.ChangePurchasePrice(dto.PurchasePrice.HasValue ? Money.Create(dto.PurchasePrice.Value, dto.Currency) : null);
+        product.ChangeSalePrice(dto.SalePrice.HasValue ? Money.Create(dto.SalePrice.Value, dto.Currency) : null);
         product.ChangeTrackingMode(ProductMapping.ParseTrackingMode(dto.TrackingMode));
         product.SetStock(dto.StockQuantity);
+        product.SetMinStock(dto.MinStockQuantity);
         product.ChangeCategory(dto.Category);
         product.ChangeDescription(dto.Description);
         if (dto.IsActive) product.Activate(); else product.Deactivate();

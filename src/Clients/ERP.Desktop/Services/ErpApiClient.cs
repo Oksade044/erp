@@ -90,6 +90,12 @@ public sealed class ErpApiClient(HttpClient http)
         return await ReadResultAsync(resp, ct);
     }
 
+    public async Task<(bool ok, string? error)> UpdateProductAsync(Guid id, UpdateProductRequest request, CancellationToken ct = default)
+    {
+        var resp = await http.PutAsJsonAsync($"/api/v1/products/{id}", request, JsonOpts, ct);
+        return await ReadResultAsync(resp, ct);
+    }
+
     public async Task<byte[]?> ExportProductsExcelAsync(CancellationToken ct = default)
     {
         var resp = await http.GetAsync("/api/v1/products/export", ct);

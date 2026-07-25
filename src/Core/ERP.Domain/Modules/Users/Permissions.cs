@@ -10,6 +10,8 @@ public static class Permissions
     public const string CustomersEdit = "customers.edit";
     public const string ProductsView = "products.view";
     public const string ProductsEdit = "products.edit";
+    /// <summary>Həssas qiymətləri (alış/maya, satış) görmək icazəsi — yalnız Admin/Menecer.</summary>
+    public const string ProductsViewCost = "products.viewcost";
     public const string OrdersView = "orders.view";
     public const string OrdersEdit = "orders.edit";
     public const string OrdersApprove = "orders.approve";
@@ -33,7 +35,7 @@ public static class Permissions
     {
         Role.Admin =>
         [
-            CustomersView, CustomersEdit, ProductsView, ProductsEdit,
+            CustomersView, CustomersEdit, ProductsView, ProductsEdit, ProductsViewCost,
             OrdersView, OrdersEdit, OrdersApprove, InvoicesView, InvoicesEdit,
             SuppliersView, SuppliersEdit, PurchasesView, PurchasesEdit,
             FinanceView, FinanceEdit, HrView, HrEdit,
@@ -41,7 +43,7 @@ public static class Permissions
         ],
         Role.Menecer =>
         [
-            CustomersView, CustomersEdit, ProductsView, ProductsEdit,
+            CustomersView, CustomersEdit, ProductsView, ProductsEdit, ProductsViewCost,
             OrdersView, OrdersEdit, OrdersApprove, InvoicesView, InvoicesEdit,
             SuppliersView, SuppliersEdit, PurchasesView, PurchasesEdit,
             FinanceView, FinanceEdit, HrView, HrEdit,

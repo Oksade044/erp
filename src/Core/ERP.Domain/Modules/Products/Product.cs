@@ -19,10 +19,22 @@ public class Product : BaseEntity, IAggregateRoot
     /// <summary>Bir icarə üçün baza qiyməti (sifarişdə dinamik dəyişə bilər — TDD prinsip §7).</summary>
     public Money RentalPrice { get; private set; } = null!;
 
+    /// <summary>Avadanlığın alış (maya) qiyməti — opsional, həssas (yalnız Admin/Menecer görür).</summary>
+    public Money? PurchasePrice { get; private set; }
+
+    /// <summary>Satış qiyməti — avadanlıq satılarsa, opsional.</summary>
+    public Money? SalePrice { get; private set; }
+
     public ProductTrackingMode TrackingMode { get; private set; }
 
     /// <summary>Mövcud anbar sayı. Toplu rejimdə birbaşa idarə olunur.</summary>
     public int StockQuantity { get; private set; }
+
+    /// <summary>Minimum stok həddi — bundan aşağı düşəndə "az qalıb" xəbərdarlığı verilir.</summary>
+    public int MinStockQuantity { get; private set; }
+
+    /// <summary>Anbar sayı minimum həddə çatıb və ya aşağıdırsa (hədd təyin olunubsa).</summary>
+    public bool IsLowStock => MinStockQuantity > 0 && StockQuantity <= MinStockQuantity;
 
     public bool IsActive { get; private set; } = true;
 
@@ -47,18 +59,26 @@ public class Product : BaseEntity, IAggregateRoot
         ProductTrackingMode trackingMode,
         int stockQuantity = 0,
         string? category = null,
-        string? description = null)
+        string? description = null,
+        Money? purchasePrice = null,
+        Money? salePrice = null,
+        int minStockQuantity = 0)
     {
         if (string.IsNullOrWhiteSpace(name))
             throw new DomainException("Məhsul adı tələb olunur.");
         if (stockQuantity < 0)
             throw new DomainException("Anbar sayı mənfi ola bilməz.");
+        if (minStockQuantity < 0)
+            throw new DomainException("Minimum stok mənfi ola bilməz.");
 
         return new Product(sku, name.Trim(), rentalPrice, trackingMode)
         {
             StockQuantity = stockQuantity,
             Category = category?.Trim(),
-            Description = description?.Trim()
+            Description = description?.Trim(),
+            PurchasePrice = purchasePrice,
+            SalePrice = salePrice,
+            MinStockQuantity = minStockQuantity
         };
     }
 
@@ -74,6 +94,19 @@ public class Product : BaseEntity, IAggregateRoot
 
     public void ChangePrice(Money price) =>
         RentalPrice = price ?? throw new DomainException("İcarə qiyməti tələb olunur.");
+
+    /// <summary>Alış qiymətini təyin edir (null = silinir).</summary>
+    public void ChangePurchasePrice(Money? price) => PurchasePrice = price;
+
+    /// <summary>Satış qiymətini təyin edir (null = silinir).</summary>
+    public void ChangeSalePrice(Money? price) => SalePrice = price;
+
+    public void SetMinStock(int minStock)
+    {
+        if (minStock < 0)
+            throw new DomainException("Minimum stok mənfi ola bilməz.");
+        MinStockQuantity = minStock;
+    }
 
     public void ChangeTrackingMode(ProductTrackingMode mode)
     {

@@ -1,5 +1,7 @@
 using System;
+using System.IO;
 using System.Net.Http;
+using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
@@ -19,6 +21,15 @@ public partial class App : Application
 
     public override void OnFrameworkInitializationCompleted()
     {
+        // Son çarə: tutulmayan exception-ları fayla yaz (proqram sükutla ölməsin, iz qalsın).
+        AppDomain.CurrentDomain.UnhandledException += (_, args) =>
+            LogCrash("AppDomain", args.ExceptionObject as Exception);
+        TaskScheduler.UnobservedTaskException += (_, args) =>
+        {
+            LogCrash("UnobservedTask", args.Exception);
+            args.SetObserved();
+        };
+
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             _desktop = desktop;
@@ -62,5 +73,15 @@ public partial class App : Application
         _desktop.MainWindow = window;
         window.Show();
         old?.Close();
+    }
+
+    private static void LogCrash(string source, Exception? ex)
+    {
+        try
+        {
+            var line = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {source}: {ex}\n";
+            File.AppendAllText(Path.Combine(AppContext.BaseDirectory, "desktop-errors.log"), line);
+        }
+        catch { /* loglama özü də uğursuz olsa, susduraq */ }
     }
 }

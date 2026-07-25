@@ -19,6 +19,7 @@ public sealed class ProductConfiguration : IEntityTypeConfiguration<Product>
         builder.Property(p => p.Category).HasMaxLength(100);
         builder.Property(p => p.Description).HasMaxLength(2000);
         builder.Property(p => p.StockQuantity).IsRequired();
+        builder.Property(p => p.MinStockQuantity).IsRequired();
         builder.Property(p => p.IsActive).IsRequired();
         builder.Property(p => p.ImagePath).HasMaxLength(500);
 
@@ -40,6 +41,22 @@ public sealed class ProductConfiguration : IEntityTypeConfiguration<Product>
             price.Property(m => m.Amount).HasColumnName("RentalPrice").HasPrecision(18, 2).IsRequired();
             price.Property(m => m.Currency).HasColumnName("Currency").HasMaxLength(3).IsRequired();
         });
+
+        // Alış qiyməti — opsional owned Money (mövcud sətirlər üçün NULL-safe migration).
+        builder.OwnsOne(p => p.PurchasePrice, price =>
+        {
+            price.Property(m => m.Amount).HasColumnName("PurchasePrice").HasPrecision(18, 2);
+            price.Property(m => m.Currency).HasColumnName("PurchaseCurrency").HasMaxLength(3);
+        });
+        builder.Navigation(p => p.PurchasePrice).IsRequired(false);
+
+        // Satış qiyməti — opsional owned Money.
+        builder.OwnsOne(p => p.SalePrice, price =>
+        {
+            price.Property(m => m.Amount).HasColumnName("SalePrice").HasPrecision(18, 2);
+            price.Property(m => m.Currency).HasColumnName("SaleCurrency").HasMaxLength(3);
+        });
+        builder.Navigation(p => p.SalePrice).IsRequired(false);
 
         // Soft delete (TDD §13).
         builder.HasQueryFilter(p => !p.IsDeleted);
