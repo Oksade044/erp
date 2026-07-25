@@ -12,6 +12,14 @@ public sealed class StockLevelRepository(AppDbContext context)
     public async Task<StockLevel?> GetAsync(Guid productId, Guid warehouseId, CancellationToken ct = default) =>
         await Set.FirstOrDefaultAsync(s => s.ProductId == productId && s.WarehouseId == warehouseId, ct);
 
+    public async Task<IReadOnlyList<StockLevel>> ListByProductsAsync(IReadOnlyCollection<Guid> productIds, CancellationToken ct = default)
+    {
+        if (productIds.Count == 0) return [];
+        return await Set.AsNoTracking()
+            .Where(s => productIds.Contains(s.ProductId))
+            .ToListAsync(ct);
+    }
+
     public async Task<PagedResult<StockLevel>> SearchAsync(
         string? search, Guid? warehouseId, bool lowOnly, int page, int pageSize, CancellationToken ct = default)
     {

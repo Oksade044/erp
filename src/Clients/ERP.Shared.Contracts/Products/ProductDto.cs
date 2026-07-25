@@ -17,4 +17,6 @@ public sealed record ProductDto(
     bool IsLowStock,
     bool IsActive,
     bool HasImage,
-    DateTimeOffset CreatedAt);
+    DateTimeOffset CreatedAt,
+    // Məhsulun anbarlar üzrə stoku (məs. "Mərkəzi anbar: 50, Filial: 10"). Siyahıda boş ola bilər.
+    string? WarehouseSummary = null);

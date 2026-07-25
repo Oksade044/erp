@@ -197,6 +197,7 @@
                     <DataGridTextColumn Header="İdarəetmə növü"
                                         Binding="{Binding TrackingMode, Converter={StaticResource TrackingMode}}" Width="Auto" />
                     <DataGridTextColumn Header="Anbar say" Binding="{Binding StockQuantity}" Width="Auto" />
+                    <DataGridTextColumn Header="Anbar(lar) üzrə" Binding="{Binding WarehouseSummary}" Width="*" />
                     <DataGridTextColumn Header="Min. stok" Binding="{Binding MinStockQuantity}" Width="Auto" />
                     <DataGridTemplateColumn Header="Stok vəziyyəti" Width="Auto">
                         <DataGridTemplateColumn.CellTemplate>
