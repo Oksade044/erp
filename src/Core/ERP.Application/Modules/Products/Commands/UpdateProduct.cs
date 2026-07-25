@@ -1,5 +1,6 @@
 ﻿using ERP.Application.Common.Interfaces;
 using ERP.Application.Common.Models;
+using ERP.Domain.Modules.Products;
 using ERP.Domain.ValueObjects;
 using ERP.Shared.Contracts.Products;
 using FluentValidation;
@@ -27,6 +28,7 @@ public sealed class UpdateProductValidator : AbstractValidator<UpdateProductComm
 
 public sealed class UpdateProductHandler(
     IProductRepository products,
+    ICategoryRepository categories,
     IUnitOfWork unitOfWork)
     : IRequestHandler<UpdateProductCommand, Result>
 {
@@ -48,6 +50,10 @@ public sealed class UpdateProductHandler(
         product.ChangeCategory(dto.Category);
         product.ChangeDescription(dto.Description);
         if (dto.IsActive) product.Activate(); else product.Deactivate();
+
+        // Yeni kateqoriya adı yazılıbsa lüğətə əlavə et.
+        if (!string.IsNullOrWhiteSpace(dto.Category) && await categories.GetByNameAsync(dto.Category, ct) is null)
+            await categories.AddAsync(Category.Create(dto.Category), ct);
 
         products.Update(product);
         await unitOfWork.SaveChangesAsync(ct);

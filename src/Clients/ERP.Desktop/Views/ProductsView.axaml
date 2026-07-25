@@ -105,9 +105,17 @@
                             <TextBox PlaceholderText="Məs: 20" Text="{Binding NewMinStock}"
                                      ToolTip.Tip="Anbar sayı bu həddə düşəndə 'az qalıb' xəbərdarlığı verilir. 0 = xəbərdarlıq yoxdur." />
                         </StackPanel>
-                        <StackPanel Width="180" Margin="0,0,12,10">
-                            <TextBlock Text="Kateqoriya" FontSize="12" Foreground="#5A6072" />
-                            <TextBox PlaceholderText="Məs: Mebel / İşıqlandırma" Text="{Binding NewCategory}" />
+                        <StackPanel Width="220" Margin="0,0,12,10">
+                            <TextBlock Text="Kateqoriya (seç və ya yeni yaz)" FontSize="12" Foreground="#5A6072" />
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <AutoCompleteBox Width="165" PlaceholderText="Məs: Mebel"
+                                                 ItemsSource="{Binding CategoryNames}"
+                                                 Text="{Binding NewCategory}"
+                                                 FilterMode="ContainsOrdinal" MinimumPrefixLength="0"
+                                                 ToolTip.Tip="Mövcud kateqoriyadan seçin və ya yeni ad yazın — məhsul əlavə olunanda avtomatik yaranır." />
+                                <Button Content="＋" Command="{Binding AddCategoryCommand}" Width="32"
+                                        ToolTip.Tip="Yazılan kateqoriyanı indi yarat (məhsulsuz)" />
+                            </StackPanel>
                         </StackPanel>
                         <StackPanel Width="200" Margin="0,0,12,10">
                             <TextBlock Text="Anbar (ilkin stok üçün)" FontSize="12" Foreground="#5A6072" />
@@ -157,9 +165,11 @@
                             <TextBlock Text="Minimum stok (xəbərdarlıq)" FontSize="12" Foreground="#5A6072" />
                             <TextBox Text="{Binding EditMinStock}" />
                         </StackPanel>
-                        <StackPanel Width="180" Margin="0,0,12,10">
-                            <TextBlock Text="Kateqoriya" FontSize="12" Foreground="#5A6072" />
-                            <TextBox Text="{Binding EditCategory}" />
+                        <StackPanel Width="220" Margin="0,0,12,10">
+                            <TextBlock Text="Kateqoriya (seç və ya yeni yaz)" FontSize="12" Foreground="#5A6072" />
+                            <AutoCompleteBox ItemsSource="{Binding CategoryNames}" Text="{Binding EditCategory}"
+                                             FilterMode="ContainsOrdinal" MinimumPrefixLength="0"
+                                             PlaceholderText="Məs: Mebel" />
                         </StackPanel>
                         <StackPanel Width="140" Margin="0,0,12,10">
                             <TextBlock Text="Aktivdir?" FontSize="12" Foreground="#5A6072" />

@@ -30,6 +30,7 @@ public sealed class CreateProductHandler(
     IProductRepository products,
     IWarehouseRepository warehouses,
     IStockLevelRepository stockLevels,
+    ICategoryRepository categories,
     IUnitOfWork unitOfWork)
     : IRequestHandler<CreateProductCommand, Result<Guid>>
 {
@@ -64,6 +65,9 @@ public sealed class CreateProductHandler(
 
         await products.AddAsync(product, ct);
 
+        // Yeni kateqoriya adı yazılıbsa, kateqoriya lüğətinə əlavə et (mövcud deyilsə).
+        await EnsureCategoryAsync(dto.Category, ct);
+
         // Anbar seçilibsə, ilkin stoku o anbarın StockLevel-inə yaz (bir tranzaksiyada).
         if (warehouse is not null)
         {
@@ -76,5 +80,12 @@ public sealed class CreateProductHandler(
         await unitOfWork.SaveChangesAsync(ct);
 
         return Result.Success(product.Id);
+    }
+
+    private async Task EnsureCategoryAsync(string? categoryName, CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(categoryName)) return;
+        if (await categories.GetByNameAsync(categoryName, ct) is null)
+            await categories.AddAsync(Category.Create(categoryName), ct);
     }
 }

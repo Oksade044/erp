@@ -25,6 +25,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
 {
     public DbSet<Customer> Customers => Set<Customer>();
     public DbSet<Product> Products => Set<Product>();
+    public DbSet<ERP.Domain.Modules.Products.Category> Categories => Set<ERP.Domain.Modules.Products.Category>();
     public DbSet<RentalOrder> Orders => Set<RentalOrder>();
     public DbSet<Invoice> Invoices => Set<Invoice>();
     public DbSet<Supplier> Suppliers => Set<Supplier>();

@@ -14,6 +14,21 @@ public static class ProductEndpoints
     {
         var group = app.MapGroup("/api/v1/products").WithTags("Products");
 
+        // --- Kateqoriyalar (məhsul formasında seçim üçün) ---
+        var categories = app.MapGroup("/api/v1/categories").WithTags("Categories");
+
+        categories.MapGet("/", async (ISender sender) =>
+            Results.Ok(await sender.Send(new GetCategoriesQuery())));
+
+        categories.MapPost("/", async (CreateCategoryRequest request, ISender sender) =>
+        {
+            var result = await sender.Send(new CreateCategoryCommand(request));
+            return result.IsSuccess
+                ? Results.Created($"/api/v1/categories/{result.Value}", new { id = result.Value })
+                : Results.BadRequest(new { error = result.Error });
+        })
+        .RequireAuthorization(ERP.Domain.Modules.Users.Permissions.ProductsEdit);
+
         group.MapGet("/", async (string? search, ISender sender, int page = 1, int pageSize = 20) =>
         {
             var result = await sender.Send(new GetProductsQuery(search, page, pageSize));

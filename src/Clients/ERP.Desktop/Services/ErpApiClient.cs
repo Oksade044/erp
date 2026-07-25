@@ -97,6 +97,16 @@ public sealed class ErpApiClient(HttpClient http)
         return await ReadResultAsync(resp, ct);
     }
 
+    // --- Kateqoriyalar ---
+    public Task<List<CategoryDto>?> GetCategoriesAsync(CancellationToken ct = default) =>
+        http.GetFromJsonAsync<List<CategoryDto>>("/api/v1/categories", JsonOpts, ct);
+
+    public async Task<(bool ok, string? error)> CreateCategoryAsync(string name, CancellationToken ct = default)
+    {
+        var resp = await http.PostAsJsonAsync("/api/v1/categories", new CreateCategoryRequest(name), JsonOpts, ct);
+        return await ReadResultAsync(resp, ct);
+    }
+
     public async Task<byte[]?> ExportProductsExcelAsync(CancellationToken ct = default)
     {
         var resp = await http.GetAsync("/api/v1/products/export", ct);

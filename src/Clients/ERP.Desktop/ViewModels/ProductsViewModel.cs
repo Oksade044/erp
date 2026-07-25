@@ -104,6 +104,9 @@ public partial class ProductsViewModel : ViewModelBase
     public ObservableCollection<WarehouseDto> Warehouses { get; } = [];
     [ObservableProperty] private WarehouseDto? _newWarehouse;
 
+    /// <summary>Mövcud kateqoriyalar — məhsul formasında seçim/yeni yazmaq üçün.</summary>
+    public ObservableCollection<string> CategoryNames { get; } = [];
+
     // ---- Redaktə forması ----
     [ObservableProperty] private bool _isEditing;
     [ObservableProperty] private string? _editName;
@@ -142,6 +145,12 @@ public partial class ProductsViewModel : ViewModelBase
                 if (whs is not null)
                     foreach (var w in whs.Items) Warehouses.Add(w);
             }
+
+            // Kateqoriyaları həmişə təzələ (yeni əlavə olunanlar dərhal görünsün).
+            var cats = await _api.GetCategoriesAsync();
+            CategoryNames.Clear();
+            if (cats is not null)
+                foreach (var c in cats) CategoryNames.Add(c.Name);
         }
         catch (Exception ex)
         {
@@ -189,6 +198,20 @@ public partial class ProductsViewModel : ViewModelBase
             else Status = error ?? "Əlavə edilmədi.";
         }
         finally { IsBusy = false; }
+    }
+
+    /// <summary>Formada yazılmış kateqoriya adını müstəqil kateqoriya kimi yaradır (əvvəlcədən).</summary>
+    [RelayCommand]
+    private async Task AddCategoryAsync()
+    {
+        var name = (IsEditing ? EditCategory : NewCategory)?.Trim();
+        if (string.IsNullOrWhiteSpace(name)) { Status = "Kateqoriya adını yazın."; return; }
+
+        var (ok, error) = await _api.CreateCategoryAsync(name);
+        if (!ok) { Status = error ?? "Kateqoriya yaradılmadı."; return; }
+
+        if (!CategoryNames.Contains(name)) CategoryNames.Add(name);
+        Status = $"Kateqoriya hazır: {name}";
     }
 
     /// <summary>Seçilmiş məhsulun məlumatlarını redaktə formasına yükləyir.</summary>
