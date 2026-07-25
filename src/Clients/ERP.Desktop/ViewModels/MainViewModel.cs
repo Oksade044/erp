@@ -1,9 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using ERP.Desktop.Services;
 using ERP.Shared.Contracts.Auth;
+using ERP.Shared.Contracts.Settings;
 
 namespace ERP.Desktop.ViewModels;
 
@@ -28,6 +30,7 @@ public partial class MainViewModel : ViewModelBase
     private readonly StockViewModel _stock;
     private readonly ReportsViewModel _reports;
     private readonly UsersViewModel _users;
+    private readonly FieldPermissionsViewModel _fieldPermissions;
     private readonly Action _onLogout;
 
     [ObservableProperty] private ViewModelBase _current = null!;
@@ -36,18 +39,28 @@ public partial class MainViewModel : ViewModelBase
     public string Title => "ERP — Toy Dekoru & Tədbir Avadanlığı İcarəsi";
     public string CurrentUser { get; }
 
-    /// <summary>İstifadəçi idarəetməsi bölməsi yalnız users.manage icazəsi olanlara görünür.</summary>
+    /// <summary>İstifadəçi idarəetməsi + sahə görünürlüyü yalnız users.manage icazəsi olanlara görünür.</summary>
     public bool CanManageUsers { get; }
 
-    public MainViewModel(ErpApiClient api, AuthResponse auth, Action onLogout)
+    public MainViewModel(ErpApiClient api, AuthResponse auth, Action onLogout,
+        IReadOnlyList<FieldPermissionDto>? fieldPermissions = null)
     {
         _onLogout = onLogout;
         CurrentUser = $"{auth.FullName} ({auth.Role})";
         CanManageUsers = auth.Permissions.Contains("users.manage");
 
+        // Sahə görünürlüyü: konfiqurasiya olunan qaydadan (yoxdursa Admin/Menecer default).
+        bool CanViewField(string key)
+        {
+            var rule = fieldPermissions?.FirstOrDefault(p => p.FieldKey == key);
+            return rule is null
+                ? auth.Role is "Admin" or "Menecer"
+                : rule.AllowedRoles.Contains(auth.Role);
+        }
+
         _dashboard = new DashboardViewModel(api);
         _customers = new CustomersViewModel(api);
-        _products = new ProductsViewModel(api, canViewCost: auth.Permissions.Contains("products.viewcost"));
+        _products = new ProductsViewModel(api, canViewCost: CanViewField("product.cost"));
         _orders = new OrdersViewModel(api);
         _invoices = new InvoicesViewModel(api);
         _suppliers = new SuppliersViewModel(api);
@@ -60,6 +73,7 @@ public partial class MainViewModel : ViewModelBase
         _stock = new StockViewModel(api);
         _reports = new ReportsViewModel(api);
         _users = new UsersViewModel(api);
+        _fieldPermissions = new FieldPermissionsViewModel(api);
 
         Current = _dashboard;
         _dashboard.LoadCommand.Execute(null);
@@ -85,6 +99,7 @@ public partial class MainViewModel : ViewModelBase
             "Stok" => _stock,
             "Hesabatlar" => _reports,
             "İstifadəçilər" => _users,
+            "Sahə İcazələri" => _fieldPermissions,
             _ => _dashboard
         };
 
@@ -105,6 +120,7 @@ public partial class MainViewModel : ViewModelBase
             case StockViewModel st: st.LoadCommand.Execute(null); break;
             case ReportsViewModel r: r.LoadCommand.Execute(null); break;
             case UsersViewModel u: u.LoadCommand.Execute(null); break;
+            case FieldPermissionsViewModel fp: fp.LoadCommand.Execute(null); break;
         }
     }
 

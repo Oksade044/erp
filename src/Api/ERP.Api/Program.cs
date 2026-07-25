@@ -175,6 +175,7 @@ app.MapWarehouseEndpoints();
 app.MapStockEndpoints();
 app.MapReportEndpoints();
 app.MapUserEndpoints();
+app.MapSettingsEndpoints();
 
 // Backup: manual trigger (users.manage) — Hangfire background job kimi növbəyə salır (TDD §29, §36).
 app.MapPost("/api/v1/admin/backup", (IBackgroundJobClient jobs) =>

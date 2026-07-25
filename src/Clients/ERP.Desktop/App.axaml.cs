@@ -53,15 +53,19 @@ public partial class App : Application
         SwitchMainWindow(login);
     }
 
-    private void OnLoggedIn(AuthResponse auth)
+    private async void OnLoggedIn(AuthResponse auth)
     {
+        // Sahə görünürlüyü qaydalarını girişdə gətir (hansı sahələr bu rola göstərilsin).
+        System.Collections.Generic.List<ERP.Shared.Contracts.Settings.FieldPermissionDto>? fieldPerms = null;
+        try { fieldPerms = await _api.GetFieldPermissionsAsync(); } catch { /* alınmasa default tətbiq olunur */ }
+
         var main = new MainWindow
         {
             DataContext = new MainViewModel(_api, auth, onLogout: () =>
             {
                 _api.SetBearerToken(null);
                 ShowLogin();
-            })
+            }, fieldPermissions: fieldPerms)
         };
         SwitchMainWindow(main);
     }

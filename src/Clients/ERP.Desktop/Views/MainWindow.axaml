@@ -52,6 +52,9 @@
                     <Button Content="🔑  İstifadəçilər" Command="{Binding NavigateCommand}"
                             CommandParameter="İstifadəçilər" Classes="nav"
                             IsVisible="{Binding CanManageUsers}" />
+                    <Button Content="🛡  Sahə İcazələri" Command="{Binding NavigateCommand}"
+                            CommandParameter="Sahə İcazələri" Classes="nav"
+                            IsVisible="{Binding CanManageUsers}" />
                 </StackPanel>
 
                 <StackPanel DockPanel.Dock="Bottom" Spacing="4">

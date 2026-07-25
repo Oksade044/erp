@@ -19,6 +19,7 @@ using ERP.Shared.Contracts.Reports;
 using ERP.Shared.Contracts.Suppliers;
 using ERP.Shared.Contracts.Warehouses;
 using ERP.Shared.Contracts.Users;
+using ERP.Shared.Contracts.Settings;
 
 namespace ERP.Desktop.Services;
 
@@ -211,6 +212,16 @@ public sealed class ErpApiClient(HttpClient http)
     public async Task<(bool ok, string? error)> CreateEmployeeAsync(CreateEmployeeRequest request, CancellationToken ct = default)
     {
         var resp = await http.PostAsJsonAsync("/api/v1/employees", request, JsonOpts, ct);
+        return await ReadResultAsync(resp, ct);
+    }
+
+    // --- Parametrlər: sahə-görünürlük icazələri ---
+    public Task<List<FieldPermissionDto>?> GetFieldPermissionsAsync(CancellationToken ct = default) =>
+        http.GetFromJsonAsync<List<FieldPermissionDto>>("/api/v1/settings/field-permissions", JsonOpts, ct);
+
+    public async Task<(bool ok, string? error)> UpdateFieldPermissionAsync(UpdateFieldPermissionRequest request, CancellationToken ct = default)
+    {
+        var resp = await http.PutAsJsonAsync("/api/v1/settings/field-permissions", request, JsonOpts, ct);
         return await ReadResultAsync(resp, ct);
     }
 
