@@ -45,10 +45,17 @@ public sealed class CreateOrderHandler(
             return Result.Failure<Guid>($"Müştəri tapılmadı: {dto.CustomerId}");
 
         var orderNumber = $"ORD-{DateTime.UtcNow:yyyyMMdd}-{Guid.NewGuid().ToString("N")[..6].ToUpperInvariant()}";
-        // Sifarişi yaradan = daxil olmuş istifadəçi (JWT-dən, spoofing olmaz).
+
+        // Sifarişi yaradan: adətən daxil olmuş istifadəçi. Amma Admin/Menecer sifarişi
+        // başqa məsul əməkdaşın adına yaza bilər (JWT-dən rol yoxlanılır — spoofing olmaz).
+        var isManager = currentUser.Role is "Admin" or "Menecer";
+        var overrideCreator = isManager && !string.IsNullOrWhiteSpace(dto.CreatedByName);
+        var createdByName = overrideCreator ? dto.CreatedByName : (currentUser.FullName ?? currentUser.UserName);
+        var createdByRole = overrideCreator ? dto.CreatedByRole : currentUser.Role;
+
         var order = RentalOrder.Create(orderNumber, customer.Id, customer.Name, dto.StartDate, dto.EndDate, dto.Notes,
-            createdByName: currentUser.FullName ?? currentUser.UserName,
-            createdByRole: currentUser.Role);
+            createdByName: createdByName,
+            createdByRole: createdByRole);
 
         foreach (var lineDto in dto.Lines)
         {

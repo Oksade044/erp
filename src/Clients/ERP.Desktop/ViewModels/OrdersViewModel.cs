@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using ERP.Desktop.Services;
 using ERP.Shared.Contracts.Customers;
+using ERP.Shared.Contracts.Hr;
 using ERP.Shared.Contracts.Orders;
 using ERP.Shared.Contracts.Products;
 
@@ -18,8 +19,19 @@ public sealed record DraftLine(Guid ProductId, string ProductName, int Quantity,
 }
 
 /// <summary>Sifarişlər ekranı — siyahı, təsdiq/ləğv/təhvil, faktura, və yeni sifariş yaratma.</summary>
-public partial class OrdersViewModel(ErpApiClient api) : ViewModelBase
+public partial class OrdersViewModel : ViewModelBase
 {
+    private readonly ErpApiClient api;
+
+    /// <summary>Admin/Menecer sifarişi başqa məsul əməkdaşın adına yarada bilər.</summary>
+    public bool CanChooseCreator { get; }
+
+    public OrdersViewModel(ErpApiClient api, bool canChooseCreator = false)
+    {
+        this.api = api;
+        CanChooseCreator = canChooseCreator;
+    }
+
     public ObservableCollection<OrderDto> Orders { get; } = [];
 
     [ObservableProperty] private string? _search;
@@ -35,6 +47,10 @@ public partial class OrdersViewModel(ErpApiClient api) : ViewModelBase
     public ObservableCollection<CustomerDto> AllCustomers { get; } = [];
     public ObservableCollection<ProductDto> AllProducts { get; } = [];
     public ObservableCollection<DraftLine> DraftLines { get; } = [];
+
+    /// <summary>Məsul əməkdaş seçimi üçün (yalnız Admin/Menecer). Boş = özüm.</summary>
+    public ObservableCollection<EmployeeDto> AllEmployees { get; } = [];
+    [ObservableProperty] private EmployeeDto? _selectedCreator;
 
     [ObservableProperty] private CustomerDto? _newCustomer;
     [ObservableProperty] private DateTimeOffset _newStartDate = DateTimeOffset.Now;
@@ -60,8 +76,18 @@ public partial class OrdersViewModel(ErpApiClient api) : ViewModelBase
             if (custs is not null) foreach (var c in custs.Items) AllCustomers.Add(c);
             var prods = await api.GetProductsAsync(null);
             if (prods is not null) foreach (var p in prods.Items) AllProducts.Add(p);
+
+            // Admin/Menecer üçün məsul əməkdaş siyahısı.
+            if (CanChooseCreator && AllEmployees.Count == 0)
+            {
+                var emps = await api.GetEmployeesAsync(null);
+                if (emps is not null) foreach (var e in emps.Items) AllEmployees.Add(e);
+            }
         }
     }
+
+    [RelayCommand]
+    private void ClearCreator() => SelectedCreator = null;
 
     [RelayCommand]
     private void AddLine()
@@ -91,14 +117,20 @@ public partial class OrdersViewModel(ErpApiClient api) : ViewModelBase
             CustomerId: NewCustomer.Id,
             StartDate: DateOnly.FromDateTime(NewStartDate.DateTime),
             EndDate: DateOnly.FromDateTime(NewEndDate.DateTime),
-            Lines: DraftLines.Select(l => new CreateOrderLineRequest(l.ProductId, l.Quantity, l.UnitPrice)).ToList());
+            Lines: DraftLines.Select(l => new CreateOrderLineRequest(l.ProductId, l.Quantity, l.UnitPrice)).ToList(),
+            // Admin/Menecer məsul əməkdaş seçibsə, sifariş onun adına yazılır (yoxsa özünün).
+            CreatedByName: CanChooseCreator ? SelectedCreator?.FullName : null,
+            CreatedByRole: CanChooseCreator ? SelectedCreator?.Position : null);
 
         var (ok, error) = await api.CreateOrderAsync(request);
         if (ok)
         {
-            Status = "Sifariş yaradıldı (Qaralama).";
+            Status = SelectedCreator is not null
+                ? $"Sifariş yaradıldı (Qaralama) — məsul: {SelectedCreator.FullName}."
+                : "Sifariş yaradıldı (Qaralama).";
             DraftLines.Clear();
             NewCustomer = null;
+            SelectedCreator = null;
             ShowNewOrder = false;
             OnPropertyChanged(nameof(DraftTotal));
             await LoadAsync();

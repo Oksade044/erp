@@ -9,7 +9,11 @@ public sealed record CreateOrderRequest(
     DateOnly StartDate,
     DateOnly EndDate,
     IReadOnlyList<CreateOrderLineRequest> Lines,
-    string? Notes = null);
+    string? Notes = null,
+    // Yalnız Admin/Menecer: sifarişi başqa məsul əməkdaşın adına yaza bilər.
+    // Boşdursa, sifariş daxil olmuş istifadəçinin adına yazılır.
+    string? CreatedByName = null,
+    string? CreatedByRole = null);
 
 public sealed record CreateOrderLineRequest(
     Guid ProductId,

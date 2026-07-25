@@ -1,11 +1,16 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:ERP.Desktop.ViewModels"
+             xmlns:conv="using:ERP.Desktop.Converters"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="850" d:DesignHeight="620"
              x:Class="ERP.Desktop.Views.OrdersView"
              x:DataType="vm:OrdersViewModel">
+
+    <UserControl.Resources>
+        <conv:StatusColorConverter x:Key="StatusColor" />
+    </UserControl.Resources>
 
     <Grid RowDefinitions="Auto,Auto,Auto,Auto,*,Auto" Margin="24">
 
@@ -74,6 +79,24 @@
                     <DatePicker SelectedDate="{Binding NewStartDate}" />
                     <TextBlock Text="—" VerticalAlignment="Center" />
                     <DatePicker SelectedDate="{Binding NewEndDate}" />
+                </StackPanel>
+
+                <!-- Məsul əməkdaş seçimi — yalnız Admin/Menecer (sifariş kimin adına) -->
+                <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding CanChooseCreator}">
+                    <TextBlock Text="Kimin adına:" VerticalAlignment="Center" Width="80"
+                               ToolTip.Tip="Sifariş hansı məsul əməkdaşın adına yazılsın. Boş buraxsanız — sizin adınıza." />
+                    <ComboBox ItemsSource="{Binding AllEmployees}" SelectedItem="{Binding SelectedCreator}" Width="220"
+                              PlaceholderText="(mən özüm)">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock>
+                                    <Run Text="{Binding FullName}" /><Run Text=" — " Foreground="#8A90A6" /><Run Text="{Binding Position}" Foreground="#8A90A6" />
+                                </TextBlock>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <Button Content="✕" Command="{Binding ClearCreatorCommand}"
+                            ToolTip.Tip="Seçimi təmizlə (öz adıma)" Padding="8,2" />
                 </StackPanel>
 
                 <StackPanel Orientation="Horizontal" Spacing="8">
@@ -145,7 +168,17 @@
                 <DataGridTextColumn Header="Müştəri" Binding="{Binding CustomerName}" Width="2*" />
                 <DataGridTextColumn Header="Başlama" Binding="{Binding StartDate}" Width="Auto" />
                 <DataGridTextColumn Header="Bitmə" Binding="{Binding EndDate}" Width="Auto" />
-                <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="Auto" />
+                <DataGridTemplateColumn Header="Status" Width="Auto">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Border Background="{Binding Status, Converter={StaticResource StatusColor}}"
+                                    CornerRadius="4" Padding="8,3" Margin="6,2" HorizontalAlignment="Left"
+                                    VerticalAlignment="Center">
+                                <TextBlock Text="{Binding Status}" Foreground="White" FontWeight="SemiBold" FontSize="12" />
+                            </Border>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
                 <DataGridTemplateColumn Header="Yaradan" Width="Auto">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
