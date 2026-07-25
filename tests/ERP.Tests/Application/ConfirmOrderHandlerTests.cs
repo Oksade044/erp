@@ -12,9 +12,10 @@ public class ConfirmOrderHandlerTests
 {
     private readonly IRentalOrderRepository _orders = Substitute.For<IRentalOrderRepository>();
     private readonly IProductRepository _products = Substitute.For<IProductRepository>();
+    private readonly IInvoiceRepository _invoices = Substitute.For<IInvoiceRepository>();
     private readonly IUnitOfWork _uow = Substitute.For<IUnitOfWork>();
 
-    private ConfirmOrderHandler Handler => new(_orders, _products, _uow);
+    private ConfirmOrderHandler Handler => new(_orders, _products, _invoices, _uow);
 
     private static readonly Guid ProductId = Guid.NewGuid();
 
@@ -60,5 +61,22 @@ public class ConfirmOrderHandlerTests
         Assert.True(result.IsSuccess);
         Assert.Equal(OrderStatus.Təsdiqlənmiş, order.Status);
         await _uow.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Auto_creates_invoice_on_confirm()
+    {
+        var (order, product) = Setup(lineQty: 2, stock: 10);
+        _orders.GetByIdWithLinesAsync(order.Id).Returns(order);
+        _products.GetByIdAsync(ProductId).Returns(product);
+        _orders.GetReservedQuantityAsync(ProductId, order.StartDate, order.EndDate, order.Id).Returns(0);
+        _invoices.ExistsForOrderAsync(order.Id).Returns(false);
+
+        var result = await Handler.Handle(new ConfirmOrderCommand(order.Id), default);
+
+        Assert.True(result.IsSuccess);
+        await _invoices.Received(1).AddAsync(
+            Arg.Is<ERP.Domain.Modules.Invoices.Invoice>(i => i.OrderId == order.Id),
+            Arg.Any<CancellationToken>());
     }
 }
