@@ -13,9 +13,10 @@ public class ConfirmOrderHandlerTests
     private readonly IRentalOrderRepository _orders = Substitute.For<IRentalOrderRepository>();
     private readonly IProductRepository _products = Substitute.For<IProductRepository>();
     private readonly IInvoiceRepository _invoices = Substitute.For<IInvoiceRepository>();
+    private readonly ICurrentUser _currentUser = Substitute.For<ICurrentUser>();
     private readonly IUnitOfWork _uow = Substitute.For<IUnitOfWork>();
 
-    private ConfirmOrderHandler Handler => new(_orders, _products, _invoices, _uow);
+    private ConfirmOrderHandler Handler => new(_orders, _products, _invoices, _currentUser, _uow);
 
     private static readonly Guid ProductId = Guid.NewGuid();
 

@@ -7,5 +7,5 @@ namespace ERP.Application.Common.Interfaces;
 public interface IAuditLogReader
 {
     /// <summary>Jurnal qeydləri — ən yeni öndə, axtarış (istifadəçi/növ/əməliyyat) + səhifələmə.</summary>
-    Task<PagedResult<AuditLogDto>> SearchAsync(string? search, int page, int pageSize, CancellationToken ct = default);
+    Task<PagedResult<AuditLogDto>> SearchAsync(string? search, string? entityId, int page, int pageSize, CancellationToken ct = default);
 }

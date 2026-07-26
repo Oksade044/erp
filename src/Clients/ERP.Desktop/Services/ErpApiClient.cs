@@ -241,9 +241,9 @@ public sealed class ErpApiClient(HttpClient http)
     }
 
     // --- Audit jurnalı (#26) ---
-    public Task<PagedResult<AuditLogDto>?> GetAuditLogsAsync(string? search, CancellationToken ct = default) =>
+    public Task<PagedResult<AuditLogDto>?> GetAuditLogsAsync(string? search, Guid? entityId = null, CancellationToken ct = default) =>
         http.GetFromJsonAsync<PagedResult<AuditLogDto>>(
-            $"/api/v1/audit?search={Uri.EscapeDataString(search ?? "")}&pageSize=200", JsonOpts, ct);
+            $"/api/v1/audit?search={Uri.EscapeDataString(search ?? "")}{(entityId is { } id ? $"&entityId={id}" : "")}&pageSize=200", JsonOpts, ct);
 
     // --- Parametrlər: sahə-görünürlük icazələri ---
     public Task<List<FieldPermissionDto>?> GetFieldPermissionsAsync(CancellationToken ct = default) =>

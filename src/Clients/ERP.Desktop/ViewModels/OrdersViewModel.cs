@@ -89,6 +89,10 @@ public partial class OrdersViewModel : ViewModelBase
     [RelayCommand]
     private void ClearCreator() => SelectedCreator = null;
 
+    /// <summary>Seçilmiş sifariş üçün detal kartı VM-i yaradır (#21) — View kod-arxasından çağırılır.</summary>
+    public OrderDetailViewModel? CreateDetail() =>
+        Selected is null ? null : new OrderDetailViewModel(api, Selected);
+
     [RelayCommand]
     private void AddLine()
     {

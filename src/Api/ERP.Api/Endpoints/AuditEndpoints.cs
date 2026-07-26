@@ -12,8 +12,8 @@ public static class AuditEndpoints
         var group = app.MapGroup("/api/v1/audit").WithTags("Audit")
             .RequireAuthorization(Permissions.AuditView);
 
-        group.MapGet("/", async (string? search, ISender sender, int page = 1, int pageSize = 50) =>
-            Results.Ok(await sender.Send(new GetAuditLogsQuery(search, page, pageSize))));
+        group.MapGet("/", async (string? search, string? entityId, ISender sender, int page = 1, int pageSize = 50) =>
+            Results.Ok(await sender.Send(new GetAuditLogsQuery(search, entityId, page, pageSize))));
 
         return app;
     }

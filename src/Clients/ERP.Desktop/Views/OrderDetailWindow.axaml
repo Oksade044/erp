@@ -1,0 +1,103 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:ERP.Desktop.ViewModels"
+        xmlns:conv="using:ERP.Desktop.Converters"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="720" d:DesignHeight="760"
+        x:Class="ERP.Desktop.Views.OrderDetailWindow"
+        x:DataType="vm:OrderDetailViewModel"
+        Width="720" Height="760" WindowStartupLocation="CenterScreen"
+        Title="Sifariş detalı">
+
+    <Window.Resources>
+        <conv:StatusColorConverter x:Key="StatusColor" />
+    </Window.Resources>
+
+    <ScrollViewer>
+        <StackPanel Margin="24" Spacing="14">
+
+            <!-- Başlıq + status -->
+            <StackPanel Orientation="Horizontal" Spacing="12">
+                <TextBlock Text="{Binding Title}" FontSize="22" FontWeight="SemiBold" VerticalAlignment="Center" />
+                <Border Background="{Binding Order.Status, Converter={StaticResource StatusColor}}"
+                        CornerRadius="4" Padding="10,3" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding Order.Status}" Foreground="White" FontWeight="SemiBold" />
+                </Border>
+                <Button Content="📄 Fakturaya bax / PDF" Command="{Binding OpenPdfCommand}"
+                        IsVisible="{Binding HasInvoice}" Background="#1971C2" Foreground="White" />
+            </StackPanel>
+
+            <!-- Əsas məlumatlar -->
+            <Border Background="#F5F6FA" CornerRadius="8" Padding="16">
+                <Grid ColumnDefinitions="160,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto">
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Müştəri:" Foreground="#5A6072" />
+                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Order.CustomerName}" FontWeight="SemiBold" />
+
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Başlama tarixi:" Foreground="#5A6072" />
+                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Order.StartDate}" />
+
+                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Bitmə tarixi:" Foreground="#5A6072" />
+                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Order.EndDate}" />
+
+                    <TextBlock Grid.Row="3" Grid.Column="0" Text="Kim yaradıb:" Foreground="#5A6072" />
+                    <TextBlock Grid.Row="3" Grid.Column="1">
+                        <Run Text="{Binding Order.CreatedByName}" /><Run Text=" " /><Run Text="{Binding Order.CreatedByRole}" Foreground="#8A90A6" />
+                    </TextBlock>
+
+                    <TextBlock Grid.Row="4" Grid.Column="0" Text="Kim təsdiqləyib:" Foreground="#5A6072" />
+                    <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding Order.ConfirmedByName}" />
+
+                    <TextBlock Grid.Row="5" Grid.Column="0" Text="Ümumi məbləğ:" Foreground="#5A6072" />
+                    <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding Order.Total, StringFormat={}{0:0.00} AZN}" FontWeight="SemiBold" />
+
+                    <TextBlock Grid.Row="6" Grid.Column="0" Text="Depozit / Tutulma / Qaytarma:" Foreground="#5A6072" />
+                    <TextBlock Grid.Row="6" Grid.Column="1">
+                        <Run Text="{Binding Order.Deposit}" /><Run Text=" / " /><Run Text="{Binding Order.TotalCharges}" /><Run Text=" / " /><Run Text="{Binding Order.DepositRefund}" />
+                    </TextBlock>
+
+                    <TextBlock Grid.Row="7" Grid.Column="0" Text="Qeyd:" Foreground="#5A6072" />
+                    <TextBlock Grid.Row="7" Grid.Column="1" Text="{Binding Order.Notes}" TextWrapping="Wrap" />
+                </Grid>
+            </Border>
+
+            <!-- Məhsullar -->
+            <TextBlock Text="Məhsullar" FontWeight="SemiBold" FontSize="15" />
+            <DataGrid ItemsSource="{Binding Lines}" IsReadOnly="True" Height="150"
+                      GridLinesVisibility="Horizontal" BorderThickness="1" BorderBrush="#E0E2EA">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Məhsul" Binding="{Binding ProductName}" Width="2*" />
+                    <DataGridTextColumn Header="Say" Binding="{Binding Quantity}" Width="*" />
+                    <DataGridTextColumn Header="Qiymət" Binding="{Binding UnitPrice}" Width="*" />
+                    <DataGridTextColumn Header="Cəm" Binding="{Binding LineTotal}" Width="*" />
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <!-- Ödənişlər -->
+            <TextBlock Text="Ödənişlər" FontWeight="SemiBold" FontSize="15" />
+            <DataGrid ItemsSource="{Binding Payments}" IsReadOnly="True" Height="120"
+                      GridLinesVisibility="Horizontal" BorderThickness="1" BorderBrush="#E0E2EA">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Tarix" Binding="{Binding PaidAt}" Width="Auto" />
+                    <DataGridTextColumn Header="Məbləğ" Binding="{Binding Amount}" Width="*" />
+                    <DataGridTextColumn Header="Üsul" Binding="{Binding Method}" Width="*" />
+                    <DataGridTextColumn Header="Qeyd" Binding="{Binding Note}" Width="2*" />
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <!-- Dəyişiklik tarixçəsi (audit) -->
+            <TextBlock Text="Dəyişiklik tarixçəsi (log)" FontWeight="SemiBold" FontSize="15" />
+            <DataGrid ItemsSource="{Binding History}" IsReadOnly="True" Height="150"
+                      GridLinesVisibility="Horizontal" BorderThickness="1" BorderBrush="#E0E2EA">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Tarix/saat" Binding="{Binding Timestamp, StringFormat='{}{0:dd.MM.yyyy HH:mm:ss}'}" Width="Auto" />
+                    <DataGridTextColumn Header="İstifadəçi" Binding="{Binding UserName}" Width="*" />
+                    <DataGridTextColumn Header="Əməliyyat" Binding="{Binding Action}" Width="Auto" />
+                    <DataGridTextColumn Header="Dəyişikliklər" Binding="{Binding Summary}" Width="2*" />
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <TextBlock Text="{Binding Status}" Foreground="#5A6072" />
+        </StackPanel>
+    </ScrollViewer>
+</Window>

@@ -47,6 +47,8 @@
             <Button Content="➕ Yeni Sifariş" Command="{Binding ToggleNewOrderCommand}"
                     Background="#3B5BDB" Foreground="White"
                     ToolTip.Tip="Yeni icarə sifarişi forması açır (müştəri, tarixlər, məhsul sətirləri)" />
+            <Button Content="📋 Detal" Click="OnOrderDetail"
+                    ToolTip.Tip="Seçilmiş sifarişin tam detalı: yaradan/təsdiqləyən, ödənişlər, dəyişiklik tarixçəsi (cədvəldə iki dəfə klik də açır)" />
             <Button Content="✓ Təsdiqlə" Command="{Binding ConfirmCommand}"
                     Background="#2F9E44" Foreground="White"
                     ToolTip.Tip="Seçilmiş sifarişi təsdiqləyir: Qaralama → Təsdiqlənmiş. Avadanlığı rezerv edir (ikiqat bron yoxlanılır)." />
@@ -162,7 +164,8 @@
 
         <DataGrid Grid.Row="4" ItemsSource="{Binding Orders}" SelectedItem="{Binding Selected}"
                   IsReadOnly="True" GridLinesVisibility="Horizontal"
-                  BorderThickness="1" BorderBrush="#E0E2EA">
+                  BorderThickness="1" BorderBrush="#E0E2EA"
+                  DoubleTapped="OnOrderDoubleTapped">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Sifariş №" Binding="{Binding OrderNumber}" Width="Auto" />
                 <DataGridTextColumn Header="Müştəri" Binding="{Binding CustomerName}" Width="2*" />

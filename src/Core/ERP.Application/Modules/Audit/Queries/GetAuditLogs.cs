@@ -6,7 +6,7 @@ using ERP.Shared.Contracts.Audit;
 namespace ERP.Application.Modules.Audit.Queries;
 
 /// <summary>Audit jurnalı — axtarış + səhifələmə (#26).</summary>
-public sealed record GetAuditLogsQuery(string? Search, int Page = 1, int PageSize = 50)
+public sealed record GetAuditLogsQuery(string? Search, string? EntityId = null, int Page = 1, int PageSize = 50)
     : IRequest<PagedResult<AuditLogDto>>;
 
 public sealed class GetAuditLogsHandler(IAuditLogReader reader)
@@ -16,6 +16,6 @@ public sealed class GetAuditLogsHandler(IAuditLogReader reader)
     {
         var page = request.Page < 1 ? 1 : request.Page;
         var size = request.PageSize is < 1 or > 200 ? 50 : request.PageSize;
-        return reader.SearchAsync(request.Search, page, size, ct);
+        return reader.SearchAsync(request.Search, request.EntityId, page, size, ct);
     }
 }

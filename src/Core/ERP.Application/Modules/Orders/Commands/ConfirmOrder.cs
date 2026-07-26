@@ -17,6 +17,7 @@ public sealed class ConfirmOrderHandler(
     IRentalOrderRepository orders,
     IProductRepository products,
     IInvoiceRepository invoices,
+    ICurrentUser currentUser,
     IUnitOfWork unitOfWork)
     : IRequestHandler<ConfirmOrderCommand, Result>
 {
@@ -44,7 +45,7 @@ public sealed class ConfirmOrderHandler(
                     $"[{order.StartDate:dd.MM.yyyy}–{order.EndDate:dd.MM.yyyy}].");
         }
 
-        order.Confirm();
+        order.Confirm(currentUser.FullName ?? currentUser.UserName);
         orders.Update(order);
 
         // #22 — təsdiq zamanı faktura avtomatik yaradılır (əvvəldən yoxdursa).

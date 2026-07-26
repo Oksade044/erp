@@ -21,6 +21,7 @@ public sealed record OrderDto(
     string? SettlementNotes,
     string? CreatedByName,
     string? CreatedByRole,
+    string? ConfirmedByName,
     IReadOnlyList<OrderLineDto> Lines);
 
 public sealed record OrderLineDto(

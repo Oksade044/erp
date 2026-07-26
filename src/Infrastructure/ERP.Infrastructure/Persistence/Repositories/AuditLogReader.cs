@@ -9,9 +9,12 @@ namespace ERP.Infrastructure.Persistence.Repositories;
 public sealed class AuditLogReader(AppDbContext context) : IAuditLogReader
 {
     public async Task<PagedResult<AuditLogDto>> SearchAsync(
-        string? search, int page, int pageSize, CancellationToken ct = default)
+        string? search, string? entityId, int page, int pageSize, CancellationToken ct = default)
     {
         var query = context.AuditLogs.AsNoTracking().AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(entityId))
+            query = query.Where(a => a.EntityId == entityId);
 
         if (!string.IsNullOrWhiteSpace(search))
         {

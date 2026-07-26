@@ -40,6 +40,7 @@ public sealed class RentalOrderConfiguration : IEntityTypeConfiguration<RentalOr
 
         builder.Property(o => o.CreatedByName).HasMaxLength(200);
         builder.Property(o => o.CreatedByRole).HasMaxLength(50);
+        builder.Property(o => o.ConfirmedByName).HasMaxLength(200);
 
         builder.Property(o => o.SettlementNotes).HasMaxLength(2000);
         builder.Property(o => o.IsSettled).IsRequired();

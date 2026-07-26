@@ -46,6 +46,9 @@ public class RentalOrder : BaseEntity, IAggregateRoot
     /// <summary>Sifarişi yaradan istifadəçinin rolu (Admin/Menecer/...).</summary>
     public string? CreatedByRole { get; private set; }
 
+    /// <summary>Sifarişi təsdiqləyən istifadəçinin adı (təsdiq anında snapshot).</summary>
+    public string? ConfirmedByName { get; private set; }
+
     public IReadOnlyList<OrderLine> Lines => _lines.AsReadOnly();
 
     /// <summary>Sifarişin ümumi məbləği (bütün sətirlərin cəmi).</summary>
@@ -140,13 +143,14 @@ public class RentalOrder : BaseEntity, IAggregateRoot
 
     // --- Status keçidləri ---
 
-    public void Confirm()
+    public void Confirm(string? confirmedByName = null)
     {
         if (Status != OrderStatus.Qaralama)
             throw new DomainException("Yalnız qaralama sifariş təsdiqlənə bilər.");
         if (_lines.Count == 0)
             throw new DomainException("Boş sifariş təsdiqlənə bilməz.");
         Status = OrderStatus.Təsdiqlənmiş;
+        ConfirmedByName = string.IsNullOrWhiteSpace(confirmedByName) ? null : confirmedByName.Trim();
     }
 
     public void Deliver()
