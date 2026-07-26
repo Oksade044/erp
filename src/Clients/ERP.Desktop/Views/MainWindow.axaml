@@ -13,14 +13,23 @@
     <Grid ColumnDefinitions="220,*">
 
         <!-- Yan naviqasiya -->
-        <Border Grid.Column="0" Background="#1E2130" Padding="0,16">
-            <DockPanel LastChildFill="False">
-                <StackPanel DockPanel.Dock="Top" Spacing="4">
-                    <TextBlock Text="ERP" FontSize="26" FontWeight="Bold" Foreground="White"
-                               Margin="20,0,0,4" />
-                    <TextBlock Text="Toy Dekoru &amp; Tədbir İcarəsi" FontSize="11"
-                               Foreground="#8A90A6" Margin="20,0,0,20" TextWrapping="Wrap" />
+        <Border Grid.Column="0" Background="#1E2130" Padding="0,12">
+            <DockPanel LastChildFill="True">
+                <StackPanel DockPanel.Dock="Top" Spacing="2">
+                    <TextBlock Text="ERP" FontSize="22" FontWeight="Bold" Foreground="White"
+                               Margin="16,0,0,2" />
+                    <TextBlock Text="Toy Dekoru &amp; Tədbir İcarəsi" FontSize="10"
+                               Foreground="#8A90A6" Margin="16,0,0,10" TextWrapping="Wrap" />
+                </StackPanel>
 
+                <StackPanel DockPanel.Dock="Bottom" Spacing="2">
+                    <TextBlock Text="{Binding CurrentUser}" Foreground="#8A90A6" FontSize="11"
+                               Margin="16,6,16,6" TextWrapping="Wrap" />
+                    <Button Content="🚪  Çıxış" Command="{Binding LogoutCommand}" Classes="nav" />
+                </StackPanel>
+
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel Spacing="1">
                     <Button Content="📊  İdarə Paneli" Command="{Binding NavigateCommand}"
                             CommandParameter="İdarə Paneli" Classes="nav" />
                     <Button Content="👤  Müştərilər" Command="{Binding NavigateCommand}"
@@ -61,13 +70,8 @@
                     <Button Content="📜  Audit Jurnalı" Command="{Binding NavigateCommand}"
                             CommandParameter="Audit Jurnalı" Classes="nav"
                             IsVisible="{Binding CanViewAudit}" />
-                </StackPanel>
-
-                <StackPanel DockPanel.Dock="Bottom" Spacing="4">
-                    <TextBlock Text="{Binding CurrentUser}" Foreground="#8A90A6" FontSize="11"
-                               Margin="20,0,20,6" TextWrapping="Wrap" />
-                    <Button Content="🚪  Çıxış" Command="{Binding LogoutCommand}" Classes="nav" />
-                </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
             </DockPanel>
         </Border>
 
@@ -81,8 +85,8 @@
             <Setter Property="HorizontalContentAlignment" Value="Left" />
             <Setter Property="Background" Value="Transparent" />
             <Setter Property="Foreground" Value="#D5D8E4" />
-            <Setter Property="Padding" Value="20,12" />
-            <Setter Property="FontSize" Value="14" />
+            <Setter Property="Padding" Value="16,7" />
+            <Setter Property="FontSize" Value="13" />
         </Style>
         <Style Selector="Button.nav:pointerover /template/ ContentPresenter">
             <Setter Property="Background" Value="#2A2E42" />

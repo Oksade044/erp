@@ -33,6 +33,10 @@ public sealed class ConfirmOrderHandler(
         {
             var avail = await availability.GetProductAvailabilityAsync(line.ProductId, ct);
 
+            // Məhsul heç bir anbarda izlənmirsə (StockLevel yoxdur) — bloklamırıq (köhnə məhsullar).
+            if (avail.Count == 0)
+                continue;
+
             int free;
             string where;
             if (line.WarehouseId is { } whId)
