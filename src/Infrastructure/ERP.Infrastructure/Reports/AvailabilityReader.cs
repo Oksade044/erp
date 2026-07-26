@@ -82,13 +82,16 @@ public sealed class AvailabilityReader(AppDbContext context) : IAvailabilityRead
 
     private async Task<List<LineRow>> ActiveLinesAsync(IReadOnlyCollection<Guid> productIds, CancellationToken ct)
     {
-        return await context.Set<OrderLine>()
+        // EF pozitiv record ctor-unu SQL-də tərcümə edə bilmir → anonim proyeksiya + client map.
+        var rows = await context.Set<OrderLine>()
             .AsNoTracking()
             .Where(l => productIds.Contains(l.ProductId) && l.WarehouseId != null)
             .Join(context.Orders, l => l.OrderId, o => o.Id,
-                (l, o) => new LineRow(l.WarehouseId!.Value, l.Quantity, o.Status))
+                (l, o) => new { l.WarehouseId, l.Quantity, o.Status })
             .Where(x => x.Status == OrderStatus.Təsdiqlənmiş || x.Status == OrderStatus.TəhvilVerilmiş)
             .ToListAsync(ct);
+
+        return rows.Select(x => new LineRow(x.WarehouseId!.Value, x.Quantity, x.Status)).ToList();
     }
 
     private sealed record LineRow(Guid WarehouseId, int Quantity, OrderStatus Status);
