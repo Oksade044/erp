@@ -2,6 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:ERP.Desktop.ViewModels"
              xmlns:conv="using:ERP.Desktop.Converters"
+             xmlns:prod="using:ERP.Shared.Contracts.Products"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="850" d:DesignHeight="620"
@@ -103,25 +104,55 @@
 
                 <StackPanel Orientation="Horizontal" Spacing="8">
                     <TextBlock Text="Məhsul:" VerticalAlignment="Center" Width="60" />
-                    <ComboBox ItemsSource="{Binding AllProducts}" SelectedItem="{Binding LineProduct}" Width="200">
-                        <ComboBox.ItemTemplate>
-                            <DataTemplate><TextBlock Text="{Binding Name}" /></DataTemplate>
-                        </ComboBox.ItemTemplate>
-                    </ComboBox>
-                    <TextBlock Text="Anbardan:" VerticalAlignment="Center" />
-                    <ComboBox ItemsSource="{Binding LineAvailability}" SelectedItem="{Binding LineWarehouse}" Width="240"
-                              ToolTip.Tip="Məhsulun götürüləcəyi anbar. Mötərizədə boş say göstərilir.">
-                        <ComboBox.ItemTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding WarehouseName}" />
+                    <AutoCompleteBox Width="220" PlaceholderText="Məhsul adını yazın (axtar)..."
+                                     ItemsSource="{Binding AllProducts}" SelectedItem="{Binding LineProduct}"
+                                     ValueMemberBinding="{Binding Name, x:DataType=prod:ProductDto}"
+                                     FilterMode="ContainsOrdinal" MinimumPrefixLength="0"
+                                     ToolTip.Tip="Yazdıqca məhsullar süzülür (#28 canlı axtarış).">
+                        <AutoCompleteBox.ItemTemplate>
+                            <DataTemplate x:DataType="prod:ProductDto">
+                                <TextBlock Text="{Binding Name}" />
                             </DataTemplate>
+                        </AutoCompleteBox.ItemTemplate>
+                    </AutoCompleteBox>
+                    <TextBlock Text="Anbardan:" VerticalAlignment="Center" />
+                    <ComboBox ItemsSource="{Binding LineAvailability}" SelectedItem="{Binding LineWarehouse}" Width="200"
+                              ToolTip.Tip="Məhsulun götürüləcəyi anbar.">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate><TextBlock Text="{Binding WarehouseName}" /></DataTemplate>
                         </ComboBox.ItemTemplate>
                     </ComboBox>
-                    <TextBox Width="70" PlaceholderText="Say" Text="{Binding LineQuantity}" />
+                    <TextBox Width="60" PlaceholderText="Say" Text="{Binding LineQuantity}" />
+                    <TextBlock Text="Qiymət:" VerticalAlignment="Center"
+                               ToolTip.Tip="Bu sifariş üçün kirayə qiyməti. Standartdan başlayır, dəyişdirilə bilər (#29). Məhsulun əsas qiymətinə təsir etmir." />
+                    <TextBox Width="80" Text="{Binding LineUnitPrice}" />
+                    <TextBlock Text="{Binding LinePreviewTotal, StringFormat='= {0:0.00} AZN'}" VerticalAlignment="Center" FontWeight="SemiBold" />
                     <Button Content="+ Sətir" Command="{Binding AddLineCommand}" />
                 </StackPanel>
 
-                <!-- #18/#19 — seçilmiş məhsulun anbarlar üzrə mövcudluğu -->
+                <!-- #28 — seçilmiş məhsulun kartı (şəkil + məlumat + yekun stok) -->
+                <Border Background="#F5F6FA" CornerRadius="8" Padding="12"
+                        IsVisible="{Binding LineProduct, Converter={x:Static ObjectConverters.IsNotNull}}">
+                    <StackPanel Orientation="Horizontal" Spacing="16">
+                        <Image Source="{Binding SelectedLineImage}" Width="90" Height="90" Stretch="Uniform" />
+                        <StackPanel Spacing="2" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding LineProduct.Name}" FontWeight="SemiBold" FontSize="14" />
+                            <TextBlock Text="{Binding LineProduct.Sku, StringFormat=SKU: {0}}" Foreground="#5A6072" FontSize="12" />
+                            <TextBlock Text="{Binding LineProduct.Category, StringFormat=Kateqoriya: {0}}" Foreground="#5A6072" FontSize="12" />
+                            <TextBlock Text="{Binding LineProduct.RentalPrice, StringFormat=Standart kirayə: {0:0.00} AZN}" FontSize="12" />
+                            <TextBlock Text="{Binding LineProduct.SalePrice, StringFormat=Satış: {0:0.00} AZN}" FontSize="12"
+                                       IsVisible="{Binding LineProduct.SalePrice, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                        </StackPanel>
+                        <StackPanel Spacing="2" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding LineProduct.TotalStock, StringFormat=Ümumi stok: {0}}" FontSize="12" />
+                            <TextBlock Text="{Binding LineProduct.FreeStock, StringFormat=Boş: {0}}" FontSize="12" Foreground="#2B8A3E" FontWeight="SemiBold" />
+                            <TextBlock Text="{Binding LineProduct.ReservedStock, StringFormat=Rezervdə: {0}}" FontSize="12" Foreground="#E8590C" />
+                            <TextBlock Text="{Binding LineProduct.RentedStock, StringFormat=Kirayədə: {0}}" FontSize="12" Foreground="#1971C2" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <!-- #18/#19/#28 — seçilmiş məhsulun anbarlar üzrə mövcudluğu -->
                 <DataGrid ItemsSource="{Binding LineAvailability}" IsReadOnly="True" Height="90"
                           GridLinesVisibility="Horizontal" BorderThickness="1" BorderBrush="#E0E2EA"
                           IsVisible="{Binding LineProduct, Converter={x:Static ObjectConverters.IsNotNull}}">

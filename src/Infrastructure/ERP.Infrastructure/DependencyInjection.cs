@@ -67,6 +67,7 @@ public static class DependencyInjection
         services.AddScoped<IRoleRepository, RoleRepository>();
         services.AddScoped<IFieldPermissionRepository, FieldPermissionRepository>();
         services.AddScoped<IAuditLogReader, AuditLogReader>();
+        services.AddScoped<IAuditLogWriter, AuditLogWriter>();
         services.AddScoped<IAvailabilityReader, AvailabilityReader>();
 
         // Autentifikasiya servisləri (TDD §6, §39).

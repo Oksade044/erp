@@ -59,11 +59,44 @@ public partial class OrdersViewModel : ViewModelBase
     [ObservableProperty] private ProductDto? _lineProduct;
     [ObservableProperty] private int _lineQuantity = 1;
 
+    // #29/#30 — sifariş üçün (dəyişdirilə bilən) vahid qiymət; default = məhsulun standart kirayə qiyməti.
+    [ObservableProperty] private decimal _lineUnitPrice;
+    // #28 — seçilmiş məhsulun şəkli (info panelində).
+    [ObservableProperty] private Avalonia.Media.Imaging.Bitmap? _selectedLineImage;
+
+    /// <summary>Say × vahid qiymət — canlı hesablanır (#30).</summary>
+    public decimal LinePreviewTotal => LineQuantity * LineUnitPrice;
+    partial void OnLineQuantityChanged(int value) => OnPropertyChanged(nameof(LinePreviewTotal));
+    partial void OnLineUnitPriceChanged(decimal value) => OnPropertyChanged(nameof(LinePreviewTotal));
+
     // #18/#19 — seçilmiş məhsulun anbarlar üzrə mövcudluğu + götürüləcək anbar.
     public ObservableCollection<ProductAvailabilityDto> LineAvailability { get; } = [];
     [ObservableProperty] private ProductAvailabilityDto? _lineWarehouse;
 
-    partial void OnLineProductChanged(ProductDto? value) => _ = LoadAvailabilityAsync(value);
+    partial void OnLineProductChanged(ProductDto? value)
+    {
+        // #29 — qiymət standart kirayə qiymətindən başlayır (istifadəçi dəyişə bilər).
+        LineUnitPrice = value?.RentalPrice ?? 0;
+        OnPropertyChanged(nameof(LinePreviewTotal));
+        _ = LoadAvailabilityAsync(value);
+        _ = LoadLineImageAsync(value);
+    }
+
+    private async Task LoadLineImageAsync(ProductDto? product)
+    {
+        SelectedLineImage = null;
+        if (product is null || !product.HasImage) return;
+        try
+        {
+            var bytes = await api.GetProductImageBytesAsync(product.Id);
+            if (bytes is not null)
+            {
+                using var ms = new System.IO.MemoryStream(bytes);
+                SelectedLineImage = new Avalonia.Media.Imaging.Bitmap(ms);
+            }
+        }
+        catch { /* şəkil yüklənə bilmədi */ }
+    }
 
     private async Task LoadAvailabilityAsync(ProductDto? product)
     {
@@ -116,6 +149,7 @@ public partial class OrdersViewModel : ViewModelBase
     private void AddLine()
     {
         if (LineProduct is null || LineQuantity <= 0) { Status = "Məhsul və say seçin."; return; }
+        if (LineUnitPrice < 0) { Status = "Qiymət mənfi ola bilməz."; return; }
         if (DraftLines.Any(l => l.ProductId == LineProduct.Id)) { Status = "Bu məhsul artıq əlavə olunub."; return; }
 
         // #18/#19 — seçilmiş anbarda kifayət qədər boş varmı?
@@ -125,7 +159,8 @@ public partial class OrdersViewModel : ViewModelBase
             return;
         }
 
-        DraftLines.Add(new DraftLine(LineProduct.Id, LineProduct.Name, LineQuantity, LineProduct.RentalPrice,
+        // #29/#30 — istifadəçinin daxil etdiyi (dəyişdirilə bilən) vahid qiymət istifadə olunur.
+        DraftLines.Add(new DraftLine(LineProduct.Id, LineProduct.Name, LineQuantity, LineUnitPrice,
             LineWarehouse?.WarehouseId, LineWarehouse?.WarehouseName));
         OnPropertyChanged(nameof(DraftTotal));
         LineQuantity = 1;

@@ -34,6 +34,7 @@ public sealed class CreateOrderHandler(
     IProductRepository products,
     IWarehouseRepository warehouses,
     ICurrentUser currentUser,
+    IAuditLogWriter audit,
     IUnitOfWork unitOfWork)
     : IRequestHandler<CreateOrderCommand, Result<Guid>>
 {
@@ -68,6 +69,16 @@ public sealed class CreateOrderHandler(
             var unitPrice = lineDto.UnitPrice is { } p
                 ? Money.Create(p, product.RentalPrice.Currency)
                 : product.RentalPrice;
+
+            // #32 — istifadəçi standart qiyməti dəyişibsə audit jurnalına yaz.
+            if (lineDto.UnitPrice is { } entered && entered != product.RentalPrice.Amount)
+                audit.Add(
+                    createdByName ?? currentUser.UserName ?? "system",
+                    "Qiymət dəyişdirildi",
+                    "OrderLine",
+                    orderNumber,
+                    $"Məhsul: {product.Name} — standart {product.RentalPrice.Amount:0.00} {product.RentalPrice.Currency} " +
+                    $"→ tətbiq {entered:0.00} {product.RentalPrice.Currency} (sifariş {orderNumber})");
 
             // #18 — məhsulun götürüləcəyi anbar (opsional).
             string? warehouseName = null;
