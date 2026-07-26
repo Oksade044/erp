@@ -33,6 +33,23 @@ public sealed class ReportService(AppDbContext context) : IReportService
         var totalInvoiced = (await context.Invoices.Select(i => i.TotalAmount.Amount).ToListAsync(ct)).Sum();
         var totalPaid = (await context.Set<Payment>().Select(p => p.Amount.Amount).ToListAsync(ct)).Sum();
 
+        // #20 — bugünkü əməliyyatlar (DateOnly SQLite-də WHERE-də təhlükəsizdir).
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        var deliveriesToday = await context.Orders.CountAsync(
+            o => o.StartDate == today && o.Status == OrderStatus.Təsdiqlənmiş, ct);
+        var returnsToday = await context.Orders.CountAsync(
+            o => o.EndDate == today && o.Status == OrderStatus.TəhvilVerilmiş, ct);
+        var overdueReturns = await context.Orders.CountAsync(
+            o => o.EndDate < today && o.Status == OrderStatus.TəhvilVerilmiş, ct);
+
+        // #23 — ödəniş tarixinə görə gəlir (client tərəfdə decimal cəm).
+        var payments = await context.Set<Payment>()
+            .Select(p => new { p.PaidAt, Amount = p.Amount.Amount })
+            .ToListAsync(ct);
+        var startOfWeek = today.AddDays(-(((int)today.DayOfWeek + 6) % 7)); // həftə bazar ertəsindən
+        var startOfMonth = new DateOnly(today.Year, today.Month, 1);
+        var startOfYear = new DateOnly(today.Year, 1, 1);
+
         return new DashboardDto(
             CustomerCount: customerCount,
             ProductCount: productCount,
@@ -45,7 +62,14 @@ public sealed class ReportService(AppDbContext context) : IReportService
             TotalInvoiced: totalInvoiced,
             TotalPaid: totalPaid,
             TotalOutstanding: totalInvoiced - totalPaid,
-            Currency: DefaultCurrency);
+            Currency: DefaultCurrency,
+            DeliveriesToday: deliveriesToday,
+            ReturnsToday: returnsToday,
+            OverdueReturns: overdueReturns,
+            IncomeToday: payments.Where(p => p.PaidAt == today).Sum(p => p.Amount),
+            IncomeThisWeek: payments.Where(p => p.PaidAt >= startOfWeek).Sum(p => p.Amount),
+            IncomeThisMonth: payments.Where(p => p.PaidAt >= startOfMonth).Sum(p => p.Amount),
+            IncomeThisYear: payments.Where(p => p.PaidAt >= startOfYear).Sum(p => p.Amount));
     }
 
     public async Task<IReadOnlyList<OutstandingInvoiceDto>> GetOutstandingInvoicesAsync(CancellationToken ct = default)

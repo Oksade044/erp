@@ -9,7 +9,7 @@
              x:DataType="vm:DashboardViewModel">
 
     <ScrollViewer>
-        <Grid RowDefinitions="Auto,Auto,Auto,Auto,*" Margin="24">
+        <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,*" Margin="24">
 
             <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12" Margin="0,0,0,20">
                 <TextBlock Text="İdarə Paneli" FontSize="24" FontWeight="SemiBold" VerticalAlignment="Center" />
@@ -66,8 +66,76 @@
                 </StackPanel>
             </Border>
 
+            <!-- #20 — Bugünkü əməliyyatlar -->
+            <StackPanel Grid.Row="3" Margin="0,0,0,20">
+                <TextBlock Text="Bugünkü əməliyyatlar" FontWeight="SemiBold" FontSize="15" Margin="0,0,0,8" />
+                <WrapPanel>
+                    <Border Classes="card" Background="#E7F5FF" Width="200">
+                        <StackPanel>
+                            <TextBlock Text="🚚 BUGÜN TƏHVİL VERİLƏCƏK" Classes="cardLabel" />
+                            <TextBlock Text="{Binding Summary.DeliveriesToday}" Classes="cardValue" Foreground="#1971C2" />
+                        </StackPanel>
+                    </Border>
+                    <Border Classes="card" Background="#EBFBEE" Width="200">
+                        <StackPanel>
+                            <TextBlock Text="↩ BUGÜN QAYTARILACAQ" Classes="cardLabel" />
+                            <TextBlock Text="{Binding Summary.ReturnsToday}" Classes="cardValue" Foreground="#2F9E44" />
+                        </StackPanel>
+                    </Border>
+                    <Border Classes="card" Background="#FFF0F0" Width="200">
+                        <StackPanel>
+                            <TextBlock Text="⚠ GECİKMİŞ QAYTARMA" Classes="cardLabel" />
+                            <TextBlock Text="{Binding Summary.OverdueReturns}" Classes="cardValue" Foreground="#C92A2A" />
+                        </StackPanel>
+                    </Border>
+                    <Border Classes="card" Background="#F3F0FF" Width="200">
+                        <StackPanel>
+                            <TextBlock Text="📦 HAZIRDA KİRAYƏDƏ" Classes="cardLabel" />
+                            <TextBlock Text="{Binding Summary.DeliveredOrders}" Classes="cardValue" Foreground="#7048E8" />
+                        </StackPanel>
+                    </Border>
+                    <Border Classes="card" Background="#FFF9DB" Width="200">
+                        <StackPanel>
+                            <TextBlock Text="🔖 REZERVDƏ (təsdiqli)" Classes="cardLabel" />
+                            <TextBlock Text="{Binding Summary.ConfirmedOrders}" Classes="cardValue" Foreground="#F08C00" />
+                        </StackPanel>
+                    </Border>
+                </WrapPanel>
+            </StackPanel>
+
+            <!-- #23 — Maliyyə paneli (dövr üzrə gəlir) -->
+            <StackPanel Grid.Row="4" Margin="0,0,0,20">
+                <TextBlock Text="Maliyyə — gəlir (ödəniş tarixinə görə)" FontWeight="SemiBold" FontSize="15" Margin="0,0,0,8" />
+                <WrapPanel>
+                    <Border Classes="card" Background="#E6FCF5" Width="200">
+                        <StackPanel>
+                            <TextBlock Text="BUGÜN" Classes="cardLabel" />
+                            <TextBlock Text="{Binding Summary.IncomeToday, StringFormat={}{0:0.00} AZN}" Classes="cardValue" Foreground="#0CA678" />
+                        </StackPanel>
+                    </Border>
+                    <Border Classes="card" Background="#E6FCF5" Width="200">
+                        <StackPanel>
+                            <TextBlock Text="BU HƏFTƏ" Classes="cardLabel" />
+                            <TextBlock Text="{Binding Summary.IncomeThisWeek, StringFormat={}{0:0.00} AZN}" Classes="cardValue" Foreground="#0CA678" />
+                        </StackPanel>
+                    </Border>
+                    <Border Classes="card" Background="#E6FCF5" Width="200">
+                        <StackPanel>
+                            <TextBlock Text="BU AY" Classes="cardLabel" />
+                            <TextBlock Text="{Binding Summary.IncomeThisMonth, StringFormat={}{0:0.00} AZN}" Classes="cardValue" Foreground="#099268" />
+                        </StackPanel>
+                    </Border>
+                    <Border Classes="card" Background="#E6FCF5" Width="200">
+                        <StackPanel>
+                            <TextBlock Text="BU İL" Classes="cardLabel" />
+                            <TextBlock Text="{Binding Summary.IncomeThisYear, StringFormat={}{0:0.00} AZN}" Classes="cardValue" Foreground="#087F5B" />
+                        </StackPanel>
+                    </Border>
+                </WrapPanel>
+            </StackPanel>
+
             <!-- Mənfəət/Zərər (cari il) + aylıq analitika -->
-            <Grid Grid.Row="3" ColumnDefinitions="Auto,16,*" Margin="0,0,0,20">
+            <Grid Grid.Row="5" ColumnDefinitions="Auto,16,*" Margin="0,0,0,20">
                 <StackPanel Grid.Column="0" Spacing="10">
                     <TextBlock Text="Mənfəət / Zərər (cari il)" FontWeight="SemiBold" FontSize="15" />
                     <Border Classes="card" Background="#EBFBEE" Width="220" Margin="0">
@@ -105,7 +173,7 @@
             </Grid>
 
             <!-- İki siyahı: top məhsullar + borclar -->
-            <Grid Grid.Row="4" ColumnDefinitions="*,16,*">
+            <Grid Grid.Row="6" ColumnDefinitions="*,16,*">
                 <StackPanel Grid.Column="0">
                     <TextBlock Text="Ən çox icarəyə verilən" FontWeight="SemiBold" FontSize="15" Margin="0,0,0,8" />
                     <DataGrid ItemsSource="{Binding TopProducts}" IsReadOnly="True" Height="240"

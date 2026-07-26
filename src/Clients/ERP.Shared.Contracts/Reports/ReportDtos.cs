@@ -13,7 +13,16 @@ public sealed record DashboardDto(
     decimal TotalInvoiced,
     decimal TotalPaid,
     decimal TotalOutstanding,
-    string Currency);
+    string Currency,
+    // #20 — bugünkü əməliyyatlar
+    int DeliveriesToday = 0,
+    int ReturnsToday = 0,
+    int OverdueReturns = 0,
+    // #23 — maliyyə paneli (ödəniş tarixinə görə gəlir)
+    decimal IncomeToday = 0,
+    decimal IncomeThisWeek = 0,
+    decimal IncomeThisMonth = 0,
+    decimal IncomeThisYear = 0);
 
 /// <summary>Qalıq borcu olan faktura.</summary>
 public sealed record OutstandingInvoiceDto(
