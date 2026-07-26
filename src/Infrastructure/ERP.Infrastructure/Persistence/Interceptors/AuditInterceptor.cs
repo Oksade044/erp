@@ -1,5 +1,6 @@
 using ERP.Application.Common.Interfaces;
 using ERP.Domain.Common;
+using ERP.Domain.Modules.Audit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -33,7 +34,9 @@ public sealed class AuditInterceptor(ICurrentUser currentUser) : SaveChangesInte
         if (context is null) return;
 
         var now = DateTimeOffset.UtcNow;
-        var user = currentUser.UserName ?? currentUser.UserId ?? "system";
+        var user = currentUser.FullName ?? currentUser.UserName ?? currentUser.UserId ?? "system";
+
+        var logs = new List<AuditLog>();
 
         foreach (EntityEntry<BaseEntity> entry in context.ChangeTracker.Entries<BaseEntity>())
         {
@@ -42,11 +45,13 @@ public sealed class AuditInterceptor(ICurrentUser currentUser) : SaveChangesInte
                 case EntityState.Added:
                     entry.Entity.CreatedAt = now;
                     entry.Entity.CreatedBy = user;
+                    logs.Add(BuildLog(entry, now, user, "Yaradıldı"));
                     break;
 
                 case EntityState.Modified:
                     entry.Entity.UpdatedAt = now;
                     entry.Entity.UpdatedBy = user;
+                    logs.Add(BuildLog(entry, now, user, "Dəyişdirildi"));
                     break;
 
                 case EntityState.Deleted:
@@ -55,8 +60,31 @@ public sealed class AuditInterceptor(ICurrentUser currentUser) : SaveChangesInte
                     entry.Entity.IsDeleted = true;
                     entry.Entity.DeletedAt = now;
                     entry.Entity.DeletedBy = user;
+                    logs.Add(BuildLog(entry, now, user, "Silindi"));
                     break;
             }
         }
+
+        // Audit qeydlərini əlavə et (BaseEntity deyil → yenidən audit olunmur, rekursiya yoxdur).
+        if (logs.Count > 0)
+            context.Set<AuditLog>().AddRange(logs);
+    }
+
+    private static AuditLog BuildLog(EntityEntry<BaseEntity> entry, DateTimeOffset now, string user, string action)
+    {
+        // Soft-delete-i dəyişiklik kimi yazmayaq — silmə üçün ayrıca summary.
+        string? summary = null;
+        if (action == "Dəyişdirildi")
+        {
+            var changed = entry.Properties
+                .Where(p => p.IsModified && p.Metadata.Name is not ("UpdatedAt" or "UpdatedBy"
+                    or "IsDeleted" or "DeletedAt" or "DeletedBy"))
+                .Select(p => p.Metadata.Name)
+                .ToList();
+            summary = changed.Count > 0 ? "Dəyişən sahələr: " + string.Join(", ", changed) : null;
+        }
+
+        return AuditLog.Create(now, user, action, entry.Entity.GetType().Name,
+            entry.Entity.Id.ToString(), summary);
     }
 }

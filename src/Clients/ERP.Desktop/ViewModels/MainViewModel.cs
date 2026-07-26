@@ -31,6 +31,7 @@ public partial class MainViewModel : ViewModelBase
     private readonly ReportsViewModel _reports;
     private readonly UsersViewModel _users;
     private readonly FieldPermissionsViewModel _fieldPermissions;
+    private readonly AuditViewModel _audit;
     private readonly Action _onLogout;
 
     [ObservableProperty] private ViewModelBase _current = null!;
@@ -42,12 +43,16 @@ public partial class MainViewModel : ViewModelBase
     /// <summary>İstifadəçi idarəetməsi + sahə görünürlüyü yalnız users.manage icazəsi olanlara görünür.</summary>
     public bool CanManageUsers { get; }
 
+    /// <summary>Audit jurnalı yalnız audit.view icazəsi olanlara görünür.</summary>
+    public bool CanViewAudit { get; }
+
     public MainViewModel(ErpApiClient api, AuthResponse auth, Action onLogout,
         IReadOnlyList<FieldPermissionDto>? fieldPermissions = null)
     {
         _onLogout = onLogout;
         CurrentUser = $"{auth.FullName} ({auth.Role})";
         CanManageUsers = auth.Permissions.Contains("users.manage");
+        CanViewAudit = auth.Permissions.Contains("audit.view");
 
         // Sahə görünürlüyü: konfiqurasiya olunan qaydadan (yoxdursa Admin/Menecer default).
         bool CanViewField(string key)
@@ -74,6 +79,7 @@ public partial class MainViewModel : ViewModelBase
         _reports = new ReportsViewModel(api);
         _users = new UsersViewModel(api);
         _fieldPermissions = new FieldPermissionsViewModel(api);
+        _audit = new AuditViewModel(api);
 
         Current = _dashboard;
         _dashboard.LoadCommand.Execute(null);
@@ -100,6 +106,7 @@ public partial class MainViewModel : ViewModelBase
             "Hesabatlar" => _reports,
             "İstifadəçilər" => _users,
             "Sahə İcazələri" => _fieldPermissions,
+            "Audit Jurnalı" => _audit,
             _ => _dashboard
         };
 
@@ -121,6 +128,7 @@ public partial class MainViewModel : ViewModelBase
             case ReportsViewModel r: r.LoadCommand.Execute(null); break;
             case UsersViewModel u: u.LoadCommand.Execute(null); break;
             case FieldPermissionsViewModel fp: fp.LoadCommand.Execute(null); break;
+            case AuditViewModel au: au.LoadCommand.Execute(null); break;
         }
     }
 

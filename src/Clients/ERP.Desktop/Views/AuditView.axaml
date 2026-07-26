@@ -1,0 +1,43 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:ERP.Desktop.ViewModels"
+             xmlns:ctrl="using:ERP.Desktop.Controls"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="900" d:DesignHeight="560"
+             x:Class="ERP.Desktop.Views.AuditView"
+             x:DataType="vm:AuditViewModel">
+
+    <Grid RowDefinitions="Auto,Auto,*,Auto" Margin="24">
+
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="8" Margin="0,0,0,16">
+            <TextBlock Text="Audit Jurnalı" FontSize="24" FontWeight="SemiBold" VerticalAlignment="Center" />
+            <ctrl:InfoHelp Title="Audit Jurnalı (əməliyyat qeydiyyatı)"
+                           Text="Sistemdə edilən bütün əməliyyatlar: kim, nə vaxt, hansı obyekti yaratdı/dəyişdi/sildi və hansı sahələr dəyişdi."
+                           Note="Yalnız səlahiyyətli istifadəçilər (audit.view — adətən Admin) görə bilər." />
+        </StackPanel>
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="8" Margin="0,0,0,12">
+            <TextBox Width="300" PlaceholderText="İstifadəçi, obyekt növü və ya əməliyyat üzrə axtar" Text="{Binding Search}"
+                     ToolTip.Tip="Yazdıqca süzülür, Enter də işləyir">
+                <TextBox.KeyBindings>
+                    <KeyBinding Gesture="Enter" Command="{Binding LoadCommand}" />
+                </TextBox.KeyBindings>
+            </TextBox>
+            <Button Content="🔍 Axtar / Yenilə" Command="{Binding LoadCommand}" />
+        </StackPanel>
+
+        <DataGrid Grid.Row="2" ItemsSource="{Binding Logs}" IsReadOnly="True"
+                  GridLinesVisibility="Horizontal" BorderThickness="1" BorderBrush="#E0E2EA">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Tarix / saat" Binding="{Binding Timestamp, StringFormat='{}{0:dd.MM.yyyy HH:mm:ss}'}" Width="Auto" />
+                <DataGridTextColumn Header="İstifadəçi" Binding="{Binding UserName}" Width="*" />
+                <DataGridTextColumn Header="Əməliyyat" Binding="{Binding Action}" Width="Auto" />
+                <DataGridTextColumn Header="Obyekt" Binding="{Binding EntityType}" Width="Auto" />
+                <DataGridTextColumn Header="Dəyişikliklər" Binding="{Binding Summary}" Width="2*" />
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <TextBlock Grid.Row="3" Text="{Binding Status}" Foreground="#5A6072" Margin="0,10,0,0" />
+    </Grid>
+</UserControl>

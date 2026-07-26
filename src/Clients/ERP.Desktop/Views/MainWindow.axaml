@@ -55,6 +55,9 @@
                     <Button Content="🛡  Sahə İcazələri" Command="{Binding NavigateCommand}"
                             CommandParameter="Sahə İcazələri" Classes="nav"
                             IsVisible="{Binding CanManageUsers}" />
+                    <Button Content="📜  Audit Jurnalı" Command="{Binding NavigateCommand}"
+                            CommandParameter="Audit Jurnalı" Classes="nav"
+                            IsVisible="{Binding CanViewAudit}" />
                 </StackPanel>
 
                 <StackPanel DockPanel.Dock="Bottom" Spacing="4">

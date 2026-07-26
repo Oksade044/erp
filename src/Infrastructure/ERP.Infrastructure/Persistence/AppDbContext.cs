@@ -38,6 +38,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
     public DbSet<StockLevel> StockLevels => Set<StockLevel>();
     public DbSet<User> Users => Set<User>();
     public DbSet<ERP.Domain.Modules.Settings.FieldPermission> FieldPermissions => Set<ERP.Domain.Modules.Settings.FieldPermission>();
+    public DbSet<ERP.Domain.Modules.Audit.AuditLog> AuditLogs => Set<ERP.Domain.Modules.Audit.AuditLog>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

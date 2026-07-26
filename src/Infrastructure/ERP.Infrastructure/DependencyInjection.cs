@@ -65,6 +65,7 @@ public static class DependencyInjection
         services.AddScoped<IStockLevelRepository, StockLevelRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IFieldPermissionRepository, FieldPermissionRepository>();
+        services.AddScoped<IAuditLogReader, AuditLogReader>();
 
         // Autentifikasiya servisləri (TDD §6, §39).
         services.Configure<JwtSettings>(configuration.GetSection("Jwt"));

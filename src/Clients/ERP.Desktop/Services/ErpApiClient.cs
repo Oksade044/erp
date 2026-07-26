@@ -20,6 +20,7 @@ using ERP.Shared.Contracts.Suppliers;
 using ERP.Shared.Contracts.Warehouses;
 using ERP.Shared.Contracts.Users;
 using ERP.Shared.Contracts.Settings;
+using ERP.Shared.Contracts.Audit;
 
 namespace ERP.Desktop.Services;
 
@@ -238,6 +239,11 @@ public sealed class ErpApiClient(HttpClient http)
         var resp = await http.PostAsJsonAsync("/api/v1/employees", request, JsonOpts, ct);
         return await ReadResultAsync(resp, ct);
     }
+
+    // --- Audit jurnalı (#26) ---
+    public Task<PagedResult<AuditLogDto>?> GetAuditLogsAsync(string? search, CancellationToken ct = default) =>
+        http.GetFromJsonAsync<PagedResult<AuditLogDto>>(
+            $"/api/v1/audit?search={Uri.EscapeDataString(search ?? "")}&pageSize=200", JsonOpts, ct);
 
     // --- Parametrlər: sahə-görünürlük icazələri ---
     public Task<List<FieldPermissionDto>?> GetFieldPermissionsAsync(CancellationToken ct = default) =>

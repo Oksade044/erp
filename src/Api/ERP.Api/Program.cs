@@ -70,6 +70,7 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy(Permissions.HrEdit, p => p.RequireClaim("permission", Permissions.HrEdit));
     options.AddPolicy(Permissions.WarehousesView, p => p.RequireClaim("permission", Permissions.WarehousesView));
     options.AddPolicy(Permissions.WarehousesEdit, p => p.RequireClaim("permission", Permissions.WarehousesEdit));
+    options.AddPolicy(Permissions.AuditView, p => p.RequireClaim("permission", Permissions.AuditView));
 });
 
 // --- Rate limiting (TDD §39 — sui-istifadəyə qarşı müdafiə) ---
@@ -176,6 +177,7 @@ app.MapStockEndpoints();
 app.MapReportEndpoints();
 app.MapUserEndpoints();
 app.MapSettingsEndpoints();
+app.MapAuditEndpoints();
 
 // Backup: manual trigger (users.manage) — Hangfire background job kimi növbəyə salır (TDD §29, §36).
 app.MapPost("/api/v1/admin/backup", (IBackgroundJobClient jobs) =>

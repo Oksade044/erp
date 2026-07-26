@@ -29,6 +29,8 @@ public static class Permissions
     public const string WarehousesEdit = "warehouses.edit";
     public const string ReportsView = "reports.view";
     public const string UsersManage = "users.manage";
+    /// <summary>Audit jurnalını görmək — yalnız səlahiyyətli (Admin).</summary>
+    public const string AuditView = "audit.view";
 
     /// <summary>Rol → icazələr xəritəsi. Admin hər şeyi bacarır.</summary>
     public static IReadOnlyCollection<string> ForRole(Role role) => role switch
@@ -39,7 +41,7 @@ public static class Permissions
             OrdersView, OrdersEdit, OrdersApprove, InvoicesView, InvoicesEdit,
             SuppliersView, SuppliersEdit, PurchasesView, PurchasesEdit,
             FinanceView, FinanceEdit, HrView, HrEdit,
-            WarehousesView, WarehousesEdit, ReportsView, UsersManage
+            WarehousesView, WarehousesEdit, ReportsView, UsersManage, AuditView
         ],
         Role.Menecer =>
         [
