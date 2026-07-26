@@ -42,6 +42,7 @@ public sealed class AdjustStockHandler(
         {
             existing.SetQuantity(dto.Quantity);
             existing.SetMinQuantity(dto.MinQuantity);
+            existing.SetCondition(dto.InRepair, dto.Damaged);
             stockLevels.Update(existing);
             await unitOfWork.SaveChangesAsync(ct);
             await notifier.NotifyStockChangedAsync(existing.ToNotification(), ct);
@@ -57,7 +58,8 @@ public sealed class AdjustStockHandler(
             return Result.Failure<Guid>($"Anbar tapılmadı: {dto.WarehouseId}");
 
         var level = StockLevel.Create(
-            product.Id, product.Name, warehouse.Id, warehouse.Name, dto.Quantity, dto.MinQuantity);
+            product.Id, product.Name, warehouse.Id, warehouse.Name,
+            dto.Quantity, dto.MinQuantity, dto.InRepair, dto.Damaged);
 
         await stockLevels.AddAsync(level, ct);
         await unitOfWork.SaveChangesAsync(ct);

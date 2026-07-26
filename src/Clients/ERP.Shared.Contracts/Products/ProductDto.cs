@@ -19,4 +19,11 @@ public sealed record ProductDto(
     bool HasImage,
     DateTimeOffset CreatedAt,
     // Məhsulun anbarlar üzrə stoku (məs. "Mərkəzi anbar: 50, Filial: 10"). Siyahıda boş ola bilər.
-    string? WarehouseSummary = null);
+    string? WarehouseSummary = null,
+    // #27 — anbarlardan avtomatik hesablanan yekun stok göstəriciləri.
+    int TotalStock = 0,
+    int FreeStock = 0,
+    int ReservedStock = 0,
+    int RentedStock = 0,
+    int InRepairStock = 0,
+    int DamagedStock = 0);

@@ -38,6 +38,8 @@ public partial class StockViewModel(ErpApiClient api) : ViewModelBase
     [ObservableProperty] private WarehouseDto? _adjWarehouse;
     [ObservableProperty] private int _adjQuantity;
     [ObservableProperty] private int _adjMinQuantity;
+    [ObservableProperty] private int _adjInRepair;
+    [ObservableProperty] private int _adjDamaged;
 
     // Transfer forması
     [ObservableProperty] private ProductDto? _trProduct;
@@ -116,7 +118,8 @@ public partial class StockViewModel(ErpApiClient api) : ViewModelBase
 
         var (ok, error) = await api.AdjustStockAsync(new AdjustStockRequest(
             ProductId: AdjProduct.Id, WarehouseId: AdjWarehouse.Id,
-            Quantity: AdjQuantity, MinQuantity: AdjMinQuantity));
+            Quantity: AdjQuantity, MinQuantity: AdjMinQuantity,
+            InRepair: AdjInRepair, Damaged: AdjDamaged));
         Status = ok ? "Stok təyin edildi." : error ?? "Alınmadı.";
         if (ok) await LoadAsync();
     }

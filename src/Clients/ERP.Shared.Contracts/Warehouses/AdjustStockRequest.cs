@@ -8,4 +8,6 @@ public sealed record AdjustStockRequest(
     Guid ProductId,
     Guid WarehouseId,
     int Quantity,
-    int MinQuantity = 0);
+    int MinQuantity = 0,
+    int InRepair = 0,
+    int Damaged = 0);

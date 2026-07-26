@@ -15,8 +15,8 @@ public sealed record ConfirmOrderCommand(Guid Id) : IRequest<Result>;
 
 public sealed class ConfirmOrderHandler(
     IRentalOrderRepository orders,
-    IProductRepository products,
     IInvoiceRepository invoices,
+    IAvailabilityReader availability,
     ICurrentUser currentUser,
     IUnitOfWork unitOfWork)
     : IRequestHandler<ConfirmOrderCommand, Result>
@@ -27,22 +27,30 @@ public sealed class ConfirmOrderHandler(
         if (order is null)
             return Result.Failure($"Sifariş tapılmadı: {request.Id}");
 
-        // Mövcudluq yoxlaması — hər sətir üçün.
+        // #27 — mövcudluq yoxlaması: yalnız BOŞ (rezerv/kirayə/təmir/zədəli xaric) stoka icazə.
+        // Sifariş hələ Qaralama olduğundan onun sətirləri boş sayına daxil deyil.
         foreach (var line in order.Lines)
         {
-            var product = await products.GetByIdAsync(line.ProductId, ct);
-            if (product is null)
-                return Result.Failure($"Məhsul tapılmadı: {line.ProductName}");
+            var avail = await availability.GetProductAvailabilityAsync(line.ProductId, ct);
 
-            var reserved = await orders.GetReservedQuantityAsync(
-                line.ProductId, order.StartDate, order.EndDate, order.Id, ct);
+            int free;
+            string where;
+            if (line.WarehouseId is { } whId)
+            {
+                var wh = avail.FirstOrDefault(a => a.WarehouseId == whId);
+                free = wh?.Free ?? 0;
+                where = $"'{line.WarehouseName ?? "anbar"}' anbarında";
+            }
+            else
+            {
+                free = avail.Sum(a => a.Free);
+                where = "boş";
+            }
 
-            var available = product.StockQuantity - reserved;
-            if (line.Quantity > available)
+            if (line.Quantity > free)
                 return Result.Failure(
-                    $"'{product.Name}' üçün kifayət qədər mövcud deyil: tələb {line.Quantity}, " +
-                    $"mövcud {available} (anbar {product.StockQuantity}, rezerv {reserved}) " +
-                    $"[{order.StartDate:dd.MM.yyyy}–{order.EndDate:dd.MM.yyyy}].");
+                    $"'{line.ProductName}' üçün {where} boş yalnız {free} ədəddir, " +
+                    $"tələb {line.Quantity}. Rezervdə/kirayədə olan stok sifariş edilə bilməz.");
         }
 
         // Sifariş izlənilir (GetByIdWithLinesAsync) → mutasiya kifayətdir; Update() çağırsaq

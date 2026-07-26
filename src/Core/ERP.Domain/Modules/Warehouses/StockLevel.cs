@@ -20,6 +20,11 @@ public class StockLevel : BaseEntity, IAggregateRoot
     public int Quantity { get; private set; }
     public int MinQuantity { get; private set; }
 
+    /// <summary>Təmirdə olan say (#27 — opsional).</summary>
+    public int InRepair { get; private set; }
+    /// <summary>İtirilmiş/zədələnmiş say (#27 — opsional).</summary>
+    public int Damaged { get; private set; }
+
     /// <summary>Miqdar minimum həddin altındadırsa xəbərdarlıq.</summary>
     public bool IsLow => Quantity < MinQuantity;
 
@@ -36,7 +41,7 @@ public class StockLevel : BaseEntity, IAggregateRoot
 
     public static StockLevel Create(
         Guid productId, string productName, Guid warehouseId, string warehouseName,
-        int quantity = 0, int minQuantity = 0)
+        int quantity = 0, int minQuantity = 0, int inRepair = 0, int damaged = 0)
     {
         if (productId == Guid.Empty)
             throw new DomainException("Məhsul tələb olunur.");
@@ -46,12 +51,25 @@ public class StockLevel : BaseEntity, IAggregateRoot
             throw new DomainException("Miqdar mənfi ola bilməz.");
         if (minQuantity < 0)
             throw new DomainException("Minimum miqdar mənfi ola bilməz.");
+        if (inRepair < 0 || damaged < 0)
+            throw new DomainException("Təmir/zədəli say mənfi ola bilməz.");
 
         return new StockLevel(productId, productName.Trim(), warehouseId, warehouseName.Trim())
         {
             Quantity = quantity,
-            MinQuantity = minQuantity
+            MinQuantity = minQuantity,
+            InRepair = inRepair,
+            Damaged = damaged
         };
+    }
+
+    /// <summary>Təmir/zədəli sayını təyin edir (#27).</summary>
+    public void SetCondition(int inRepair, int damaged)
+    {
+        if (inRepair < 0 || damaged < 0)
+            throw new DomainException("Təmir/zədəli say mənfi ola bilməz.");
+        InRepair = inRepair;
+        Damaged = damaged;
     }
 
     public void Increase(int amount)

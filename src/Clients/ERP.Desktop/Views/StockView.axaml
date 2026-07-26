@@ -65,10 +65,20 @@
                         <TextBlock Text="Mövcud say" FontSize="12" Foreground="#5A6072" />
                         <TextBox PlaceholderText="Məs: 30" Text="{Binding AdjQuantity}" />
                     </StackPanel>
-                    <StackPanel Width="120">
+                    <StackPanel Width="110">
                         <TextBlock Text="Minimum həd" FontSize="12" Foreground="#5A6072" />
                         <TextBox PlaceholderText="Məs: 5" Text="{Binding AdjMinQuantity}"
                                  ToolTip.Tip="Bu saydan aşağı düşəndə xəbərdarlıq verilir" />
+                    </StackPanel>
+                    <StackPanel Width="100">
+                        <TextBlock Text="Təmirdə" FontSize="12" Foreground="#5A6072" />
+                        <TextBox PlaceholderText="0" Text="{Binding AdjInRepair}"
+                                 ToolTip.Tip="Təmirdə olan say (icarəyə verilə bilməz)" />
+                    </StackPanel>
+                    <StackPanel Width="100">
+                        <TextBlock Text="Zədəli/itmiş" FontSize="12" Foreground="#5A6072" />
+                        <TextBox PlaceholderText="0" Text="{Binding AdjDamaged}"
+                                 ToolTip.Tip="Zədələnmiş/itirilmiş say (icarəyə verilə bilməz)" />
                     </StackPanel>
                     <Button Content="Təyin et" Command="{Binding AdjustCommand}"
                             Background="#3B5BDB" Foreground="White" VerticalAlignment="Bottom" />
@@ -118,6 +128,8 @@
                 <DataGridTextColumn Header="Məhsul" Binding="{Binding ProductName}" Width="2*" />
                 <DataGridTextColumn Header="Anbar" Binding="{Binding WarehouseName}" Width="*" />
                 <DataGridTextColumn Header="Mövcud say" Binding="{Binding Quantity}" Width="Auto" />
+                <DataGridTextColumn Header="Təmirdə" Binding="{Binding InRepair}" Width="Auto" />
+                <DataGridTextColumn Header="Zədəli" Binding="{Binding Damaged}" Width="Auto" />
                 <DataGridTextColumn Header="Minimum həd" Binding="{Binding MinQuantity}" Width="Auto" />
                 <DataGridTemplateColumn Header="Vəziyyət" Width="Auto">
                     <DataGridTemplateColumn.CellTemplate>

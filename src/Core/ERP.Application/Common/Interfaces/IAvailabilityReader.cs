@@ -6,4 +6,8 @@ namespace ERP.Application.Common.Interfaces;
 public interface IAvailabilityReader
 {
     Task<IReadOnlyList<ProductAvailabilityDto>> GetProductAvailabilityAsync(Guid productId, CancellationToken ct = default);
+
+    /// <summary>Verilmiş məhsullar üçün yekun stok xülasəsi (#27 — siyahıda göstərmək üçün, bir sorğuda).</summary>
+    Task<IReadOnlyDictionary<Guid, StockSummaryDto>> GetSummariesAsync(
+        IReadOnlyCollection<Guid> productIds, CancellationToken ct = default);
 }

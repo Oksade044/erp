@@ -97,8 +97,9 @@
                                       ToolTip.Tip="Say ilə: eyni əşyadan çox (200 stul). Fərdi: hər nüsxə ayrıca izlənir." />
                         </StackPanel>
                         <StackPanel Width="140" Margin="0,0,12,10">
-                            <TextBlock Text="Anbarda mövcud say" FontSize="12" Foreground="#5A6072" />
-                            <TextBox PlaceholderText="Məs: 200" Text="{Binding NewStock}" />
+                            <TextBlock Text="İlkin say (seçilmiş anbara)" FontSize="12" Foreground="#5A6072" />
+                            <TextBox PlaceholderText="Məs: 200" Text="{Binding NewStock}"
+                                     ToolTip.Tip="Yalnız aşağıda anbar seçilsə tətbiq olunur. Ümumi stok anbarlardan avtomatik hesablanır." />
                         </StackPanel>
                         <StackPanel Width="150" Margin="0,0,12,10">
                             <TextBlock Text="Minimum stok (xəbərdarlıq)" FontSize="12" Foreground="#5A6072" />
@@ -168,13 +169,10 @@
                             <ComboBox ItemsSource="{Binding TrackingModes}" SelectedItem="{Binding EditTrackingMode}"
                                       HorizontalAlignment="Stretch" />
                         </StackPanel>
-                        <StackPanel Width="140" Margin="0,0,12,10">
-                            <TextBlock Text="Anbarda mövcud say" FontSize="12" Foreground="#5A6072" />
-                            <TextBox Text="{Binding EditStock}" />
-                        </StackPanel>
-                        <StackPanel Width="150" Margin="0,0,12,10">
-                            <TextBlock Text="Minimum stok (xəbərdarlıq)" FontSize="12" Foreground="#5A6072" />
-                            <TextBox Text="{Binding EditMinStock}" />
+                        <StackPanel Width="180" Margin="0,0,12,10">
+                            <TextBlock Text="Ümumi stok (avtomatik)" FontSize="12" Foreground="#5A6072" />
+                            <TextBox Text="{Binding Selected.TotalStock}" IsEnabled="False"
+                                     ToolTip.Tip="Anbarlardan avtomatik hesablanır — əl ilə dəyişdirilmir. Aşağıda anbar üzrə dəyişin." />
                         </StackPanel>
                         <StackPanel Width="220" Margin="0,0,12,10">
                             <TextBlock Text="Kateqoriya (seç və ya yeni yaz)" FontSize="12" Foreground="#5A6072" />
@@ -263,9 +261,13 @@
                     <DataGridTextColumn Header="İcarə qiyməti" Binding="{Binding RentalPrice}" Width="Auto" />
                     <DataGridTextColumn Header="İdarəetmə növü"
                                         Binding="{Binding TrackingMode, Converter={StaticResource TrackingMode}}" Width="Auto" />
-                    <DataGridTextColumn Header="Anbar say" Binding="{Binding StockQuantity}" Width="Auto" />
+                    <DataGridTextColumn Header="Ümumi stok" Binding="{Binding TotalStock}" Width="Auto" />
+                    <DataGridTextColumn Header="Boş" Binding="{Binding FreeStock}" Width="Auto" />
+                    <DataGridTextColumn Header="Rezervdə" Binding="{Binding ReservedStock}" Width="Auto" />
+                    <DataGridTextColumn Header="Kirayədə" Binding="{Binding RentedStock}" Width="Auto" />
+                    <DataGridTextColumn Header="Təmirdə" Binding="{Binding InRepairStock}" Width="Auto" />
+                    <DataGridTextColumn Header="Zədəli" Binding="{Binding DamagedStock}" Width="Auto" />
                     <DataGridTextColumn Header="Anbar(lar) üzrə" Binding="{Binding WarehouseSummary}" Width="*" />
-                    <DataGridTextColumn Header="Min. stok" Binding="{Binding MinStockQuantity}" Width="Auto" />
                     <DataGridTemplateColumn Header="Stok vəziyyəti" Width="Auto">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>

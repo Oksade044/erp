@@ -19,6 +19,8 @@ public sealed class StockLevelConfiguration : IEntityTypeConfiguration<StockLeve
         builder.Property(s => s.WarehouseName).HasMaxLength(200).IsRequired();
         builder.Property(s => s.Quantity).IsRequired();
         builder.Property(s => s.MinQuantity).IsRequired();
+        builder.Property(s => s.InRepair).IsRequired();
+        builder.Property(s => s.Damaged).IsRequired();
 
         builder.Ignore(s => s.IsLow);
 

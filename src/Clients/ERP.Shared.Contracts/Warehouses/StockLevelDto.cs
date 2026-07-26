@@ -9,4 +9,6 @@ public sealed record StockLevelDto(
     string WarehouseName,
     int Quantity,
     int MinQuantity,
-    bool IsLow);
+    bool IsLow,
+    int InRepair = 0,
+    int Damaged = 0);

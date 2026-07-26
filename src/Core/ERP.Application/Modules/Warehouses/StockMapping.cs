@@ -14,7 +14,9 @@ public static class StockMapping
         WarehouseName: s.WarehouseName,
         Quantity: s.Quantity,
         MinQuantity: s.MinQuantity,
-        IsLow: s.IsLow);
+        IsLow: s.IsLow,
+        InRepair: s.InRepair,
+        Damaged: s.Damaged);
 
     /// <summary>Canlı SignalR bildirişi üçün (TDD §38).</summary>
     public static StockChangedNotification ToNotification(this StockLevel s) => new(
