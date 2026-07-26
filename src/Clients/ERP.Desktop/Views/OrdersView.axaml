@@ -207,7 +207,16 @@
         <Border Grid.Row="3" Background="#E7F5FF" BorderBrush="#1971C2" BorderThickness="1"
                 CornerRadius="8" Padding="12" Margin="0,0,0,12" IsVisible="{Binding ShowPaymentPrompt}">
             <StackPanel Spacing="8">
-                <TextBlock Text="{Binding PaymentPromptTitle}" FontWeight="SemiBold" Foreground="#1971C2" />
+                <TextBlock Text="{Binding PaymentPromptTitle}" FontWeight="SemiBold" Foreground="#1971C2" TextWrapping="Wrap" />
+                <!-- #C — qaytarma zamanı zədə/cərimə (yalnız Qaytarıldı mərhələsində) -->
+                <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding IsReturnPrompt}">
+                    <TextBlock Text="Zədə (AZN):" VerticalAlignment="Center"
+                               ToolTip.Tip="Qaytarılan məhsulda zədə/itki dəyəri — fakturanın yekun borcuna əlavə olunur." />
+                    <TextBox Width="100" PlaceholderText="0" Text="{Binding PromptDamage}" />
+                    <TextBlock Text="Cərimə (AZN):" VerticalAlignment="Center"
+                               ToolTip.Tip="Gecikmə/şərt pozuntusu cəriməsi — fakturaya əlavə olunur." />
+                    <TextBox Width="100" PlaceholderText="0" Text="{Binding PromptPenalty}" />
+                </StackPanel>
                 <StackPanel Orientation="Horizontal" Spacing="8">
                     <TextBlock Text="Məbləğ:" VerticalAlignment="Center" />
                     <TextBox Width="110" Text="{Binding PaymentAmount}" />

@@ -125,7 +125,7 @@ public partial class ProductsViewModel : ViewModelBase
 
     /// <summary>Seçilmiş məhsulun tarixçə pəncərəsi VM-i (#38) — View kod-arxasından çağırılır.</summary>
     public ProductHistoryViewModel? CreateHistory() =>
-        Selected is null ? null : new ProductHistoryViewModel(_api, Selected);
+        Selected is null ? null : new ProductHistoryViewModel(_api, Selected.Id, $"Tarixçə — {Selected.Name} ({Selected.Sku})");
 
     /// <summary>Mövcud kateqoriyalar — məhsul formasında seçim/yeni yazmaq üçün.</summary>
     public ObservableCollection<string> CategoryNames { get; } = [];

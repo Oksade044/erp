@@ -31,6 +31,16 @@ public sealed class InvoiceConfiguration : IEntityTypeConfiguration<Invoice>
             m.Property(x => x.Currency).HasColumnName("Currency").HasMaxLength(3).IsRequired();
         });
 
+        // Əlavə tutulmalar (zədə/cərimə) — opsional owned Money.
+        builder.OwnsOne(i => i.AdditionalCharges, m =>
+        {
+            m.Property(x => x.Amount).HasColumnName("AdditionalCharges").HasPrecision(18, 2);
+            m.Property(x => x.Currency).HasColumnName("AdditionalChargesCurrency").HasMaxLength(3);
+        });
+        builder.Navigation(i => i.AdditionalCharges).IsRequired(false);
+
+        builder.Ignore(i => i.GrandTotal);
+
         builder.HasMany(i => i.Payments)
             .WithOne()
             .HasForeignKey(p => p.InvoiceId)

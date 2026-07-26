@@ -7,6 +7,8 @@ namespace ERP.Application.Common.Interfaces;
 public interface IInvoiceRepository : IRepository<Invoice>
 {
     Task<Invoice?> GetByIdWithPaymentsAsync(Guid id, CancellationToken ct = default);
+    /// <summary>Sifarişə görə fakturanı (ödənişlərlə, tracked) qaytarır.</summary>
+    Task<Invoice?> GetByOrderIdAsync(Guid orderId, CancellationToken ct = default);
     Task<bool> ExistsForOrderAsync(Guid orderId, CancellationToken ct = default);
 
     /// <summary>

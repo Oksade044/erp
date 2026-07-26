@@ -22,6 +22,11 @@ public partial class StockViewModel(ErpApiClient api) : ViewModelBase
     [ObservableProperty] private string _liveStatus = "🔴 Oflayn";
 
     public ObservableCollection<StockLevelDto> Levels { get; } = [];
+    [ObservableProperty] private StockLevelDto? _selectedLevel;
+
+    /// <summary>Seçilmiş stok sətrinin məhsul tarixçəsi VM-i (kod-arxasından çağırılır).</summary>
+    public ProductHistoryViewModel? CreateHistory() =>
+        SelectedLevel is null ? null : new ProductHistoryViewModel(api, SelectedLevel.ProductId, $"Tarixçə — {SelectedLevel.ProductName}");
     public ObservableCollection<ProductDto> AllProducts { get; } = [];
     public ObservableCollection<WarehouseDto> AllWarehouses { get; } = [];
 

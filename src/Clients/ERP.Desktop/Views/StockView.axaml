@@ -122,8 +122,9 @@
         </Border>
 
         <!-- Səviyyələr -->
-        <DataGrid Grid.Row="4" ItemsSource="{Binding Levels}" IsReadOnly="True"
-                  GridLinesVisibility="Horizontal" BorderThickness="1" BorderBrush="#E0E2EA">
+        <DataGrid Grid.Row="4" ItemsSource="{Binding Levels}" SelectedItem="{Binding SelectedLevel}" IsReadOnly="True"
+                  GridLinesVisibility="Horizontal" BorderThickness="1" BorderBrush="#E0E2EA"
+                  DoubleTapped="OnLevelDoubleTapped">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Məhsul" Binding="{Binding ProductName}" Width="2*" />
                 <DataGridTextColumn Header="Anbar" Binding="{Binding WarehouseName}" Width="*" />

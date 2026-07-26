@@ -124,18 +124,28 @@ public partial class OrdersViewModel : ViewModelBase
     [ObservableProperty] private decimal _paymentAmount;
     [ObservableProperty] private string _paymentMethod = "Nağd";
     [ObservableProperty] private string? _paymentNote;
+    // #C — qaytarma zamanı zədə/cərimə (fakturaya yansıyır).
+    [ObservableProperty] private bool _isReturnPrompt;
+    [ObservableProperty] private decimal _promptDamage;
+    [ObservableProperty] private decimal _promptPenalty;
     private Guid? _pendingInvoiceId;
+    private Guid _pendingOrderId;
 
-    private async Task OpenPaymentPromptAsync(string orderNumber, string statusLabel)
+    private async Task OpenPaymentPromptAsync(Guid orderId, string orderNumber, string statusLabel, bool isReturn = false)
     {
         var invs = await api.GetInvoicesAsync(orderNumber);
         var inv = invs?.Items.FirstOrDefault(i => i.OrderNumber == orderNumber);
         if (inv is null) return; // faktura yoxdur (məs. hələ təsdiqlənməyib)
         _pendingInvoiceId = inv.Id;
+        _pendingOrderId = orderId;
+        IsReturnPrompt = isReturn;
+        PromptDamage = 0; PromptPenalty = 0;
         PaymentAmount = inv.Balance > 0 ? inv.Balance : 0;
         PaymentMethod = "Nağd";
         PaymentNote = statusLabel;
-        PaymentPromptTitle = $"{statusLabel}. Müştəri ödəniş edib? (qalıq borc: {inv.Balance:0.00} AZN)";
+        PaymentPromptTitle = isReturn
+            ? $"Qaytarıldı. Zədə/cərimə varsa qeyd edin (fakturaya əlavə olunur). Qalıq borc: {inv.Balance:0.00} AZN"
+            : $"{statusLabel}. Müştəri ödəniş edib? (qalıq borc: {inv.Balance:0.00} AZN)";
         ShowPaymentPrompt = true;
     }
 
@@ -143,9 +153,21 @@ public partial class OrdersViewModel : ViewModelBase
     private async Task SubmitPaymentAsync()
     {
         if (_pendingInvoiceId is not { } id) { ShowPaymentPrompt = false; return; }
-        if (PaymentAmount <= 0) { Status = "Məbləğ 0-dan böyük olmalıdır."; return; }
-        var (ok, err) = await api.AddInvoicePaymentAsync(id, new AddPaymentRequest(PaymentAmount, PaymentMethod, null, PaymentNote));
-        Status = ok ? $"Ödəniş əlavə olundu: {PaymentAmount:0.00} AZN ({PaymentMethod})" : (err ?? "Ödəniş alınmadı.");
+
+        // #C — qaytarmada zədə/cərimə → hesablaşma (fakturanın yekun borcunu artırır).
+        if (IsReturnPrompt && (PromptDamage > 0 || PromptPenalty > 0))
+        {
+            var (sok, serr) = await api.SettleOrderAsync(_pendingOrderId, PromptDamage, PromptPenalty, PaymentNote);
+            if (!sok) { Status = serr ?? "Hesablaşma alınmadı."; return; }
+        }
+
+        if (PaymentAmount > 0)
+        {
+            var (ok, err) = await api.AddInvoicePaymentAsync(id, new AddPaymentRequest(PaymentAmount, PaymentMethod, null, PaymentNote));
+            Status = ok ? $"Ödəniş əlavə olundu: {PaymentAmount:0.00} AZN ({PaymentMethod})" : (err ?? "Ödəniş alınmadı.");
+        }
+        else Status = IsReturnPrompt ? "Hesablaşma qeyd olundu." : "Ödəniş məbləği daxil edilmədi.";
+
         ShowPaymentPrompt = false;
         await LoadAsync();
     }
@@ -276,11 +298,11 @@ public partial class OrdersViewModel : ViewModelBase
     private async Task ConfirmAsync()
     {
         if (Selected is null) { Status = "Sifariş seçin."; return; }
-        var num = Selected.OrderNumber;
+        var num = Selected.OrderNumber; var id = Selected.Id;
         var (ok, error) = await api.ConfirmOrderAsync(Selected.Id);
         Status = ok ? "Sifariş təsdiqləndi." : error ?? "Təsdiqlənmədi.";
         await LoadAsync();
-        if (ok) await OpenPaymentPromptAsync(num, "Təsdiqləndi");
+        if (ok) await OpenPaymentPromptAsync(id, num, "Təsdiqləndi");
     }
 
     [RelayCommand]
@@ -296,22 +318,22 @@ public partial class OrdersViewModel : ViewModelBase
     private async Task DeliverAsync()
     {
         if (Selected is null) { Status = "Sifariş seçin."; return; }
-        var num = Selected.OrderNumber;
+        var num = Selected.OrderNumber; var id = Selected.Id;
         var (ok, error) = await api.DeliverOrderAsync(Selected.Id);
         Status = ok ? "Sifariş təhvil verildi." : error ?? "Təhvil verilmədi.";
         await LoadAsync();
-        if (ok) await OpenPaymentPromptAsync(num, "Təhvil verildi");
+        if (ok) await OpenPaymentPromptAsync(id, num, "Təhvil verildi");
     }
 
     [RelayCommand]
     private async Task ReturnAsync()
     {
         if (Selected is null) { Status = "Sifariş seçin."; return; }
-        var num = Selected.OrderNumber;
+        var num = Selected.OrderNumber; var id = Selected.Id;
         var (ok, error) = await api.ReturnOrderAsync(Selected.Id);
         Status = ok ? "Sifariş qaytarıldı." : error ?? "Qaytarılmadı.";
         await LoadAsync();
-        if (ok) await OpenPaymentPromptAsync(num, "Qaytarıldı");
+        if (ok) await OpenPaymentPromptAsync(id, num, "Qaytarıldı", isReturn: true);
     }
 
     [RelayCommand]

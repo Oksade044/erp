@@ -14,7 +14,9 @@ public sealed record InvoiceDto(
     decimal Balance,
     string Currency,
     string Status,
-    IReadOnlyList<PaymentDto> Payments);
+    IReadOnlyList<PaymentDto> Payments,
+    decimal AdditionalCharges = 0,
+    decimal GrandTotal = 0);
 
 public sealed record PaymentDto(
     Guid Id,

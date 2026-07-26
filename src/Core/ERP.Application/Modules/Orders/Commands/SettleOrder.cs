@@ -25,6 +25,9 @@ public sealed class SettleOrderValidator : AbstractValidator<SettleOrderCommand>
 
 public sealed class SettleOrderHandler(
     IRentalOrderRepository orders,
+    IInvoiceRepository invoices,
+    IAuditLogWriter audit,
+    ICurrentUser currentUser,
     IUnitOfWork unitOfWork)
     : IRequestHandler<SettleOrderCommand, Result>
 {
@@ -46,7 +49,20 @@ public sealed class SettleOrderHandler(
             return Result.Failure(ex.Message);
         }
 
-        orders.Update(order);
+        // #C — zədə/cərimə fakturaya yansısın (yekun borc artır).
+        var invoice = await invoices.GetByOrderIdAsync(order.Id, ct);
+        if (invoice is not null)
+            invoice.SetAdditionalCharges(order.TotalCharges);
+
+        // #43 — depozit/hesablaşma əməliyyatını audit jurnalına yaz.
+        audit.Add(
+            currentUser.FullName ?? currentUser.UserName ?? "system",
+            "Hesablaşma (zədə/cərimə)",
+            "Order",
+            order.OrderNumber,
+            $"Zədə {order.DamageCharge?.Amount ?? 0:0.00}, cərimə {order.PenaltyCharge?.Amount ?? 0:0.00}, " +
+            $"depozit qaytarma {order.DepositRefund.Amount:0.00} (sifariş {order.OrderNumber})");
+
         await unitOfWork.SaveChangesAsync(ct);
         return Result.Success();
     }

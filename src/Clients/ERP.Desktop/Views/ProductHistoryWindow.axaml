@@ -12,8 +12,9 @@
     <Grid RowDefinitions="Auto,*,Auto" Margin="20">
         <TextBlock Grid.Row="0" Text="{Binding Title}" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,12" />
 
-        <DataGrid Grid.Row="1" ItemsSource="{Binding Rows}" IsReadOnly="True"
-                  GridLinesVisibility="Horizontal" BorderThickness="1" BorderBrush="#E0E2EA">
+        <DataGrid Grid.Row="1" ItemsSource="{Binding Rows}" SelectedItem="{Binding Selected}" IsReadOnly="True"
+                  GridLinesVisibility="Horizontal" BorderThickness="1" BorderBrush="#E0E2EA"
+                  DoubleTapped="OnRowDoubleTapped">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Növ" Binding="{Binding OrderType}" Width="Auto" />
                 <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="Auto" />

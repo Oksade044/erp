@@ -97,6 +97,20 @@ public sealed class InvoicePdfService : IInvoicePdfService
                                 r.RelativeItem().Text("Ümumi məbləğ:").FontColor(Colors.Grey.Darken1);
                                 r.AutoItem().Text($"{inv.TotalAmount:0.00} {inv.Currency}");
                             });
+                            // #C — qaytarma zamanı zədə/cərimə (yalnız varsa göstər)
+                            if (inv.AdditionalCharges > 0)
+                            {
+                                c.Item().Row(r =>
+                                {
+                                    r.RelativeItem().Text("Zədə/cərimə:").FontColor(Colors.Red.Darken1);
+                                    r.AutoItem().Text($"+{inv.AdditionalCharges:0.00} {inv.Currency}").FontColor(Colors.Red.Darken1);
+                                });
+                                c.Item().Row(r =>
+                                {
+                                    r.RelativeItem().Text("Yekun məbləğ:").SemiBold();
+                                    r.AutoItem().Text($"{inv.GrandTotal:0.00} {inv.Currency}").SemiBold();
+                                });
+                            }
                             c.Item().Row(r =>
                             {
                                 r.RelativeItem().Text("Ödənilib:").FontColor(Colors.Grey.Darken1);

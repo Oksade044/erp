@@ -26,7 +26,9 @@ public static class InvoiceMapping
             Currency: p.Amount.Currency,
             PaidAt: p.PaidAt,
             Method: p.Method.ToString(),
-            Note: p.Note)).ToList());
+            Note: p.Note)).ToList(),
+        AdditionalCharges: i.AdditionalCharges?.Amount ?? 0m,
+        GrandTotal: i.GrandTotal.Amount);
 
     public static PaymentMethod ParseMethod(string? method)
     {

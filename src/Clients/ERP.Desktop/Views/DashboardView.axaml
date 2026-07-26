@@ -9,231 +9,278 @@
              x:DataType="vm:DashboardViewModel">
 
     <ScrollViewer>
-        <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto" Margin="24">
+        <StackPanel Margin="24" Spacing="18">
 
-            <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12" Margin="0,0,0,20">
+            <!-- Başlıq -->
+            <StackPanel Orientation="Horizontal" Spacing="12">
                 <TextBlock Text="İdarə Paneli" FontSize="24" FontWeight="SemiBold" VerticalAlignment="Center" />
                 <ctrl:InfoHelp Title="İdarə Paneli"
-                               Text="Biznesin ümumi mənzərəsi: sifariş/müştəri sayı, gəlir, ödənilməmiş borclar, ən çox icarəyə verilən məhsullar, aylıq mənfəət/zərər."
+                               Text="Biznesin ümumi mənzərəsi bölmələr üzrə: günün işləri, ümumi göstəricilər, maliyyə və analitika siyahıları."
                                Note="Açılışda görünən əsas ekrandır; rəqəmlər ⟳ Yenilə ilə təzələnir." />
                 <Button Content="⟳ Yenilə" Command="{Binding LoadCommand}" VerticalAlignment="Center" />
                 <TextBlock Text="{Binding Status}" Foreground="#8A90A6" VerticalAlignment="Center" />
             </StackPanel>
 
-            <!-- Əsas göstərici kartları -->
-            <WrapPanel Grid.Row="1" Margin="0,0,0,20">
-                <Border Classes="card" Background="#E7F5FF">
-                    <StackPanel>
-                        <TextBlock Text="GƏLİR (ödənilmiş)" Classes="cardLabel" />
-                        <TextBlock Text="{Binding Summary.TotalPaid, StringFormat={}{0:0.00} AZN}" Classes="cardValue" Foreground="#1971C2" />
+            <!-- ══ BÖLMƏ 1 — GÜNÜN İŞLƏRİ ══ -->
+            <Border Classes="section">
+                <StackPanel Spacing="12">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Border Classes="accent" Background="#1971C2" />
+                        <TextBlock Text="Günün işləri" Classes="sectionTitle" />
+                        <TextBlock Text="— bu gün diqqət tələb edən əməliyyatlar" Classes="sectionHint" />
                     </StackPanel>
-                </Border>
-                <Border Classes="card" Background="#FFF0F6">
-                    <StackPanel>
-                        <TextBlock Text="QALIQ BORC" Classes="cardLabel" />
-                        <TextBlock Text="{Binding Summary.TotalOutstanding, StringFormat={}{0:0.00} AZN}" Classes="cardValue" Foreground="#E03131" />
-                    </StackPanel>
-                </Border>
-                <Border Classes="card" Background="#EBFBEE">
-                    <StackPanel>
-                        <TextBlock Text="MÜŞTƏRİLƏR" Classes="cardLabel" />
-                        <TextBlock Text="{Binding Summary.CustomerCount}" Classes="cardValue" Foreground="#2F9E44" />
-                    </StackPanel>
-                </Border>
-                <Border Classes="card" Background="#FFF9DB">
-                    <StackPanel>
-                        <TextBlock Text="MƏHSULLAR" Classes="cardLabel" />
-                        <TextBlock Text="{Binding Summary.ProductCount}" Classes="cardValue" Foreground="#F08C00" />
-                    </StackPanel>
-                </Border>
-                <Border Classes="card" Background="#F3F0FF">
-                    <StackPanel>
-                        <TextBlock Text="SİFARİŞLƏR" Classes="cardLabel" />
-                        <TextBlock Text="{Binding Summary.OrderCount}" Classes="cardValue" Foreground="#7048E8" />
-                    </StackPanel>
-                </Border>
-            </WrapPanel>
-
-            <!-- Sifariş statusları -->
-            <Border Grid.Row="2" Background="#F5F6FA" CornerRadius="8" Padding="16" Margin="0,0,0,20">
-                <StackPanel Orientation="Horizontal" Spacing="24">
-                    <TextBlock Text="Sifariş statusları:" FontWeight="SemiBold" VerticalAlignment="Center" />
-                    <TextBlock Text="{Binding Summary.DraftOrders, StringFormat=Qaralama: {0}}" VerticalAlignment="Center" />
-                    <TextBlock Text="{Binding Summary.ConfirmedOrders, StringFormat=Təsdiqlənmiş: {0}}" VerticalAlignment="Center" />
-                    <TextBlock Text="{Binding Summary.DeliveredOrders, StringFormat=Təhvil: {0}}" VerticalAlignment="Center" />
-                    <TextBlock Text="{Binding Summary.ReturnedOrders, StringFormat=Qaytarılmış: {0}}" VerticalAlignment="Center" />
-                    <TextBlock Text="{Binding Summary.CancelledOrders, StringFormat=Ləğv: {0}}" VerticalAlignment="Center" />
+                    <WrapPanel>
+                        <Border Classes="card" Background="#E7F5FF">
+                            <StackPanel>
+                                <TextBlock Text="🚚 BUGÜN TƏHVİL" Classes="cardLabel" />
+                                <TextBlock Text="{Binding Summary.DeliveriesToday}" Classes="cardValue" Foreground="#1971C2" />
+                            </StackPanel>
+                        </Border>
+                        <Border Classes="card" Background="#EBFBEE">
+                            <StackPanel>
+                                <TextBlock Text="↩ BUGÜN QAYTARMA" Classes="cardLabel" />
+                                <TextBlock Text="{Binding Summary.ReturnsToday}" Classes="cardValue" Foreground="#2F9E44" />
+                            </StackPanel>
+                        </Border>
+                        <Border Classes="card" Background="#FFF0F0">
+                            <StackPanel>
+                                <TextBlock Text="⚠ GECİKMİŞ QAYTARMA" Classes="cardLabel" />
+                                <TextBlock Text="{Binding Summary.OverdueReturns}" Classes="cardValue" Foreground="#C92A2A" />
+                            </StackPanel>
+                        </Border>
+                        <Border Classes="card" Background="#F3F0FF">
+                            <StackPanel>
+                                <TextBlock Text="📦 HAZIRDA KİRAYƏDƏ" Classes="cardLabel" />
+                                <TextBlock Text="{Binding Summary.DeliveredOrders}" Classes="cardValue" Foreground="#7048E8" />
+                            </StackPanel>
+                        </Border>
+                        <Border Classes="card" Background="#E6FCF5">
+                            <StackPanel>
+                                <TextBlock Text="💵 BUGÜNKÜ GƏLİR" Classes="cardLabel" />
+                                <TextBlock Text="{Binding Summary.IncomeToday, StringFormat={}{0:0.00} AZN}" Classes="cardValue" Foreground="#0CA678" />
+                            </StackPanel>
+                        </Border>
+                    </WrapPanel>
                 </StackPanel>
             </Border>
 
-            <!-- #20 — Bugünkü əməliyyatlar -->
-            <StackPanel Grid.Row="3" Margin="0,0,0,20">
-                <TextBlock Text="Bugünkü əməliyyatlar" FontWeight="SemiBold" FontSize="15" Margin="0,0,0,8" />
-                <WrapPanel>
-                    <Border Classes="card" Background="#E7F5FF" Width="200">
-                        <StackPanel>
-                            <TextBlock Text="🚚 BUGÜN TƏHVİL VERİLƏCƏK" Classes="cardLabel" />
-                            <TextBlock Text="{Binding Summary.DeliveriesToday}" Classes="cardValue" Foreground="#1971C2" />
-                        </StackPanel>
-                    </Border>
-                    <Border Classes="card" Background="#EBFBEE" Width="200">
-                        <StackPanel>
-                            <TextBlock Text="↩ BUGÜN QAYTARILACAQ" Classes="cardLabel" />
-                            <TextBlock Text="{Binding Summary.ReturnsToday}" Classes="cardValue" Foreground="#2F9E44" />
-                        </StackPanel>
-                    </Border>
-                    <Border Classes="card" Background="#FFF0F0" Width="200">
-                        <StackPanel>
-                            <TextBlock Text="⚠ GECİKMİŞ QAYTARMA" Classes="cardLabel" />
-                            <TextBlock Text="{Binding Summary.OverdueReturns}" Classes="cardValue" Foreground="#C92A2A" />
-                        </StackPanel>
-                    </Border>
-                    <Border Classes="card" Background="#F3F0FF" Width="200">
-                        <StackPanel>
-                            <TextBlock Text="📦 HAZIRDA KİRAYƏDƏ" Classes="cardLabel" />
-                            <TextBlock Text="{Binding Summary.DeliveredOrders}" Classes="cardValue" Foreground="#7048E8" />
-                        </StackPanel>
-                    </Border>
-                    <Border Classes="card" Background="#FFF9DB" Width="200">
-                        <StackPanel>
-                            <TextBlock Text="🔖 REZERVDƏ (təsdiqli)" Classes="cardLabel" />
-                            <TextBlock Text="{Binding Summary.ConfirmedOrders}" Classes="cardValue" Foreground="#F08C00" />
-                        </StackPanel>
-                    </Border>
-                </WrapPanel>
-            </StackPanel>
-
-            <!-- #23 — Maliyyə paneli (dövr üzrə gəlir) -->
-            <StackPanel Grid.Row="4" Margin="0,0,0,20">
-                <TextBlock Text="Maliyyə — gəlir (ödəniş tarixinə görə)" FontWeight="SemiBold" FontSize="15" Margin="0,0,0,8" />
-                <WrapPanel>
-                    <Border Classes="card" Background="#E6FCF5" Width="200">
-                        <StackPanel>
-                            <TextBlock Text="BUGÜN" Classes="cardLabel" />
-                            <TextBlock Text="{Binding Summary.IncomeToday, StringFormat={}{0:0.00} AZN}" Classes="cardValue" Foreground="#0CA678" />
-                        </StackPanel>
-                    </Border>
-                    <Border Classes="card" Background="#E6FCF5" Width="200">
-                        <StackPanel>
-                            <TextBlock Text="BU HƏFTƏ" Classes="cardLabel" />
-                            <TextBlock Text="{Binding Summary.IncomeThisWeek, StringFormat={}{0:0.00} AZN}" Classes="cardValue" Foreground="#0CA678" />
-                        </StackPanel>
-                    </Border>
-                    <Border Classes="card" Background="#E6FCF5" Width="200">
-                        <StackPanel>
-                            <TextBlock Text="BU AY" Classes="cardLabel" />
-                            <TextBlock Text="{Binding Summary.IncomeThisMonth, StringFormat={}{0:0.00} AZN}" Classes="cardValue" Foreground="#099268" />
-                        </StackPanel>
-                    </Border>
-                    <Border Classes="card" Background="#E6FCF5" Width="200">
-                        <StackPanel>
-                            <TextBlock Text="BU İL" Classes="cardLabel" />
-                            <TextBlock Text="{Binding Summary.IncomeThisYear, StringFormat={}{0:0.00} AZN}" Classes="cardValue" Foreground="#087F5B" />
-                        </StackPanel>
-                    </Border>
-                </WrapPanel>
-            </StackPanel>
-
-            <!-- Mənfəət/Zərər (cari il) + aylıq analitika -->
-            <Grid Grid.Row="5" ColumnDefinitions="Auto,16,*" Margin="0,0,0,20">
-                <StackPanel Grid.Column="0" Spacing="10">
-                    <TextBlock Text="Mənfəət / Zərər (cari il)" FontWeight="SemiBold" FontSize="15" />
-                    <Border Classes="card" Background="#EBFBEE" Width="220" Margin="0">
-                        <StackPanel>
-                            <TextBlock Text="ÜMUMİ GƏLİR" Classes="cardLabel" />
-                            <TextBlock Text="{Binding ProfitLoss.TotalIncome, StringFormat={}{0:0.00} AZN}" Classes="cardValue" Foreground="#2B8A3E" />
-                        </StackPanel>
-                    </Border>
-                    <Border Classes="card" Background="#FFF0F0" Width="220" Margin="0">
-                        <StackPanel>
-                            <TextBlock Text="ÜMUMİ XƏRC" Classes="cardLabel" />
-                            <TextBlock Text="{Binding ProfitLoss.TotalExpense, StringFormat={}{0:0.00} AZN}" Classes="cardValue" Foreground="#C92A2A" />
-                        </StackPanel>
-                    </Border>
-                    <Border Classes="card" Background="#E7F5FF" Width="220" Margin="0">
-                        <StackPanel>
-                            <TextBlock Text="XALİS MƏNFƏƏT" Classes="cardLabel" />
-                            <TextBlock Text="{Binding ProfitLoss.NetProfit, StringFormat={}{0:0.00} AZN}" Classes="cardValue" Foreground="#1971C2" />
-                        </StackPanel>
+            <!-- ══ BÖLMƏ 2 — ÜMUMİ GÖSTƏRİCİLƏR ══ -->
+            <Border Classes="section">
+                <StackPanel Spacing="12">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Border Classes="accent" Background="#2F9E44" />
+                        <TextBlock Text="Ümumi göstəricilər" Classes="sectionTitle" />
+                    </StackPanel>
+                    <WrapPanel>
+                        <Border Classes="card" Background="#E7F5FF">
+                            <StackPanel>
+                                <TextBlock Text="GƏLİR (ödənilmiş)" Classes="cardLabel" />
+                                <TextBlock Text="{Binding Summary.TotalPaid, StringFormat={}{0:0.00} AZN}" Classes="cardValue" Foreground="#1971C2" />
+                            </StackPanel>
+                        </Border>
+                        <Border Classes="card" Background="#FFF0F6">
+                            <StackPanel>
+                                <TextBlock Text="QALIQ BORC" Classes="cardLabel" />
+                                <TextBlock Text="{Binding Summary.TotalOutstanding, StringFormat={}{0:0.00} AZN}" Classes="cardValue" Foreground="#E03131" />
+                            </StackPanel>
+                        </Border>
+                        <Border Classes="card" Background="#F3F0FF">
+                            <StackPanel>
+                                <TextBlock Text="SİFARİŞLƏR" Classes="cardLabel" />
+                                <TextBlock Text="{Binding Summary.OrderCount}" Classes="cardValue" Foreground="#7048E8" />
+                            </StackPanel>
+                        </Border>
+                        <Border Classes="card" Background="#EBFBEE">
+                            <StackPanel>
+                                <TextBlock Text="MÜŞTƏRİLƏR" Classes="cardLabel" />
+                                <TextBlock Text="{Binding Summary.CustomerCount}" Classes="cardValue" Foreground="#2F9E44" />
+                            </StackPanel>
+                        </Border>
+                        <Border Classes="card" Background="#FFF9DB">
+                            <StackPanel>
+                                <TextBlock Text="MƏHSULLAR" Classes="cardLabel" />
+                                <TextBlock Text="{Binding Summary.ProductCount}" Classes="cardValue" Foreground="#F08C00" />
+                            </StackPanel>
+                        </Border>
+                    </WrapPanel>
+                    <!-- Sifariş statusları — kompakt zolaq -->
+                    <Border Background="#F5F6FA" CornerRadius="8" Padding="14,10">
+                        <WrapPanel>
+                            <TextBlock Text="Sifariş statusları:" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,16,0" />
+                            <TextBlock Text="{Binding Summary.DraftOrders, StringFormat=Qaralama: {0}}" VerticalAlignment="Center" Margin="0,0,20,0" />
+                            <TextBlock Text="{Binding Summary.ConfirmedOrders, StringFormat=Rezervdə: {0}}" VerticalAlignment="Center" Margin="0,0,20,0" />
+                            <TextBlock Text="{Binding Summary.DeliveredOrders, StringFormat=Kirayədə: {0}}" VerticalAlignment="Center" Margin="0,0,20,0" />
+                            <TextBlock Text="{Binding Summary.ReturnedOrders, StringFormat=Qaytarılmış: {0}}" VerticalAlignment="Center" Margin="0,0,20,0" />
+                            <TextBlock Text="{Binding Summary.CancelledOrders, StringFormat=Ləğv: {0}}" VerticalAlignment="Center" />
+                        </WrapPanel>
                     </Border>
                 </StackPanel>
+            </Border>
 
-                <StackPanel Grid.Column="2">
-                    <TextBlock Text="Aylıq gəlir / xərc" FontWeight="SemiBold" FontSize="15" Margin="0,0,0,8" />
-                    <DataGrid ItemsSource="{Binding MonthlyRevenue}" IsReadOnly="True" Height="200"
-                              GridLinesVisibility="Horizontal" BorderThickness="1" BorderBrush="#E0E2EA">
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="Ay" Binding="{Binding Month}" Width="Auto" />
-                            <DataGridTextColumn Header="Gəlir" Binding="{Binding Income}" Width="*" />
-                            <DataGridTextColumn Header="Xərc" Binding="{Binding Expense}" Width="*" />
-                            <DataGridTextColumn Header="Xalis" Binding="{Binding Net}" Width="*" />
-                        </DataGrid.Columns>
-                    </DataGrid>
-                </StackPanel>
-            </Grid>
+            <!-- ══ BÖLMƏ 3 — MALİYYƏ ══ -->
+            <Border Classes="section">
+                <StackPanel Spacing="12">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Border Classes="accent" Background="#0CA678" />
+                        <TextBlock Text="Maliyyə" Classes="sectionTitle" />
+                        <TextBlock Text="— gəlir dövrlər üzrə və illik mənfəət/zərər" Classes="sectionHint" />
+                    </StackPanel>
 
-            <!-- İki siyahı: top məhsullar + borclar -->
-            <Grid Grid.Row="6" ColumnDefinitions="*,16,*">
-                <StackPanel Grid.Column="0">
-                    <TextBlock Text="Ən çox icarəyə verilən" FontWeight="SemiBold" FontSize="15" Margin="0,0,0,8" />
-                    <DataGrid ItemsSource="{Binding TopProducts}" IsReadOnly="True" Height="240"
-                              GridLinesVisibility="Horizontal" BorderThickness="1" BorderBrush="#E0E2EA">
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="Məhsul" Binding="{Binding ProductName}" Width="2*" />
-                            <DataGridTextColumn Header="Ədəd" Binding="{Binding TotalQuantityRented}" Width="*" />
-                            <DataGridTextColumn Header="Sifariş" Binding="{Binding OrderCount}" Width="*" />
-                        </DataGrid.Columns>
-                    </DataGrid>
-                </StackPanel>
+                    <!-- Dövr üzrə gəlir -->
+                    <WrapPanel>
+                        <Border Classes="card" Background="#E6FCF5">
+                            <StackPanel>
+                                <TextBlock Text="BU HƏFTƏ" Classes="cardLabel" />
+                                <TextBlock Text="{Binding Summary.IncomeThisWeek, StringFormat={}{0:0.00} AZN}" Classes="cardValue" Foreground="#0CA678" />
+                            </StackPanel>
+                        </Border>
+                        <Border Classes="card" Background="#E6FCF5">
+                            <StackPanel>
+                                <TextBlock Text="BU AY" Classes="cardLabel" />
+                                <TextBlock Text="{Binding Summary.IncomeThisMonth, StringFormat={}{0:0.00} AZN}" Classes="cardValue" Foreground="#099268" />
+                            </StackPanel>
+                        </Border>
+                        <Border Classes="card" Background="#E6FCF5">
+                            <StackPanel>
+                                <TextBlock Text="BU İL" Classes="cardLabel" />
+                                <TextBlock Text="{Binding Summary.IncomeThisYear, StringFormat={}{0:0.00} AZN}" Classes="cardValue" Foreground="#087F5B" />
+                            </StackPanel>
+                        </Border>
+                    </WrapPanel>
 
-                <StackPanel Grid.Column="2">
-                    <TextBlock Text="Borclu fakturalar" FontWeight="SemiBold" FontSize="15" Margin="0,0,0,8" />
-                    <DataGrid ItemsSource="{Binding Outstanding}" IsReadOnly="True" Height="240"
-                              GridLinesVisibility="Horizontal" BorderThickness="1" BorderBrush="#E0E2EA">
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="Faktura" Binding="{Binding InvoiceNumber}" Width="Auto" />
-                            <DataGridTextColumn Header="Müştəri" Binding="{Binding CustomerName}" Width="2*" />
-                            <DataGridTextColumn Header="Borc" Binding="{Binding Balance}" Width="*" />
-                        </DataGrid.Columns>
-                    </DataGrid>
-                </StackPanel>
-            </Grid>
+                    <!-- Mənfəət/Zərər + aylıq grid -->
+                    <Grid ColumnDefinitions="Auto,16,*">
+                        <StackPanel Grid.Column="0" Spacing="10">
+                            <TextBlock Text="Mənfəət / Zərər (cari il)" FontWeight="SemiBold" />
+                            <Border Classes="card" Background="#EBFBEE" Width="220" Margin="0">
+                                <StackPanel>
+                                    <TextBlock Text="ÜMUMİ GƏLİR" Classes="cardLabel" />
+                                    <TextBlock Text="{Binding ProfitLoss.TotalIncome, StringFormat={}{0:0.00} AZN}" Classes="cardValue" Foreground="#2B8A3E" />
+                                </StackPanel>
+                            </Border>
+                            <Border Classes="card" Background="#FFF0F0" Width="220" Margin="0">
+                                <StackPanel>
+                                    <TextBlock Text="ÜMUMİ XƏRC" Classes="cardLabel" />
+                                    <TextBlock Text="{Binding ProfitLoss.TotalExpense, StringFormat={}{0:0.00} AZN}" Classes="cardValue" Foreground="#C92A2A" />
+                                </StackPanel>
+                            </Border>
+                            <Border Classes="card" Background="#E7F5FF" Width="220" Margin="0">
+                                <StackPanel>
+                                    <TextBlock Text="XALİS MƏNFƏƏT" Classes="cardLabel" />
+                                    <TextBlock Text="{Binding ProfitLoss.NetProfit, StringFormat={}{0:0.00} AZN}" Classes="cardValue" Foreground="#1971C2" />
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
 
-            <!-- #25 — Analitika: top əməkdaşlar + ən aktiv müştərilər -->
-            <Grid Grid.Row="7" ColumnDefinitions="*,16,*" Margin="0,20,0,0">
-                <StackPanel Grid.Column="0">
-                    <TextBlock Text="Top əməkdaşlar (cari ay dövriyyəsi)" FontWeight="SemiBold" FontSize="15" Margin="0,0,0,8" />
-                    <DataGrid ItemsSource="{Binding TopEmployees}" IsReadOnly="True" Height="220"
-                              GridLinesVisibility="Horizontal" BorderThickness="1" BorderBrush="#E0E2EA">
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="Əməkdaş" Binding="{Binding EmployeeName}" Width="2*" />
-                            <DataGridTextColumn Header="Sifariş" Binding="{Binding OrderCount}" Width="*" />
-                            <DataGridTextColumn Header="Dövriyyə (AZN)" Binding="{Binding TotalRevenue}" Width="*" />
-                        </DataGrid.Columns>
-                    </DataGrid>
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="Aylıq gəlir / xərc" FontWeight="SemiBold" Margin="0,0,0,8" />
+                            <DataGrid ItemsSource="{Binding MonthlyRevenue}" IsReadOnly="True" Height="200"
+                                      GridLinesVisibility="Horizontal" BorderThickness="1" BorderBrush="#E0E2EA">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Ay" Binding="{Binding Month}" Width="Auto" />
+                                    <DataGridTextColumn Header="Gəlir" Binding="{Binding Income}" Width="*" />
+                                    <DataGridTextColumn Header="Xərc" Binding="{Binding Expense}" Width="*" />
+                                    <DataGridTextColumn Header="Xalis" Binding="{Binding Net}" Width="*" />
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </StackPanel>
+                    </Grid>
                 </StackPanel>
+            </Border>
 
-                <StackPanel Grid.Column="2">
-                    <TextBlock Text="Ən aktiv müştərilər" FontWeight="SemiBold" FontSize="15" Margin="0,0,0,8" />
-                    <DataGrid ItemsSource="{Binding TopCustomers}" IsReadOnly="True" Height="220"
-                              GridLinesVisibility="Horizontal" BorderThickness="1" BorderBrush="#E0E2EA">
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="Müştəri" Binding="{Binding CustomerName}" Width="2*" />
-                            <DataGridTextColumn Header="Sifariş" Binding="{Binding OrderCount}" Width="*" />
-                            <DataGridTextColumn Header="Fakturalanıb" Binding="{Binding TotalInvoiced}" Width="*" />
-                        </DataGrid.Columns>
-                    </DataGrid>
+            <!-- ══ BÖLMƏ 4 — ANALİTİKA ══ -->
+            <Border Classes="section">
+                <StackPanel Spacing="12">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Border Classes="accent" Background="#7048E8" />
+                        <TextBlock Text="Analitika" Classes="sectionTitle" />
+                        <TextBlock Text="— ən aktiv məhsul, müştəri, əməkdaş və borclular" Classes="sectionHint" />
+                    </StackPanel>
+
+                    <Grid ColumnDefinitions="*,16,*">
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Ən çox icarəyə verilən" FontWeight="SemiBold" Margin="0,0,0,8" />
+                            <DataGrid ItemsSource="{Binding TopProducts}" IsReadOnly="True" Height="220"
+                                      GridLinesVisibility="Horizontal" BorderThickness="1" BorderBrush="#E0E2EA">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Məhsul" Binding="{Binding ProductName}" Width="2*" />
+                                    <DataGridTextColumn Header="Ədəd" Binding="{Binding TotalQuantityRented}" Width="*" />
+                                    <DataGridTextColumn Header="Sifariş" Binding="{Binding OrderCount}" Width="*" />
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="Borclu fakturalar" FontWeight="SemiBold" Margin="0,0,0,8" />
+                            <DataGrid ItemsSource="{Binding Outstanding}" IsReadOnly="True" Height="220"
+                                      GridLinesVisibility="Horizontal" BorderThickness="1" BorderBrush="#E0E2EA">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Faktura" Binding="{Binding InvoiceNumber}" Width="Auto" />
+                                    <DataGridTextColumn Header="Müştəri" Binding="{Binding CustomerName}" Width="2*" />
+                                    <DataGridTextColumn Header="Borc" Binding="{Binding Balance}" Width="*" />
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </StackPanel>
+                    </Grid>
+
+                    <Grid ColumnDefinitions="*,16,*">
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Top əməkdaşlar (cari ay dövriyyəsi)" FontWeight="SemiBold" Margin="0,0,0,8" />
+                            <DataGrid ItemsSource="{Binding TopEmployees}" IsReadOnly="True" Height="200"
+                                      GridLinesVisibility="Horizontal" BorderThickness="1" BorderBrush="#E0E2EA">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Əməkdaş" Binding="{Binding EmployeeName}" Width="2*" />
+                                    <DataGridTextColumn Header="Sifariş" Binding="{Binding OrderCount}" Width="*" />
+                                    <DataGridTextColumn Header="Dövriyyə (AZN)" Binding="{Binding TotalRevenue}" Width="*" />
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="Ən aktiv müştərilər" FontWeight="SemiBold" Margin="0,0,0,8" />
+                            <DataGrid ItemsSource="{Binding TopCustomers}" IsReadOnly="True" Height="200"
+                                      GridLinesVisibility="Horizontal" BorderThickness="1" BorderBrush="#E0E2EA">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Müştəri" Binding="{Binding CustomerName}" Width="2*" />
+                                    <DataGridTextColumn Header="Sifariş" Binding="{Binding OrderCount}" Width="*" />
+                                    <DataGridTextColumn Header="Fakturalanıb" Binding="{Binding TotalInvoiced}" Width="*" />
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </StackPanel>
+                    </Grid>
                 </StackPanel>
-            </Grid>
-        </Grid>
+            </Border>
+
+        </StackPanel>
     </ScrollViewer>
 
     <UserControl.Styles>
+        <Style Selector="Border.section">
+            <Setter Property="Background" Value="#FBFBFD" />
+            <Setter Property="BorderBrush" Value="#E9EBF1" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="12" />
+            <Setter Property="Padding" Value="18" />
+        </Style>
+        <Style Selector="Border.accent">
+            <Setter Property="Width" Value="4" />
+            <Setter Property="CornerRadius" Value="2" />
+        </Style>
+        <Style Selector="TextBlock.sectionTitle">
+            <Setter Property="FontSize" Value="17" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style Selector="TextBlock.sectionHint">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Foreground" Value="#8A90A6" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
         <Style Selector="Border.card">
             <Setter Property="CornerRadius" Value="10" />
             <Setter Property="Padding" Value="18" />
             <Setter Property="Margin" Value="0,0,12,12" />
-            <Setter Property="Width" Value="180" />
+            <Setter Property="Width" Value="190" />
         </Style>
         <Style Selector="TextBlock.cardLabel">
             <Setter Property="FontSize" Value="11" />

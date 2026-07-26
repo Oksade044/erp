@@ -12,6 +12,9 @@ public sealed class InvoiceRepository(AppDbContext context)
     public async Task<Invoice?> GetByIdWithPaymentsAsync(Guid id, CancellationToken ct = default) =>
         await Set.Include(i => i.Payments).FirstOrDefaultAsync(i => i.Id == id, ct);
 
+    public async Task<Invoice?> GetByOrderIdAsync(Guid orderId, CancellationToken ct = default) =>
+        await Set.Include(i => i.Payments).FirstOrDefaultAsync(i => i.OrderId == orderId, ct);
+
     public async Task<bool> ExistsForOrderAsync(Guid orderId, CancellationToken ct = default) =>
         await Set.AnyAsync(i => i.OrderId == orderId, ct);
 

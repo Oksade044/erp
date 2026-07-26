@@ -20,8 +20,14 @@ public class Invoice : BaseEntity, IAggregateRoot
     public string CustomerName { get; private set; } = null!;
     public DateOnly IssueDate { get; private set; }
 
-    /// <summary>Faktura məbləği — sifariş cəminin snapshot-ı.</summary>
+    /// <summary>Faktura məbləği — sifariş cəminin snapshot-ı (kirayə/satış).</summary>
     public Money TotalAmount { get; private set; } = null!;
+
+    /// <summary>Əlavə tutulmalar — qaytarma zamanı zədə + cərimə (fakturaya yansıyır).</summary>
+    public Money? AdditionalCharges { get; private set; }
+
+    /// <summary>Ödəniləcək yekun məbləğ = əsas + əlavə tutulmalar.</summary>
+    public Money GrandTotal => Money.Create(TotalAmount.Amount + (AdditionalCharges?.Amount ?? 0m), TotalAmount.Currency);
 
     public IReadOnlyList<Payment> Payments => _payments.AsReadOnly();
 
@@ -29,13 +35,16 @@ public class Invoice : BaseEntity, IAggregateRoot
     public Money AmountPaid => _payments.Aggregate(
         Money.Zero(TotalAmount.Currency), (sum, p) => sum.Add(p.Amount));
 
-    /// <summary>Qalıq borc.</summary>
-    public Money Balance => Money.Create(TotalAmount.Amount - AmountPaid.Amount, TotalAmount.Currency);
+    /// <summary>Qalıq borc (yekun məbləğə görə).</summary>
+    public Money Balance => Money.Create(GrandTotal.Amount - AmountPaid.Amount, TotalAmount.Currency);
 
     public InvoiceStatus Status =>
         AmountPaid.Amount <= 0 ? InvoiceStatus.Ödənilməmiş
-        : AmountPaid.Amount >= TotalAmount.Amount ? InvoiceStatus.Ödənilmiş
+        : AmountPaid.Amount >= GrandTotal.Amount ? InvoiceStatus.Ödənilmiş
         : InvoiceStatus.QismənÖdənilmiş;
+
+    /// <summary>Qaytarma hesablaşmasının tutulmalarını fakturaya əlavə edir (idempotent — set).</summary>
+    public void SetAdditionalCharges(Money charges) => AdditionalCharges = charges;
 
     // EF Core üçün.
     private Invoice() { }
