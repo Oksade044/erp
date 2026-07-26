@@ -29,7 +29,7 @@ public sealed class CreateSupplierHandler(
     public async Task<Result<Guid>> Handle(CreateSupplierCommand request, CancellationToken ct)
     {
         var dto = request.Request;
-        var phone = PhoneNumber.Create(dto.Phone);
+        var phone = PhoneNumber.CreateInternational(dto.Phone);
 
         if (await suppliers.PhoneExistsAsync(phone.Value, ct))
             return Result.Failure<Guid>($"Bu telefon nömrəsi ilə təchizatçı artıq mövcuddur: {phone.Value}");
@@ -38,7 +38,8 @@ public sealed class CreateSupplierHandler(
         var address = SupplierMapping.ToAddress(dto.City, dto.AddressLine);
 
         var supplier = Supplier.Create(
-            dto.Name, phone, dto.ContactPerson, email, address, dto.TaxId, dto.Notes);
+            dto.Name, phone, dto.ContactPerson, email, address, dto.TaxId, dto.Notes,
+            dto.CompanyName, dto.Country, dto.WhatsApp, dto.WeChat, dto.Position);
 
         await suppliers.AddAsync(supplier, ct);
         await unitOfWork.SaveChangesAsync(ct);

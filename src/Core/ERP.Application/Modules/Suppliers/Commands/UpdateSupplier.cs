@@ -33,7 +33,7 @@ public sealed class UpdateSupplierHandler(
             return Result.Failure($"Təchizatçı tapılmadı: {request.Id}");
 
         var dto = request.Request;
-        var phone = PhoneNumber.Create(dto.Phone);
+        var phone = PhoneNumber.CreateInternational(dto.Phone);
 
         if (phone.Value != supplier.Phone.Value && await suppliers.PhoneExistsAsync(phone.Value, ct))
             return Result.Failure($"Bu telefon nömrəsi ilə başqa təchizatçı mövcuddur: {phone.Value}");
@@ -45,6 +45,7 @@ public sealed class UpdateSupplierHandler(
         supplier.ChangeAddress(SupplierMapping.ToAddress(dto.City, dto.AddressLine));
         supplier.SetTaxId(dto.TaxId);
         supplier.SetNotes(dto.Notes);
+        supplier.SetExtras(dto.CompanyName, dto.Country, dto.WhatsApp, dto.WeChat, dto.Position);
         if (dto.IsActive) supplier.Activate(); else supplier.Deactivate();
 
         suppliers.Update(supplier);

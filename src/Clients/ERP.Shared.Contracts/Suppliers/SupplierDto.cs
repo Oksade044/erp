@@ -12,4 +12,10 @@ public sealed record SupplierDto(
     string? TaxId,
     string? Notes,
     bool IsActive,
-    DateTimeOffset CreatedAt);
+    DateTimeOffset CreatedAt,
+    // V2 (#15)
+    string? CompanyName = null,
+    string? Country = null,
+    string? WhatsApp = null,
+    string? WeChat = null,
+    string? Position = null);

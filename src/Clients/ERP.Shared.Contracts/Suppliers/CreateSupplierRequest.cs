@@ -9,4 +9,9 @@ public sealed record CreateSupplierRequest(
     string? City = null,
     string? AddressLine = null,
     string? TaxId = null,
-    string? Notes = null);
+    string? Notes = null,
+    string? CompanyName = null,
+    string? Country = null,
+    string? WhatsApp = null,
+    string? WeChat = null,
+    string? Position = null);

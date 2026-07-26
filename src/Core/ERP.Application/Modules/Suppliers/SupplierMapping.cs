@@ -18,7 +18,12 @@ public static class SupplierMapping
         TaxId: s.TaxId,
         Notes: s.Notes,
         IsActive: s.IsActive,
-        CreatedAt: s.CreatedAt);
+        CreatedAt: s.CreatedAt,
+        CompanyName: s.CompanyName,
+        Country: s.Country,
+        WhatsApp: s.WhatsApp,
+        WeChat: s.WeChat,
+        Position: s.Position);
 
     public static Address? ToAddress(string? city, string? line) =>
         string.IsNullOrWhiteSpace(city) ? null : Address.Create(city, line);

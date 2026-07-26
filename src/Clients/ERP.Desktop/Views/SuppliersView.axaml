@@ -59,7 +59,27 @@
                     </StackPanel>
                     <StackPanel Width="130" Margin="0,0,12,8">
                         <TextBlock Text="Şəhər" FontSize="12" Foreground="#5A6072" />
-                        <TextBox PlaceholderText="Bakı" Text="{Binding NewCity}" />
+                        <TextBox PlaceholderText="Bakı / Guangzhou" Text="{Binding NewCity}" />
+                    </StackPanel>
+                    <StackPanel Width="180" Margin="0,0,12,8">
+                        <TextBlock Text="Şirkət adı" FontSize="12" Foreground="#5A6072" />
+                        <TextBox PlaceholderText="Məs: Guangzhou Decor Co." Text="{Binding NewCompanyName}" />
+                    </StackPanel>
+                    <StackPanel Width="130" Margin="0,0,12,8">
+                        <TextBlock Text="Ölkə" FontSize="12" Foreground="#5A6072" />
+                        <TextBox PlaceholderText="Çin / Azərbaycan" Text="{Binding NewCountry}" />
+                    </StackPanel>
+                    <StackPanel Width="150" Margin="0,0,12,8">
+                        <TextBlock Text="WhatsApp" FontSize="12" Foreground="#5A6072" />
+                        <TextBox PlaceholderText="+86 ..." Text="{Binding NewWhatsApp}" />
+                    </StackPanel>
+                    <StackPanel Width="150" Margin="0,0,12,8">
+                        <TextBlock Text="WeChat" FontSize="12" Foreground="#5A6072" />
+                        <TextBox PlaceholderText="WeChat ID" Text="{Binding NewWeChat}" />
+                    </StackPanel>
+                    <StackPanel Width="150" Margin="0,0,12,8">
+                        <TextBlock Text="Vəzifə" FontSize="12" Foreground="#5A6072" />
+                        <TextBox PlaceholderText="Satış meneceri" Text="{Binding NewPosition}" />
                     </StackPanel>
                 </WrapPanel>
                 <Button Content="+ Əlavə et" Command="{Binding AddCommand}"
@@ -71,12 +91,14 @@
         <DataGrid Grid.Row="2" ItemsSource="{Binding Suppliers}" IsReadOnly="True"
                   GridLinesVisibility="Horizontal" BorderThickness="1" BorderBrush="#E0E2EA">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Ad" Binding="{Binding Name}" Width="2*" />
-                <DataGridTextColumn Header="Əlaqədar şəxs" Binding="{Binding ContactPerson}" Width="*" />
-                <DataGridTextColumn Header="Telefon" Binding="{Binding Phone}" Width="*" />
+                <DataGridTextColumn Header="Ad" Binding="{Binding Name}" Width="*" />
+                <DataGridTextColumn Header="Şirkət" Binding="{Binding CompanyName}" Width="*" />
+                <DataGridTextColumn Header="Ölkə" Binding="{Binding Country}" Width="Auto" />
+                <DataGridTextColumn Header="Telefon" Binding="{Binding Phone}" Width="Auto" />
+                <DataGridTextColumn Header="WhatsApp" Binding="{Binding WhatsApp}" Width="Auto" />
+                <DataGridTextColumn Header="WeChat" Binding="{Binding WeChat}" Width="Auto" />
+                <DataGridTextColumn Header="Vəzifə" Binding="{Binding Position}" Width="Auto" />
                 <DataGridTextColumn Header="E-poçt" Binding="{Binding Email}" Width="*" />
-                <DataGridTextColumn Header="Şəhər" Binding="{Binding City}" Width="Auto" />
-                <DataGridTextColumn Header="VÖEN" Binding="{Binding TaxId}" Width="Auto" />
                 <DataGridCheckBoxColumn Header="Aktiv" Binding="{Binding IsActive}" Width="Auto" />
             </DataGrid.Columns>
         </DataGrid>

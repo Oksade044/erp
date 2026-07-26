@@ -20,6 +20,13 @@ public sealed class SupplierConfiguration : IEntityTypeConfiguration<Supplier>
         builder.Property(s => s.Notes).HasMaxLength(2000);
         builder.Property(s => s.IsActive).IsRequired();
 
+        // V2 (#15) əlavə sahələr.
+        builder.Property(s => s.CompanyName).HasMaxLength(200);
+        builder.Property(s => s.Country).HasMaxLength(100);
+        builder.Property(s => s.WhatsApp).HasMaxLength(40);
+        builder.Property(s => s.WeChat).HasMaxLength(60);
+        builder.Property(s => s.Position).HasMaxLength(100);
+
         builder.OwnsOne(s => s.Phone, phone =>
         {
             phone.Property(p => p.Value).HasColumnName("Phone").HasMaxLength(20).IsRequired();

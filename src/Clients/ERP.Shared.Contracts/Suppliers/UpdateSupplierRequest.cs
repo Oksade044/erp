@@ -10,4 +10,9 @@ public sealed record UpdateSupplierRequest(
     string? AddressLine = null,
     string? TaxId = null,
     string? Notes = null,
-    bool IsActive = true);
+    bool IsActive = true,
+    string? CompanyName = null,
+    string? Country = null,
+    string? WhatsApp = null,
+    string? WeChat = null,
+    string? Position = null);

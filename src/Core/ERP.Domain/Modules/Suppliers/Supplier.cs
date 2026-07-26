@@ -23,6 +23,14 @@ public class Supplier : BaseEntity, IAggregateRoot
     /// <summary>VÖEN (opsional).</summary>
     public string? TaxId { get; private set; }
 
+    // --- V2 (#15 — Çin ofisi / xarici təchizatçılar üçün əlavə sahələr) ---
+    public string? CompanyName { get; private set; }
+    public string? Country { get; private set; }
+    public string? WhatsApp { get; private set; }
+    public string? WeChat { get; private set; }
+    /// <summary>Vəzifə (məs. Satış meneceri).</summary>
+    public string? Position { get; private set; }
+
     public string? Notes { get; private set; }
     public bool IsActive { get; private set; } = true;
 
@@ -35,6 +43,8 @@ public class Supplier : BaseEntity, IAggregateRoot
         Phone = phone;
     }
 
+    private static string? Clean(string? s) => string.IsNullOrWhiteSpace(s) ? null : s.Trim();
+
     public static Supplier Create(
         string name,
         PhoneNumber phone,
@@ -42,19 +52,39 @@ public class Supplier : BaseEntity, IAggregateRoot
         Email? email = null,
         Address? address = null,
         string? taxId = null,
-        string? notes = null)
+        string? notes = null,
+        string? companyName = null,
+        string? country = null,
+        string? whatsApp = null,
+        string? weChat = null,
+        string? position = null)
     {
         if (string.IsNullOrWhiteSpace(name))
             throw new DomainException("Təchizatçı adı tələb olunur.");
 
         return new Supplier(name.Trim(), phone)
         {
-            ContactPerson = string.IsNullOrWhiteSpace(contactPerson) ? null : contactPerson.Trim(),
+            ContactPerson = Clean(contactPerson),
             Email = email,
             Address = address,
-            TaxId = string.IsNullOrWhiteSpace(taxId) ? null : taxId.Trim(),
-            Notes = notes?.Trim()
+            TaxId = Clean(taxId),
+            Notes = notes?.Trim(),
+            CompanyName = Clean(companyName),
+            Country = Clean(country),
+            WhatsApp = Clean(whatsApp),
+            WeChat = Clean(weChat),
+            Position = Clean(position)
         };
+    }
+
+    /// <summary>V2 əlavə sahələrini yeniləyir.</summary>
+    public void SetExtras(string? companyName, string? country, string? whatsApp, string? weChat, string? position)
+    {
+        CompanyName = Clean(companyName);
+        Country = Clean(country);
+        WhatsApp = Clean(whatsApp);
+        WeChat = Clean(weChat);
+        Position = Clean(position);
     }
 
     public void Rename(string name)

@@ -25,6 +25,12 @@ public partial class SuppliersViewModel(ErpApiClient api) : ViewModelBase
     [ObservableProperty] private string? _newContactPerson;
     [ObservableProperty] private string? _newEmail;
     [ObservableProperty] private string? _newCity;
+    // V2 (#15)
+    [ObservableProperty] private string? _newCompanyName;
+    [ObservableProperty] private string? _newCountry;
+    [ObservableProperty] private string? _newWhatsApp;
+    [ObservableProperty] private string? _newWeChat;
+    [ObservableProperty] private string? _newPosition;
 
     [RelayCommand]
     private async Task LoadAsync()
@@ -60,12 +66,15 @@ public partial class SuppliersViewModel(ErpApiClient api) : ViewModelBase
         {
             var (ok, error) = await api.CreateSupplierAsync(new CreateSupplierRequest(
                 Name: NewName!, Phone: NewPhone!,
-                ContactPerson: NewContactPerson, Email: NewEmail, City: NewCity));
+                ContactPerson: NewContactPerson, Email: NewEmail, City: NewCity,
+                CompanyName: NewCompanyName, Country: NewCountry,
+                WhatsApp: NewWhatsApp, WeChat: NewWeChat, Position: NewPosition));
 
             if (ok)
             {
                 Status = "Təchizatçı əlavə olundu.";
                 NewName = NewPhone = NewContactPerson = NewEmail = NewCity = null;
+                NewCompanyName = NewCountry = NewWhatsApp = NewWeChat = NewPosition = null;
                 await LoadAsync();
             }
             else Status = error ?? "Əlavə edilmədi.";
