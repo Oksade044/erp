@@ -17,7 +17,8 @@ public sealed class TokenService(IOptions<JwtSettings> options) : ITokenService
 {
     private readonly JwtSettings _settings = options.Value;
 
-    public (string accessToken, string refreshToken, DateTimeOffset expiresAt) GenerateTokens(User user)
+    public (string accessToken, string refreshToken, DateTimeOffset expiresAt) GenerateTokens(
+        User user, IReadOnlyCollection<string> permissions)
     {
         var expiresAt = DateTimeOffset.UtcNow.AddMinutes(_settings.AccessTokenMinutes);
 
@@ -27,9 +28,9 @@ public sealed class TokenService(IOptions<JwtSettings> options) : ITokenService
             new(ClaimTypes.NameIdentifier, user.Id.ToString()),
             new(ClaimTypes.Name, user.Username),
             new("fullName", user.FullName),
-            new(ClaimTypes.Role, user.Role.ToString())
+            new(ClaimTypes.Role, user.RoleName)
         };
-        claims.AddRange(user.GetPermissions().Select(p => new Claim("permission", p)));
+        claims.AddRange(permissions.Select(p => new Claim("permission", p)));
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_settings.Key));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);

@@ -32,6 +32,25 @@ public static class Permissions
     /// <summary>Audit jurnalını görmək — yalnız səlahiyyətli (Admin).</summary>
     public const string AuditView = "audit.view";
 
+    /// <summary>Bütün icazələr + istifadəçi üçün aydın adları (#16 — rol matrisi UI).</summary>
+    public static readonly IReadOnlyList<(string Key, string Label)> Catalog =
+    [
+        (CustomersView, "Müştərilər — bax"), (CustomersEdit, "Müştərilər — dəyiş"),
+        (ProductsView, "Məhsullar — bax"), (ProductsEdit, "Məhsullar — dəyiş"),
+        (ProductsViewCost, "Məhsul alış/satış qiyməti — bax"),
+        (OrdersView, "Sifarişlər — bax"), (OrdersEdit, "Sifarişlər — dəyiş"),
+        (OrdersApprove, "Sifariş — təsdiqlə"),
+        (InvoicesView, "Fakturalar — bax"), (InvoicesEdit, "Fakturalar — dəyiş/ödəniş"),
+        (SuppliersView, "Təchizatçılar — bax"), (SuppliersEdit, "Təchizatçılar — dəyiş"),
+        (PurchasesView, "Alışlar — bax"), (PurchasesEdit, "Alışlar — dəyiş"),
+        (FinanceView, "Maliyyə — bax"), (FinanceEdit, "Maliyyə — dəyiş"),
+        (HrView, "HR (işçilər) — bax"), (HrEdit, "HR — dəyiş"),
+        (WarehousesView, "Anbarlar/Stok — bax"), (WarehousesEdit, "Anbarlar/Stok — dəyiş"),
+        (ReportsView, "Hesabatlar — bax"),
+        (UsersManage, "İstifadəçilər & Rollar — idarə et"),
+        (AuditView, "Audit jurnalı — bax"),
+    ];
+
     /// <summary>Rol → icazələr xəritəsi. Admin hər şeyi bacarır.</summary>
     public static IReadOnlyCollection<string> ForRole(Role role) => role switch
     {

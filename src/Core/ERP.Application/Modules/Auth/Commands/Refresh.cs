@@ -16,6 +16,7 @@ public sealed class RefreshValidator : AbstractValidator<RefreshCommand>
 
 public sealed class RefreshHandler(
     IUserRepository users,
+    IRoleRepository roles,
     ITokenService tokens,
     IUnitOfWork unitOfWork)
     : IRequestHandler<RefreshCommand, Result<AuthResponse>>
@@ -26,13 +27,14 @@ public sealed class RefreshHandler(
         if (user is null || !user.IsActive || !user.IsRefreshTokenValid(request.Request.RefreshToken))
             return Result.Failure<AuthResponse>("Refresh token etibarsızdır və ya vaxtı bitib.");
 
-        var (accessToken, refreshToken, expiresAt) = tokens.GenerateTokens(user);
+        var permissions = await AuthPermissions.ResolveAsync(roles, user.RoleName, ct);
+
+        var (accessToken, refreshToken, expiresAt) = tokens.GenerateTokens(user, permissions);
         user.SetRefreshToken(refreshToken, DateTimeOffset.UtcNow.AddDays(7));
         await unitOfWork.SaveChangesAsync(ct);
 
         return Result.Success(new AuthResponse(
             accessToken, refreshToken, expiresAt,
-            user.Username, user.FullName, user.Role.ToString(),
-            user.GetPermissions().ToList()));
+            user.Username, user.FullName, user.RoleName, permissions));
     }
 }

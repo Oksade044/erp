@@ -21,9 +21,10 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(u => u.RefreshToken).HasMaxLength(200);
         builder.Property(u => u.IsActive).IsRequired();
 
-        builder.Property(u => u.Role)
-            .HasConversion<string>()
-            .HasMaxLength(20)
+        // #16 — rol adı string kimi; köhnə "Role" sütununda qalır (data migration lazım deyil).
+        builder.Property(u => u.RoleName)
+            .HasColumnName("Role")
+            .HasMaxLength(50)
             .IsRequired();
 
         builder.HasQueryFilter(u => !u.IsDeleted);

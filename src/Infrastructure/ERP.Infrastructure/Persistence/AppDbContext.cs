@@ -37,6 +37,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
     public DbSet<Warehouse> Warehouses => Set<Warehouse>();
     public DbSet<StockLevel> StockLevels => Set<StockLevel>();
     public DbSet<User> Users => Set<User>();
+    public DbSet<ERP.Domain.Modules.Users.AppRole> Roles => Set<ERP.Domain.Modules.Users.AppRole>();
     public DbSet<ERP.Domain.Modules.Settings.FieldPermission> FieldPermissions => Set<ERP.Domain.Modules.Settings.FieldPermission>();
     public DbSet<ERP.Domain.Modules.Audit.AuditLog> AuditLogs => Set<ERP.Domain.Modules.Audit.AuditLog>();
 

@@ -1,4 +1,3 @@
-using ERP.Domain.Exceptions;
 using ERP.Domain.Modules.Users;
 using ERP.Shared.Contracts.Users;
 
@@ -11,14 +10,7 @@ public static class UserMapping
         Id: u.Id,
         Username: u.Username,
         FullName: u.FullName,
-        Role: u.Role.ToString(),
+        Role: u.RoleName,
         IsActive: u.IsActive,
         CreatedAt: u.CreatedAt);
-
-    public static Role ParseRole(string? role)
-    {
-        if (Enum.TryParse<Role>(role, ignoreCase: true, out var parsed))
-            return parsed;
-        throw new DomainException($"Rol düzgün deyil: {role}. (Admin | Menecer | Anbardar | Kassir)");
-    }
 }

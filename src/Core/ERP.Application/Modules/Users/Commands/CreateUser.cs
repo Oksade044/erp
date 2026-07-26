@@ -23,6 +23,7 @@ public sealed class CreateUserValidator : AbstractValidator<CreateUserCommand>
 
 public sealed class CreateUserHandler(
     IUserRepository users,
+    IRoleRepository roles,
     IPasswordHasher hasher,
     IUnitOfWork unitOfWork)
     : IRequestHandler<CreateUserCommand, Result<Guid>>
@@ -35,9 +36,13 @@ public sealed class CreateUserHandler(
         if (await users.GetByUsernameAsync(username, ct) is not null)
             return Result.Failure<Guid>($"Bu istifadəçi adı artıq mövcuddur: {username}");
 
-        var role = UserMapping.ParseRole(dto.Role);
+        // Rol mövcud olmalıdır (dinamik rollar — #16).
+        var role = await roles.GetByNameAsync(dto.Role, ct);
+        if (role is null)
+            return Result.Failure<Guid>($"Belə rol yoxdur: {dto.Role}");
+
         var (hash, salt) = hasher.Hash(dto.Password);
-        var user = User.Create(username, hash, salt, dto.FullName, role);
+        var user = User.Create(username, hash, salt, dto.FullName, role.Name);
 
         await users.AddAsync(user, ct);
         await unitOfWork.SaveChangesAsync(ct);

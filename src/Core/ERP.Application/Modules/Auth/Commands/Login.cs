@@ -20,6 +20,7 @@ public sealed class LoginValidator : AbstractValidator<LoginCommand>
 
 public sealed class LoginHandler(
     IUserRepository users,
+    IRoleRepository roles,
     IPasswordHasher hasher,
     ITokenService tokens,
     IUnitOfWork unitOfWork)
@@ -34,13 +35,14 @@ public sealed class LoginHandler(
         if (user is null || !user.IsActive || !hasher.Verify(dto.Password, user.PasswordHash, user.PasswordSalt))
             return Result.Failure<AuthResponse>("İstifadəçi adı və ya parol yanlışdır.");
 
-        var (accessToken, refreshToken, expiresAt) = tokens.GenerateTokens(user);
+        var permissions = await AuthPermissions.ResolveAsync(roles, user.RoleName, ct);
+
+        var (accessToken, refreshToken, expiresAt) = tokens.GenerateTokens(user, permissions);
         user.SetRefreshToken(refreshToken, DateTimeOffset.UtcNow.AddDays(7));
         await unitOfWork.SaveChangesAsync(ct);
 
         return Result.Success(new AuthResponse(
             accessToken, refreshToken, expiresAt,
-            user.Username, user.FullName, user.Role.ToString(),
-            user.GetPermissions().ToList()));
+            user.Username, user.FullName, user.RoleName, permissions));
     }
 }

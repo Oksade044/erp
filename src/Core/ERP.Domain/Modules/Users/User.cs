@@ -13,7 +13,9 @@ public class User : BaseEntity, IAggregateRoot
     public string PasswordHash { get; private set; } = null!;
     public string PasswordSalt { get; private set; } = null!;
     public string FullName { get; private set; } = null!;
-    public Role Role { get; private set; }
+
+    /// <summary>Rol adı (#16 — dinamik). İcazələr AppRole-dan bu ada görə həll olunur.</summary>
+    public string RoleName { get; private set; } = null!;
     public bool IsActive { get; private set; } = true;
 
     public string? RefreshToken { get; private set; }
@@ -22,16 +24,16 @@ public class User : BaseEntity, IAggregateRoot
     // EF Core üçün.
     private User() { }
 
-    private User(string username, string hash, string salt, string fullName, Role role)
+    private User(string username, string hash, string salt, string fullName, string roleName)
     {
         Username = username;
         PasswordHash = hash;
         PasswordSalt = salt;
         FullName = fullName;
-        Role = role;
+        RoleName = roleName;
     }
 
-    public static User Create(string username, string passwordHash, string passwordSalt, string fullName, Role role)
+    public static User Create(string username, string passwordHash, string passwordSalt, string fullName, string roleName)
     {
         if (string.IsNullOrWhiteSpace(username))
             throw new DomainException("İstifadəçi adı tələb olunur.");
@@ -39,8 +41,10 @@ public class User : BaseEntity, IAggregateRoot
             throw new DomainException("Parol hash-i tələb olunur.");
         if (string.IsNullOrWhiteSpace(fullName))
             throw new DomainException("Ad tələb olunur.");
+        if (string.IsNullOrWhiteSpace(roleName))
+            throw new DomainException("Rol tələb olunur.");
 
-        return new User(username.Trim().ToLowerInvariant(), passwordHash, passwordSalt, fullName.Trim(), role);
+        return new User(username.Trim().ToLowerInvariant(), passwordHash, passwordSalt, fullName.Trim(), roleName.Trim());
     }
 
     public void SetRefreshToken(string token, DateTimeOffset expiresAt)
@@ -64,5 +68,11 @@ public class User : BaseEntity, IAggregateRoot
     public void Deactivate() => IsActive = false;
     public void Activate() => IsActive = true;
 
-    public IReadOnlyCollection<string> GetPermissions() => Permissions.ForRole(Role);
+    /// <summary>Rolu dəyişir (Admin tərəfindən).</summary>
+    public void ChangeRole(string roleName)
+    {
+        if (string.IsNullOrWhiteSpace(roleName))
+            throw new DomainException("Rol tələb olunur.");
+        RoleName = roleName.Trim();
+    }
 }
