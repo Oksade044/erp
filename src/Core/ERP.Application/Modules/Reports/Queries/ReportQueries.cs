@@ -76,3 +76,14 @@ public sealed class GetDamageReportHandler(IReportService reports)
     public Task<IReadOnlyList<DamageReportRowDto>> Handle(GetDamageReportQuery request, CancellationToken ct) =>
         reports.GetDamageReportAsync(ct);
 }
+
+// --- İşçi performansı (#24) ---
+public sealed record GetEmployeePerformanceQuery(DateOnly From, DateOnly To)
+    : IRequest<IReadOnlyList<EmployeePerformanceRowDto>>;
+
+public sealed class GetEmployeePerformanceHandler(IReportService reports)
+    : IRequestHandler<GetEmployeePerformanceQuery, IReadOnlyList<EmployeePerformanceRowDto>>
+{
+    public Task<IReadOnlyList<EmployeePerformanceRowDto>> Handle(GetEmployeePerformanceQuery request, CancellationToken ct) =>
+        reports.GetEmployeePerformanceAsync(request.From, request.To, ct);
+}

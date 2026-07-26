@@ -10,6 +10,14 @@ public sealed record CustomerReportRowDto(
     decimal Outstanding,
     string Currency);
 
+/// <summary>İşçi performansı — əməkdaş üzrə sifariş sayı və ümumi dövriyyə (#24).</summary>
+public sealed record EmployeePerformanceRowDto(
+    string EmployeeName,
+    string? Role,
+    int OrderCount,
+    decimal TotalRevenue,
+    string Currency);
+
 /// <summary>Zədə/itki hesabatı sətri — hesablaşması aparılmış, tutulması olan sifarişlər.</summary>
 public sealed record DamageReportRowDto(
     string OrderNumber,

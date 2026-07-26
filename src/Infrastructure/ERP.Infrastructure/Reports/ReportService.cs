@@ -142,6 +142,41 @@ public sealed class ReportService(AppDbContext context) : IReportService
         return new MonthlyRevenueDto(year, DefaultCurrency, points);
     }
 
+    public async Task<IReadOnlyList<EmployeePerformanceRowDto>> GetEmployeePerformanceAsync(
+        DateOnly from, DateOnly to, CancellationToken ct = default)
+    {
+        var fromUtc = from.ToDateTime(TimeOnly.MinValue);
+        var toUtc = to.ToDateTime(TimeOnly.MaxValue);
+
+        // Sifarişləri sətirlərlə gətir (dövriyyə = sətirlərin cəmi; decimal client tərəfdə).
+        // Ləğv olunmuş sifarişlər sayılmır.
+        var orders = (await context.Orders
+                .Where(o => o.Status != OrderStatus.Ləğv)
+                .Select(o => new
+                {
+                    o.CreatedByName,
+                    o.CreatedByRole,
+                    o.CreatedAt,
+                    Lines = o.Lines.Select(l => new { l.Quantity, Amount = l.UnitPrice.Amount })
+                })
+                .ToListAsync(ct))
+            .Where(o => o.CreatedByName != null
+                        && o.CreatedAt.UtcDateTime >= fromUtc
+                        && o.CreatedAt.UtcDateTime <= toUtc)
+            .ToList();
+
+        return orders
+            .GroupBy(o => o.CreatedByName!)
+            .Select(g => new EmployeePerformanceRowDto(
+                EmployeeName: g.Key,
+                Role: g.Select(x => x.CreatedByRole).FirstOrDefault(r => r != null),
+                OrderCount: g.Count(),
+                TotalRevenue: g.Sum(o => o.Lines.Sum(l => l.Amount * l.Quantity)),
+                Currency: DefaultCurrency))
+            .OrderByDescending(r => r.TotalRevenue)
+            .ToList();
+    }
+
     public async Task<IReadOnlyList<CustomerReportRowDto>> GetCustomerReportAsync(CancellationToken ct = default)
     {
         // Sifariş sayı müştəri üzrə.

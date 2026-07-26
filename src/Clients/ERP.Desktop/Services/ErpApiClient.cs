@@ -370,6 +370,12 @@ public sealed class ErpApiClient(HttpClient http)
     public Task<List<DamageReportRowDto>?> GetDamageReportAsync(CancellationToken ct = default) =>
         http.GetFromJsonAsync<List<DamageReportRowDto>>("/api/v1/reports/damages", JsonOpts, ct);
 
+    public Task<List<EmployeePerformanceRowDto>?> GetEmployeePerformanceAsync(DateOnly? from = null, DateOnly? to = null, CancellationToken ct = default)
+    {
+        var q = from is not null && to is not null ? $"?from={from:yyyy-MM-dd}&to={to:yyyy-MM-dd}" : "";
+        return http.GetFromJsonAsync<List<EmployeePerformanceRowDto>>($"/api/v1/reports/employee-performance{q}", JsonOpts, ct);
+    }
+
     // --- İstifadəçilər ---
     public Task<List<UserDto>?> GetUsersAsync(CancellationToken ct = default) =>
         http.GetFromJsonAsync<List<UserDto>>("/api/v1/users", JsonOpts, ct);

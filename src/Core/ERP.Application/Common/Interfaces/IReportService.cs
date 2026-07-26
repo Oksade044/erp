@@ -23,4 +23,8 @@ public interface IReportService
 
     /// <summary>Zədə/itki hesabatı — tutulması olan (hesablaşılmış) sifarişlər.</summary>
     Task<IReadOnlyList<DamageReportRowDto>> GetDamageReportAsync(CancellationToken ct = default);
+
+    /// <summary>İşçi performansı — verilmiş dövrdə əməkdaş üzrə sifariş sayı + dövriyyə (#24).</summary>
+    Task<IReadOnlyList<EmployeePerformanceRowDto>> GetEmployeePerformanceAsync(
+        DateOnly from, DateOnly to, CancellationToken ct = default);
 }

@@ -13,6 +13,7 @@ public partial class ReportsViewModel(ErpApiClient api) : ViewModelBase
 {
     public ObservableCollection<CustomerReportRowDto> Customers { get; } = [];
     public ObservableCollection<DamageReportRowDto> Damages { get; } = [];
+    public ObservableCollection<EmployeePerformanceRowDto> EmployeePerformance { get; } = [];
 
     [ObservableProperty] private bool _isBusy;
     [ObservableProperty] private string? _status;
@@ -32,7 +33,11 @@ public partial class ReportsViewModel(ErpApiClient api) : ViewModelBase
             var dmg = await api.GetDamageReportAsync();
             if (dmg is not null) foreach (var d in dmg) Damages.Add(d);
 
-            Status = $"{Customers.Count} müştəri · {Damages.Count} zədə qeydi";
+            EmployeePerformance.Clear();
+            var perf = await api.GetEmployeePerformanceAsync();
+            if (perf is not null) foreach (var p in perf) EmployeePerformance.Add(p);
+
+            Status = $"{Customers.Count} müştəri · {Damages.Count} zədə · {EmployeePerformance.Count} əməkdaş (cari ay)";
         }
         catch (Exception ex) { Status = $"Xəta: {ex.Message}"; }
         finally { IsBusy = false; }

@@ -41,6 +41,14 @@ public static class ReportEndpoints
         group.MapGet("/damages", async (ISender sender) =>
             Results.Ok(await sender.Send(new GetDamageReportQuery())));
 
+        // İşçi performansı (#24) — dövr üzrə. Default: cari ay.
+        group.MapGet("/employee-performance", async (ISender sender, DateOnly? from, DateOnly? to) =>
+        {
+            var f = from ?? new DateOnly(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1);
+            var t = to ?? DateOnly.FromDateTime(DateTime.UtcNow);
+            return Results.Ok(await sender.Send(new GetEmployeePerformanceQuery(f, t)));
+        });
+
         return app;
     }
 }
