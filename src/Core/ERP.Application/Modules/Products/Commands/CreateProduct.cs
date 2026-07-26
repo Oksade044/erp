@@ -38,13 +38,22 @@ public sealed class CreateProductHandler(
     {
         var dto = request.Request;
 
-        // Anbar seçilibsə, mövcudluğunu əvvəlcədən yoxla (ilkin stok ora yazılacaq).
-        Domain.Modules.Warehouses.Warehouse? warehouse = null;
-        if (dto.WarehouseId is { } wid)
+        // İlkin stokları topla: yeni çox-anbar siyahısı, yoxdursa köhnə tək-anbar (geriyə uyğunluq).
+        var initial = (dto.InitialStocks is { Count: > 0 })
+            ? dto.InitialStocks.ToList()
+            : (dto.WarehouseId is { } single
+                ? [new Shared.Contracts.Products.InitialStockRequest(single, dto.StockQuantity, dto.MinStockQuantity)]
+                : new List<Shared.Contracts.Products.InitialStockRequest>());
+
+        // Anbarları əvvəlcədən yüklə/yoxla (ad snapshot üçün).
+        var warehousesByStock = new List<(Shared.Contracts.Products.InitialStockRequest Stock, Domain.Modules.Warehouses.Warehouse Wh)>();
+        foreach (var s in initial)
         {
-            warehouse = await warehouses.GetByIdAsync(wid, ct);
-            if (warehouse is null)
-                return Result.Failure<Guid>($"Anbar tapılmadı: {wid}");
+            if (s.Quantity < 0) return Result.Failure<Guid>("Anbar sayı mənfi ola bilməz.");
+            var wh = await warehouses.GetByIdAsync(s.WarehouseId, ct);
+            if (wh is null)
+                return Result.Failure<Guid>($"Anbar tapılmadı: {s.WarehouseId}");
+            warehousesByStock.Add((s, wh));
         }
 
         // SKU verilməyibsə avtomatik generasiya et (PRD-000001); verilibsə normalizə + unikallıq yoxla.
@@ -68,12 +77,11 @@ public sealed class CreateProductHandler(
         // Yeni kateqoriya adı yazılıbsa, kateqoriya lüğətinə əlavə et (mövcud deyilsə).
         await EnsureCategoryAsync(dto.Category, ct);
 
-        // Anbar seçilibsə, ilkin stoku o anbarın StockLevel-inə yaz (bir tranzaksiyada).
-        if (warehouse is not null)
+        // Hər anbar üçün ilkin stok (StockLevel) yarat — məhsul bir neçə anbarda ola bilər.
+        foreach (var (stock, wh) in warehousesByStock)
         {
             var level = Domain.Modules.Warehouses.StockLevel.Create(
-                product.Id, product.Name, warehouse.Id, warehouse.Name,
-                dto.StockQuantity, dto.MinStockQuantity);
+                product.Id, product.Name, wh.Id, wh.Name, stock.Quantity, stock.MinQuantity);
             await stockLevels.AddAsync(level, ct);
         }
 

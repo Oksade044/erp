@@ -16,5 +16,13 @@ public sealed record CreateProductRequest(
     int MinStockQuantity = 0,
     string? Category = null,
     string? Description = null,
-    // Seçilibsə, ilkin stok bu anbara yazılır (StockLevel yaradılır).
-    Guid? WarehouseId = null);
+    // Köhnə: tək anbar (geriyə uyğunluq üçün saxlanılır).
+    Guid? WarehouseId = null,
+    // Yeni: məhsul bir neçə anbarda müxtəlif sayda ola bilər — hər anbar üçün ilkin stok.
+    IReadOnlyList<InitialStockRequest>? InitialStocks = null);
+
+/// <summary>Yeni məhsulun bir anbardakı ilkin stoku.</summary>
+public sealed record InitialStockRequest(
+    Guid WarehouseId,
+    int Quantity,
+    int MinQuantity = 0);

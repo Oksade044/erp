@@ -2,6 +2,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -100,9 +101,27 @@ public partial class ProductsViewModel : ViewModelBase
     [ObservableProperty] private int _newMinStock;
     [ObservableProperty] private string? _newCategory;
 
-    /// <summary>Məhsulun ilkin stokunun yazılacağı anbar (seçim — məcburi deyil).</summary>
+    /// <summary>Anbar siyahısı (yeni məhsulun anbar-stoklarını seçmək üçün).</summary>
     public ObservableCollection<WarehouseDto> Warehouses { get; } = [];
     [ObservableProperty] private WarehouseDto? _newWarehouse;
+
+    /// <summary>Yeni məhsulun anbarlar üzrə ilkin stokları (məhsul bir neçə anbarda ola bilər).</summary>
+    public ObservableCollection<NewStockRow> NewStocks { get; } = [];
+    [ObservableProperty] private WarehouseDto? _addWarehouse;
+    [ObservableProperty] private int _addQty;
+    [ObservableProperty] private int _addMin;
+
+    [RelayCommand]
+    private void AddNewStockRow()
+    {
+        if (AddWarehouse is null) { Status = "Anbar seçin."; return; }
+        if (NewStocks.Any(r => r.WarehouseId == AddWarehouse.Id)) { Status = "Bu anbar artıq siyahıdadır."; return; }
+        NewStocks.Add(new NewStockRow(AddWarehouse.Id, AddWarehouse.Name, AddQty, AddMin));
+        AddWarehouse = null; AddQty = 0; AddMin = 0;
+    }
+
+    [RelayCommand]
+    private void RemoveNewStockRow(NewStockRow row) => NewStocks.Remove(row);
 
     /// <summary>Mövcud kateqoriyalar — məhsul formasında seçim/yeni yazmaq üçün.</summary>
     public ObservableCollection<string> CategoryNames { get; } = [];
@@ -245,6 +264,10 @@ public partial class ProductsViewModel : ViewModelBase
         IsBusy = true;
         try
         {
+            var initialStocks = NewStocks
+                .Select(r => new InitialStockRequest(r.WarehouseId, r.Quantity, r.MinQuantity))
+                .ToList();
+
             var (ok, id, error) = await _api.CreateProductAsync(new CreateProductRequest(
                 Name: NewName!,
                 RentalPrice: NewRentalPrice,
@@ -252,10 +275,9 @@ public partial class ProductsViewModel : ViewModelBase
                 Sku: null, // server avtomatik PRD-000001 generasiya edir
                 PurchasePrice: CanViewCost ? NewPurchasePrice : null,
                 SalePrice: CanViewCost ? NewSalePrice : null,
-                StockQuantity: NewStock,
                 MinStockQuantity: NewMinStock,
                 Category: NewCategory,
-                WarehouseId: NewWarehouse?.Id));
+                InitialStocks: initialStocks));
 
             if (ok)
             {
@@ -267,8 +289,8 @@ public partial class ProductsViewModel : ViewModelBase
                     imageNote = imgOk ? " + şəkil yükləndi" : $" (şəkil yüklənmədi: {imgErr})";
                 }
 
-                Status = (NewWarehouse is not null
-                    ? $"Məhsul əlavə olundu — ilkin stok '{NewWarehouse.Name}' anbarına yazıldı."
+                Status = (initialStocks.Count > 0
+                    ? $"Məhsul əlavə olundu — {initialStocks.Count} anbara stok yazıldı."
                     : "Məhsul əlavə olundu (SKU avtomatik təyin edildi).") + imageNote;
 
                 NewName = NewCategory = null;
@@ -276,6 +298,7 @@ public partial class ProductsViewModel : ViewModelBase
                 NewPurchasePrice = NewSalePrice = null;
                 NewTrackingMode = TrackingModeConverter.BulkDisplay;
                 NewWarehouse = null;
+                NewStocks.Clear();
                 NewImagePath = null;
                 await LoadAsync();
             }
@@ -382,6 +405,9 @@ public partial class ProductsViewModel : ViewModelBase
         Status = $"QR kod açıldı: {Selected.Sku}";
     }
 }
+
+/// <summary>Yeni məhsul əlavə edilərkən bir anbardakı ilkin stok sətri (çox-anbar).</summary>
+public sealed record NewStockRow(Guid WarehouseId, string WarehouseName, int Quantity, int MinQuantity);
 
 /// <summary>Məhsul redaktəsində bir anbardakı stok sətri (redaktə oluna bilər — #17).</summary>
 public partial class ProductStockRow(Guid warehouseId, string warehouseName, int quantity, int minQuantity)
