@@ -1,5 +1,6 @@
 using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -19,6 +20,8 @@ public partial class DashboardViewModel(ErpApiClient api) : ViewModelBase
     public ObservableCollection<TopProductDto> TopProducts { get; } = [];
     public ObservableCollection<OutstandingInvoiceDto> Outstanding { get; } = [];
     public ObservableCollection<MonthlyPointDto> MonthlyRevenue { get; } = [];
+    public ObservableCollection<EmployeePerformanceRowDto> TopEmployees { get; } = [];
+    public ObservableCollection<CustomerReportRowDto> TopCustomers { get; } = [];
 
     [RelayCommand]
     private async Task LoadAsync()
@@ -36,6 +39,16 @@ public partial class DashboardViewModel(ErpApiClient api) : ViewModelBase
             Outstanding.Clear();
             var debts = await api.GetOutstandingAsync();
             if (debts is not null) foreach (var d in debts) Outstanding.Add(d);
+
+            // #25 — top əməkdaşlar (cari ay dövriyyəsi) + ən aktiv müştərilər.
+            TopEmployees.Clear();
+            var emps = await api.GetEmployeePerformanceAsync();
+            if (emps is not null) foreach (var e in emps) TopEmployees.Add(e);
+
+            TopCustomers.Clear();
+            var custReport = await api.GetCustomerReportAsync();
+            if (custReport is not null)
+                foreach (var c in custReport.OrderByDescending(x => x.OrderCount).Take(10)) TopCustomers.Add(c);
 
             // Mənfəət/Zərər (cari il) + aylıq gəlir analitikası.
             ProfitLoss = await api.GetProfitLossAsync();

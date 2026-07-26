@@ -9,7 +9,7 @@
              x:DataType="vm:DashboardViewModel">
 
     <ScrollViewer>
-        <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,*" Margin="24">
+        <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto" Margin="24">
 
             <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12" Margin="0,0,0,20">
                 <TextBlock Text="İdarə Paneli" FontSize="24" FontWeight="SemiBold" VerticalAlignment="Center" />
@@ -194,6 +194,33 @@
                             <DataGridTextColumn Header="Faktura" Binding="{Binding InvoiceNumber}" Width="Auto" />
                             <DataGridTextColumn Header="Müştəri" Binding="{Binding CustomerName}" Width="2*" />
                             <DataGridTextColumn Header="Borc" Binding="{Binding Balance}" Width="*" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </StackPanel>
+            </Grid>
+
+            <!-- #25 — Analitika: top əməkdaşlar + ən aktiv müştərilər -->
+            <Grid Grid.Row="7" ColumnDefinitions="*,16,*" Margin="0,20,0,0">
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="Top əməkdaşlar (cari ay dövriyyəsi)" FontWeight="SemiBold" FontSize="15" Margin="0,0,0,8" />
+                    <DataGrid ItemsSource="{Binding TopEmployees}" IsReadOnly="True" Height="220"
+                              GridLinesVisibility="Horizontal" BorderThickness="1" BorderBrush="#E0E2EA">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Əməkdaş" Binding="{Binding EmployeeName}" Width="2*" />
+                            <DataGridTextColumn Header="Sifariş" Binding="{Binding OrderCount}" Width="*" />
+                            <DataGridTextColumn Header="Dövriyyə (AZN)" Binding="{Binding TotalRevenue}" Width="*" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </StackPanel>
+
+                <StackPanel Grid.Column="2">
+                    <TextBlock Text="Ən aktiv müştərilər" FontWeight="SemiBold" FontSize="15" Margin="0,0,0,8" />
+                    <DataGrid ItemsSource="{Binding TopCustomers}" IsReadOnly="True" Height="220"
+                              GridLinesVisibility="Horizontal" BorderThickness="1" BorderBrush="#E0E2EA">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Müştəri" Binding="{Binding CustomerName}" Width="2*" />
+                            <DataGridTextColumn Header="Sifariş" Binding="{Binding OrderCount}" Width="*" />
+                            <DataGridTextColumn Header="Fakturalanıb" Binding="{Binding TotalInvoiced}" Width="*" />
                         </DataGrid.Columns>
                     </DataGrid>
                 </StackPanel>
