@@ -203,8 +203,27 @@
             </StackPanel>
         </Border>
 
+        <!-- #34/#35 — status dəyişəndə ödəniş pəncərəsi -->
+        <Border Grid.Row="3" Background="#E7F5FF" BorderBrush="#1971C2" BorderThickness="1"
+                CornerRadius="8" Padding="12" Margin="0,0,0,12" IsVisible="{Binding ShowPaymentPrompt}">
+            <StackPanel Spacing="8">
+                <TextBlock Text="{Binding PaymentPromptTitle}" FontWeight="SemiBold" Foreground="#1971C2" />
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <TextBlock Text="Məbləğ:" VerticalAlignment="Center" />
+                    <TextBox Width="110" Text="{Binding PaymentAmount}" />
+                    <TextBlock Text="Üsul:" VerticalAlignment="Center" />
+                    <ComboBox ItemsSource="{Binding PaymentMethods}" SelectedItem="{Binding PaymentMethod}" Width="120" />
+                    <TextBox Width="200" PlaceholderText="Qeyd" Text="{Binding PaymentNote}" />
+                    <Button Content="✓ Ödəniş et" Command="{Binding SubmitPaymentCommand}"
+                            Background="#2F9E44" Foreground="White" />
+                    <Button Content="Ödəniş yoxdur" Command="{Binding SkipPaymentCommand}" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
         <!-- Depozit & qaytarma hesablaşması (seçilmiş sifariş üçün) -->
-        <Border Grid.Row="3" Background="#FFF9DB" CornerRadius="8" Padding="12" Margin="0,0,0,12">
+        <Border Grid.Row="3" Background="#FFF9DB" CornerRadius="8" Padding="12" Margin="0,0,0,12"
+                IsVisible="{Binding !ShowPaymentPrompt}">
             <StackPanel Orientation="Horizontal" Spacing="8">
                 <TextBlock Text="Depozit (AZN):" VerticalAlignment="Center"
                            ToolTip.Tip="Müştəridən alınan girov məbləği. Təhvildən əvvəl təyin edilir." />
