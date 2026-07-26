@@ -49,6 +49,10 @@ public static class ProductEndpoints
         group.MapGet("/{id:guid}/availability", async (Guid id, ISender sender) =>
             Results.Ok(await sender.Send(new GetProductAvailabilityQuery(id))));
 
+        // #38 — məhsulun istifadə tarixçəsi.
+        group.MapGet("/{id:guid}/history", async (Guid id, ISender sender) =>
+            Results.Ok(await sender.Send(new GetProductHistoryQuery(id))));
+
         group.MapPost("/", async (CreateProductRequest request, ISender sender) =>
         {
             var result = await sender.Send(new CreateProductCommand(request));

@@ -69,6 +69,7 @@ public static class DependencyInjection
         services.AddScoped<IAuditLogReader, AuditLogReader>();
         services.AddScoped<IAuditLogWriter, AuditLogWriter>();
         services.AddScoped<IAvailabilityReader, AvailabilityReader>();
+        services.AddScoped<IProductHistoryReader, ProductHistoryReader>();
 
         // Autentifikasiya servisləri (TDD §6, §39).
         services.Configure<JwtSettings>(configuration.GetSection("Jwt"));

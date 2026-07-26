@@ -55,9 +55,14 @@ public sealed class CreateOrderHandler(
         var createdByName = overrideCreator ? dto.CreatedByName : (currentUser.FullName ?? currentUser.UserName);
         var createdByRole = overrideCreator ? dto.CreatedByRole : currentUser.Role;
 
+        var orderType = string.Equals(dto.OrderType, "Satış", StringComparison.OrdinalIgnoreCase)
+            ? Domain.Modules.Orders.OrderType.Satış
+            : Domain.Modules.Orders.OrderType.İcarə;
+
         var order = RentalOrder.Create(orderNumber, customer.Id, customer.Name, dto.StartDate, dto.EndDate, dto.Notes,
             createdByName: createdByName,
-            createdByRole: createdByRole);
+            createdByRole: createdByRole,
+            orderType: orderType);
 
         foreach (var lineDto in dto.Lines)
         {

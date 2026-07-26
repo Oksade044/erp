@@ -273,7 +273,8 @@
         <!-- Siyahı + şəkil -->
         <Grid Grid.Row="3" ColumnDefinitions="*,Auto">
             <DataGrid Grid.Column="0" ItemsSource="{Binding Products}" SelectedItem="{Binding Selected}"
-                      IsReadOnly="True" GridLinesVisibility="Horizontal" BorderThickness="1" BorderBrush="#E0E2EA">
+                      IsReadOnly="True" GridLinesVisibility="Horizontal" BorderThickness="1" BorderBrush="#E0E2EA"
+                      DoubleTapped="OnProductDoubleTapped">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="SKU (kod)" Binding="{Binding Sku}" Width="Auto" />
                     <DataGridTextColumn Header="Ad" Binding="{Binding Name}" Width="2*" />

@@ -53,6 +53,12 @@ public partial class OrdersViewModel : ViewModelBase
     public ObservableCollection<EmployeeDto> AllEmployees { get; } = [];
     [ObservableProperty] private EmployeeDto? _selectedCreator;
 
+    // #33 — sifariş növü (İcarə / Satış).
+    public string[] OrderTypes { get; } = ["İcarə", "Satış"];
+    [ObservableProperty] private string _newOrderType = "İcarə";
+    public bool IsRental => NewOrderType != "Satış";
+    partial void OnNewOrderTypeChanged(string value) => OnPropertyChanged(nameof(IsRental));
+
     [ObservableProperty] private CustomerDto? _newCustomer;
     [ObservableProperty] private DateTimeOffset _newStartDate = DateTimeOffset.Now;
     [ObservableProperty] private DateTimeOffset _newEndDate = DateTimeOffset.Now.AddDays(1);
@@ -186,7 +192,8 @@ public partial class OrdersViewModel : ViewModelBase
             Lines: DraftLines.Select(l => new CreateOrderLineRequest(l.ProductId, l.Quantity, l.UnitPrice, l.WarehouseId)).ToList(),
             // Admin/Menecer məsul əməkdaş seçibsə, sifariş onun adına yazılır (yoxsa özünün).
             CreatedByName: CanChooseCreator ? SelectedCreator?.FullName : null,
-            CreatedByRole: CanChooseCreator ? SelectedCreator?.Position : null);
+            CreatedByRole: CanChooseCreator ? SelectedCreator?.Position : null,
+            OrderType: NewOrderType);
 
         var (ok, error) = await api.CreateOrderAsync(request);
         if (ok)

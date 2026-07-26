@@ -40,6 +40,17 @@ public partial class ProductsView : UserControl
         }
     }
 
+    /// <summary>Məhsula iki dəfə klik → tarixçə pəncərəsi (#38).</summary>
+    private void OnProductDoubleTapped(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is not ProductsViewModel vm) return;
+        var detail = vm.CreateHistory();
+        if (detail is null) return;
+        var window = new ProductHistoryWindow { DataContext = detail };
+        if (TopLevel.GetTopLevel(this) is Window owner) window.Show(owner);
+        else window.Show();
+    }
+
     /// <summary>Yeni məhsul formasında şəkil seçir (məhsul yaradılanda avtomatik yüklənəcək).</summary>
     private async void OnPickNewImageClick(object? sender, RoutedEventArgs e)
     {

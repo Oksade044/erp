@@ -22,6 +22,9 @@ public class RentalOrder : BaseEntity, IAggregateRoot
     public DateOnly StartDate { get; private set; }
     public DateOnly EndDate { get; private set; }
     public OrderStatus Status { get; private set; } = OrderStatus.Qaralama;
+
+    /// <summary>Sifariş növü — İcarə (default) və ya Satış (#33).</summary>
+    public OrderType OrderType { get; private set; } = OrderType.İcarə;
     public string? Notes { get; private set; }
 
     // --- İcarə depozit & qaytarma hesablaşması (nullable → mövcud sətirlər üçün migration-safe) ---
@@ -93,7 +96,8 @@ public class RentalOrder : BaseEntity, IAggregateRoot
         DateOnly endDate,
         string? notes = null,
         string? createdByName = null,
-        string? createdByRole = null)
+        string? createdByRole = null,
+        OrderType orderType = OrderType.İcarə)
     {
         if (string.IsNullOrWhiteSpace(orderNumber))
             throw new DomainException("Sifariş nömrəsi tələb olunur.");
@@ -106,6 +110,7 @@ public class RentalOrder : BaseEntity, IAggregateRoot
 
         return new RentalOrder(orderNumber, customerId, customerName.Trim(), startDate, endDate)
         {
+            OrderType = orderType,
             Notes = notes?.Trim(),
             CreatedByName = string.IsNullOrWhiteSpace(createdByName) ? null : createdByName.Trim(),
             CreatedByRole = string.IsNullOrWhiteSpace(createdByRole) ? null : createdByRole.Trim()

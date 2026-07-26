@@ -28,6 +28,11 @@ public sealed class RentalOrderConfiguration : IEntityTypeConfiguration<RentalOr
             .HasMaxLength(20)
             .IsRequired();
 
+        builder.Property(o => o.OrderType)
+            .HasConversion<string>()
+            .HasMaxLength(20)
+            .IsRequired();
+
         builder.HasIndex(o => o.CustomerId);
         builder.HasIndex(o => new { o.StartDate, o.EndDate });
 

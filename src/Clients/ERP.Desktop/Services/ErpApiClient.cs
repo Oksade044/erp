@@ -275,6 +275,10 @@ public sealed class ErpApiClient(HttpClient http)
     public Task<List<ProductAvailabilityDto>?> GetProductAvailabilityAsync(Guid productId, CancellationToken ct = default) =>
         http.GetFromJsonAsync<List<ProductAvailabilityDto>>($"/api/v1/products/{productId}/availability", JsonOpts, ct);
 
+    /// <summary>Məhsulun istifadə tarixçəsi (#38).</summary>
+    public Task<List<ProductHistoryRowDto>?> GetProductHistoryAsync(Guid productId, CancellationToken ct = default) =>
+        http.GetFromJsonAsync<List<ProductHistoryRowDto>>($"/api/v1/products/{productId}/history", JsonOpts, ct);
+
     public Task<PagedResult<StockLevelDto>?> GetStockLevelsAsync(string? search, bool lowOnly, CancellationToken ct = default) =>
         http.GetFromJsonAsync<PagedResult<StockLevelDto>>(
             $"/api/v1/stock/levels?search={Uri.EscapeDataString(search ?? "")}&low={(lowOnly ? "true" : "false")}", JsonOpts, ct);

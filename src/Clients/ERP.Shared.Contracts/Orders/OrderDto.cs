@@ -9,6 +9,7 @@ public sealed record OrderDto(
     DateOnly StartDate,
     DateOnly EndDate,
     string Status,
+    string OrderType,
     string? Notes,
     decimal Total,
     string Currency,

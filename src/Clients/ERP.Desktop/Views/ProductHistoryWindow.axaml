@@ -1,0 +1,35 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:ERP.Desktop.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="900" d:DesignHeight="500"
+        x:Class="ERP.Desktop.Views.ProductHistoryWindow"
+        x:DataType="vm:ProductHistoryViewModel"
+        Width="960" Height="520" WindowStartupLocation="CenterScreen"
+        Title="Məhsul tarixçəsi">
+
+    <Grid RowDefinitions="Auto,*,Auto" Margin="20">
+        <TextBlock Grid.Row="0" Text="{Binding Title}" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,12" />
+
+        <DataGrid Grid.Row="1" ItemsSource="{Binding Rows}" IsReadOnly="True"
+                  GridLinesVisibility="Horizontal" BorderThickness="1" BorderBrush="#E0E2EA">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Növ" Binding="{Binding OrderType}" Width="Auto" />
+                <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="Auto" />
+                <DataGridTextColumn Header="Müştəri" Binding="{Binding CustomerName}" Width="*" />
+                <DataGridTextColumn Header="Əməkdaş" Binding="{Binding EmployeeName}" Width="*" />
+                <DataGridTextColumn Header="Say" Binding="{Binding Quantity}" Width="Auto" />
+                <DataGridTextColumn Header="Qiymət" Binding="{Binding UnitPrice}" Width="Auto" />
+                <DataGridTextColumn Header="Verildi" Binding="{Binding StartDate}" Width="Auto" />
+                <DataGridTextColumn Header="Qaytarıldı" Binding="{Binding EndDate}" Width="Auto" />
+                <DataGridTextColumn Header="Gün" Binding="{Binding Days}" Width="Auto" />
+                <DataGridTextColumn Header="Anbar" Binding="{Binding WarehouseName}" Width="*" />
+                <DataGridTextColumn Header="Faktura №" Binding="{Binding InvoiceNumber}" Width="Auto" />
+                <DataGridTextColumn Header="Sifariş №" Binding="{Binding OrderNumber}" Width="Auto" />
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <TextBlock Grid.Row="2" Text="{Binding Status}" Foreground="#5A6072" Margin="0,10,0,0" />
+    </Grid>
+</Window>

@@ -13,7 +13,9 @@ public sealed record CreateOrderRequest(
     // Yalnız Admin/Menecer: sifarişi başqa məsul əməkdaşın adına yaza bilər.
     // Boşdursa, sifariş daxil olmuş istifadəçinin adına yazılır.
     string? CreatedByName = null,
-    string? CreatedByRole = null);
+    string? CreatedByRole = null,
+    // #33 — "İcarə" (default) və ya "Satış".
+    string OrderType = "İcarə");
 
 public sealed record CreateOrderLineRequest(
     Guid ProductId,

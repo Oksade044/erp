@@ -14,6 +14,7 @@ public static class OrderMapping
         StartDate: o.StartDate,
         EndDate: o.EndDate,
         Status: o.Status.ToString(),
+        OrderType: o.OrderType.ToString(),
         Notes: o.Notes,
         Total: o.Total.Amount,
         Currency: o.Total.Currency,
