@@ -41,6 +41,10 @@ public static class ProductEndpoints
             return result.IsSuccess ? Results.Ok(result.Value) : Results.NotFound(new { error = result.Error });
         });
 
+        // #17 — məhsulun anbarlar üzrə stok səviyyələri (redaktədə göstərmək üçün).
+        group.MapGet("/{id:guid}/stock", async (Guid id, ISender sender) =>
+            Results.Ok(await sender.Send(new ERP.Application.Modules.Warehouses.Queries.GetProductStockQuery(id))));
+
         group.MapPost("/", async (CreateProductRequest request, ISender sender) =>
         {
             var result = await sender.Send(new CreateProductCommand(request));

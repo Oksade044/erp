@@ -187,6 +187,62 @@
                             <CheckBox Content="Satışda / istifadədə" IsChecked="{Binding EditIsActive}" />
                         </StackPanel>
                     </WrapPanel>
+
+                    <!-- #17: Anbarlar üzrə stok (redaktədə) -->
+                    <Border Background="#F5F6FA" CornerRadius="8" Padding="12" Margin="0,4,0,0">
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="Anbarlar üzrə stok" FontWeight="SemiBold" />
+                            <TextBlock Text="Məhsul bir neçə anbarda ola bilər. Hər anbardakı sayı ayrıca dəyiş və ya köçür."
+                                       Foreground="#8A90A6" FontSize="12" />
+
+                            <!-- Mövcud səviyyələr -->
+                            <ItemsControl ItemsSource="{Binding EditStockLevels}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:ProductStockRow">
+                                        <Grid ColumnDefinitions="*,120,120,Auto" Margin="0,3">
+                                            <TextBlock Grid.Column="0" Text="{Binding WarehouseName}" VerticalAlignment="Center" />
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4">
+                                                <TextBlock Text="Say:" FontSize="11" Foreground="#5A6072" VerticalAlignment="Center" />
+                                                <TextBox Width="70" Text="{Binding Quantity}" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4">
+                                                <TextBlock Text="Min:" FontSize="11" Foreground="#5A6072" VerticalAlignment="Center" />
+                                                <TextBox Width="60" Text="{Binding MinQuantity}" />
+                                            </StackPanel>
+                                            <Button Grid.Column="3" Content="💾"
+                                                    Command="{Binding $parent[ItemsControl].((vm:ProductsViewModel)DataContext).SaveStockRowCommand}"
+                                                    CommandParameter="{Binding}" ToolTip.Tip="Bu anbarın stokunu yadda saxla" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            <!-- Anbara əlavə et -->
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBlock Text="Anbara əlavə et:" VerticalAlignment="Center" Foreground="#5A6072" />
+                                <ComboBox ItemsSource="{Binding Warehouses}" SelectedItem="{Binding StockWarehouse}" Width="150">
+                                    <ComboBox.ItemTemplate><DataTemplate><TextBlock Text="{Binding Name}" /></DataTemplate></ComboBox.ItemTemplate>
+                                </ComboBox>
+                                <TextBox Width="70" PlaceholderText="Say" Text="{Binding StockQty}" />
+                                <TextBox Width="60" PlaceholderText="Min" Text="{Binding StockMin}" />
+                                <Button Content="+ Yaz" Command="{Binding AddStockToWarehouseCommand}" />
+                            </StackPanel>
+
+                            <!-- Transfer -->
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBlock Text="Köçür:" VerticalAlignment="Center" Foreground="#5A6072" />
+                                <ComboBox ItemsSource="{Binding Warehouses}" SelectedItem="{Binding TransferFrom}" Width="140">
+                                    <ComboBox.ItemTemplate><DataTemplate><TextBlock Text="{Binding Name}" /></DataTemplate></ComboBox.ItemTemplate>
+                                </ComboBox>
+                                <TextBlock Text="→" VerticalAlignment="Center" />
+                                <ComboBox ItemsSource="{Binding Warehouses}" SelectedItem="{Binding TransferTo}" Width="140">
+                                    <ComboBox.ItemTemplate><DataTemplate><TextBlock Text="{Binding Name}" /></DataTemplate></ComboBox.ItemTemplate>
+                                </ComboBox>
+                                <TextBox Width="70" PlaceholderText="Say" Text="{Binding TransferQty}" />
+                                <Button Content="🔀 Köçür" Command="{Binding TransferStockCommand}" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
                     <StackPanel Orientation="Horizontal" Spacing="8">
                         <Button Content="💾 Yadda saxla" Command="{Binding SaveEditCommand}"
                                 Background="#2F9E44" Foreground="White" />

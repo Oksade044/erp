@@ -261,6 +261,10 @@ public sealed class ErpApiClient(HttpClient http)
     }
 
     // --- Stok (per-anbar səviyyələr, transfer, min-stok) ---
+    /// <summary>Bir məhsulun bütün anbarlar üzrə stok səviyyələri (#17 — redaktədə).</summary>
+    public Task<List<StockLevelDto>?> GetProductStockAsync(Guid productId, CancellationToken ct = default) =>
+        http.GetFromJsonAsync<List<StockLevelDto>>($"/api/v1/products/{productId}/stock", JsonOpts, ct);
+
     public Task<PagedResult<StockLevelDto>?> GetStockLevelsAsync(string? search, bool lowOnly, CancellationToken ct = default) =>
         http.GetFromJsonAsync<PagedResult<StockLevelDto>>(
             $"/api/v1/stock/levels?search={Uri.EscapeDataString(search ?? "")}&low={(lowOnly ? "true" : "false")}", JsonOpts, ct);

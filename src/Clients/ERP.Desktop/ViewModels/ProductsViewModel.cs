@@ -126,6 +126,73 @@ public partial class ProductsViewModel : ViewModelBase
     [ObservableProperty] private string? _editCategory;
     [ObservableProperty] private bool _editIsActive = true;
 
+    // ---- #17: redaktədə anbarlar üzrə stok ----
+    private Guid _editProductId;
+
+    /// <summary>Redaktə olunan məhsulun anbarlar üzrə stoku (hər sətir ayrıca redaktə olunur).</summary>
+    public ObservableCollection<ProductStockRow> EditStockLevels { get; } = [];
+
+    /// <summary>Yeni anbara stok əlavə etmək / transfer üçün.</summary>
+    [ObservableProperty] private WarehouseDto? _stockWarehouse;
+    [ObservableProperty] private int _stockQty;
+    [ObservableProperty] private int _stockMin;
+    [ObservableProperty] private WarehouseDto? _transferFrom;
+    [ObservableProperty] private WarehouseDto? _transferTo;
+    [ObservableProperty] private int _transferQty;
+
+    private async Task LoadEditStockAsync()
+    {
+        EditStockLevels.Clear();
+        var levels = await _api.GetProductStockAsync(_editProductId);
+        if (levels is not null)
+            foreach (var l in levels)
+                EditStockLevels.Add(new ProductStockRow(l.WarehouseId, l.WarehouseName, l.Quantity, l.MinQuantity));
+    }
+
+    /// <summary>Bir anbardakı stok sətrini yadda saxlayır (mütləq say + min).</summary>
+    [RelayCommand]
+    private async Task SaveStockRowAsync(ProductStockRow row)
+    {
+        if (row is null) return;
+        var (ok, error) = await _api.AdjustStockAsync(new AdjustStockRequest(
+            _editProductId, row.WarehouseId, row.Quantity, row.MinQuantity));
+        Status = ok ? $"'{row.WarehouseName}' stoku yeniləndi: {row.Quantity}" : (error ?? "Yenilənmədi.");
+        if (ok) await LoadEditStockAsync();
+    }
+
+    /// <summary>Məhsulu seçilmiş anbara yerləşdirir (yeni səviyyə və ya mövcudu dəyişir).</summary>
+    [RelayCommand]
+    private async Task AddStockToWarehouseAsync()
+    {
+        if (StockWarehouse is null) { Status = "Anbar seçin."; return; }
+        var (ok, error) = await _api.AdjustStockAsync(new AdjustStockRequest(
+            _editProductId, StockWarehouse.Id, StockQty, StockMin));
+        if (ok)
+        {
+            Status = $"'{StockWarehouse.Name}' anbarına yazıldı: {StockQty}";
+            StockWarehouse = null; StockQty = 0; StockMin = 0;
+            await LoadEditStockAsync();
+        }
+        else Status = error ?? "Alınmadı.";
+    }
+
+    /// <summary>Məhsulu bir anbardan digərinə köçürür (#17 — başqa anbara köçürmə).</summary>
+    [RelayCommand]
+    private async Task TransferStockAsync()
+    {
+        if (TransferFrom is null || TransferTo is null) { Status = "Mənbə və təyinat anbarını seçin."; return; }
+        if (TransferQty <= 0) { Status = "Köçürülən say 0-dan böyük olmalıdır."; return; }
+        var (ok, error) = await _api.TransferStockAsync(new TransferStockRequest(
+            _editProductId, TransferFrom.Id, TransferTo.Id, TransferQty));
+        if (ok)
+        {
+            Status = $"{TransferQty} ədəd '{TransferFrom.Name}' → '{TransferTo.Name}' köçürüldü.";
+            TransferQty = 0;
+            await LoadEditStockAsync();
+        }
+        else Status = error ?? "Köçürülmədi.";
+    }
+
     private static string ToTrackingValue(string? display) =>
         display == TrackingModeConverter.IndividualDisplay ? "Nüsxə" : "Toplu";
 
@@ -245,8 +312,10 @@ public partial class ProductsViewModel : ViewModelBase
         EditMinStock = Selected.MinStockQuantity;
         EditCategory = Selected.Category;
         EditIsActive = Selected.IsActive;
+        _editProductId = Selected.Id;
         IsEditing = true;
         Status = $"Redaktə: {Selected.Sku} — {Selected.Name}";
+        _ = LoadEditStockAsync(); // anbarlar üzrə stoku gətir (#17)
     }
 
     [RelayCommand]
@@ -312,4 +381,15 @@ public partial class ProductsViewModel : ViewModelBase
         Process.Start(new ProcessStartInfo(path) { UseShellExecute = true });
         Status = $"QR kod açıldı: {Selected.Sku}";
     }
+}
+
+/// <summary>Məhsul redaktəsində bir anbardakı stok sətri (redaktə oluna bilər — #17).</summary>
+public partial class ProductStockRow(Guid warehouseId, string warehouseName, int quantity, int minQuantity)
+    : ObservableObject
+{
+    public Guid WarehouseId { get; } = warehouseId;
+    public string WarehouseName { get; } = warehouseName;
+
+    [ObservableProperty] private int _quantity = quantity;
+    [ObservableProperty] private int _minQuantity = minQuantity;
 }
