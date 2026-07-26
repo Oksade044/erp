@@ -13,7 +13,8 @@ using ERP.Shared.Contracts.Products;
 namespace ERP.Desktop.ViewModels;
 
 /// <summary>Sifariş yaradarkən müvəqqəti sətir (UI-da göstərilir).</summary>
-public sealed record DraftLine(Guid ProductId, string ProductName, int Quantity, decimal UnitPrice)
+public sealed record DraftLine(Guid ProductId, string ProductName, int Quantity, decimal UnitPrice,
+    Guid? WarehouseId = null, string? WarehouseName = null)
 {
     public decimal LineTotal => Quantity * UnitPrice;
 }
@@ -58,6 +59,24 @@ public partial class OrdersViewModel : ViewModelBase
     [ObservableProperty] private ProductDto? _lineProduct;
     [ObservableProperty] private int _lineQuantity = 1;
 
+    // #18/#19 — seçilmiş məhsulun anbarlar üzrə mövcudluğu + götürüləcək anbar.
+    public ObservableCollection<ProductAvailabilityDto> LineAvailability { get; } = [];
+    [ObservableProperty] private ProductAvailabilityDto? _lineWarehouse;
+
+    partial void OnLineProductChanged(ProductDto? value) => _ = LoadAvailabilityAsync(value);
+
+    private async Task LoadAvailabilityAsync(ProductDto? product)
+    {
+        LineAvailability.Clear();
+        LineWarehouse = null;
+        if (product is null) return;
+        var avail = await api.GetProductAvailabilityAsync(product.Id);
+        if (avail is not null)
+            foreach (var a in avail) LineAvailability.Add(a);
+        // Ən çox boş olan anbarı default seç.
+        LineWarehouse = LineAvailability.OrderByDescending(a => a.Free).FirstOrDefault();
+    }
+
     // --- Depozit & qaytarma hesablaşması (seçilmiş sifariş üçün) ---
     [ObservableProperty] private decimal _depositAmount;
     [ObservableProperty] private decimal _damageCharge;
@@ -99,7 +118,15 @@ public partial class OrdersViewModel : ViewModelBase
         if (LineProduct is null || LineQuantity <= 0) { Status = "Məhsul və say seçin."; return; }
         if (DraftLines.Any(l => l.ProductId == LineProduct.Id)) { Status = "Bu məhsul artıq əlavə olunub."; return; }
 
-        DraftLines.Add(new DraftLine(LineProduct.Id, LineProduct.Name, LineQuantity, LineProduct.RentalPrice));
+        // #18/#19 — seçilmiş anbarda kifayət qədər boş varmı?
+        if (LineWarehouse is not null && LineQuantity > LineWarehouse.Free)
+        {
+            Status = $"'{LineWarehouse.WarehouseName}' anbarında boş yalnız {LineWarehouse.Free} ədəddir.";
+            return;
+        }
+
+        DraftLines.Add(new DraftLine(LineProduct.Id, LineProduct.Name, LineQuantity, LineProduct.RentalPrice,
+            LineWarehouse?.WarehouseId, LineWarehouse?.WarehouseName));
         OnPropertyChanged(nameof(DraftTotal));
         LineQuantity = 1;
     }
@@ -121,7 +148,7 @@ public partial class OrdersViewModel : ViewModelBase
             CustomerId: NewCustomer.Id,
             StartDate: DateOnly.FromDateTime(NewStartDate.DateTime),
             EndDate: DateOnly.FromDateTime(NewEndDate.DateTime),
-            Lines: DraftLines.Select(l => new CreateOrderLineRequest(l.ProductId, l.Quantity, l.UnitPrice)).ToList(),
+            Lines: DraftLines.Select(l => new CreateOrderLineRequest(l.ProductId, l.Quantity, l.UnitPrice, l.WarehouseId)).ToList(),
             // Admin/Menecer məsul əməkdaş seçibsə, sifariş onun adına yazılır (yoxsa özünün).
             CreatedByName: CanChooseCreator ? SelectedCreator?.FullName : null,
             CreatedByRole: CanChooseCreator ? SelectedCreator?.Position : null);

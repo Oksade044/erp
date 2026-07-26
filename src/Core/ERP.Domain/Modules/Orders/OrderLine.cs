@@ -19,6 +19,10 @@ public class OrderLine : BaseEntity
 
     public int Quantity { get; private set; }
 
+    /// <summary>Məhsulun götürüləcəyi anbar (#18/#19 — opsional, köhnə sifarişlər üçün null).</summary>
+    public Guid? WarehouseId { get; private set; }
+    public string? WarehouseName { get; private set; }
+
     /// <summary>Bir vahid üçün icarə qiyməti (sifarişə xas dinamik dəyər).</summary>
     public Money UnitPrice { get; private set; } = null!;
 
@@ -27,7 +31,8 @@ public class OrderLine : BaseEntity
     // EF Core üçün.
     private OrderLine() { }
 
-    internal OrderLine(Guid productId, string productName, int quantity, Money unitPrice)
+    internal OrderLine(Guid productId, string productName, int quantity, Money unitPrice,
+        Guid? warehouseId = null, string? warehouseName = null)
     {
         if (productId == Guid.Empty)
             throw new DomainException("Sətir üçün məhsul tələb olunur.");
@@ -40,6 +45,8 @@ public class OrderLine : BaseEntity
         ProductName = productName.Trim();
         Quantity = quantity;
         UnitPrice = unitPrice;
+        WarehouseId = warehouseId;
+        WarehouseName = string.IsNullOrWhiteSpace(warehouseName) ? null : warehouseName.Trim();
     }
 
     internal void ChangeQuantity(int quantity)

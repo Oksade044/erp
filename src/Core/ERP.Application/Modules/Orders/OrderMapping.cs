@@ -33,5 +33,6 @@ public static class OrderMapping
             Quantity: l.Quantity,
             UnitPrice: l.UnitPrice.Amount,
             LineTotal: l.LineTotal.Amount,
-            Currency: l.UnitPrice.Currency)).ToList());
+            Currency: l.UnitPrice.Currency,
+            WarehouseName: l.WarehouseName)).ToList());
 }

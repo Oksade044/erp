@@ -103,19 +103,42 @@
 
                 <StackPanel Orientation="Horizontal" Spacing="8">
                     <TextBlock Text="Məhsul:" VerticalAlignment="Center" Width="60" />
-                    <ComboBox ItemsSource="{Binding AllProducts}" SelectedItem="{Binding LineProduct}" Width="220">
+                    <ComboBox ItemsSource="{Binding AllProducts}" SelectedItem="{Binding LineProduct}" Width="200">
                         <ComboBox.ItemTemplate>
                             <DataTemplate><TextBlock Text="{Binding Name}" /></DataTemplate>
                         </ComboBox.ItemTemplate>
                     </ComboBox>
-                    <TextBox Width="80" PlaceholderText="Say" Text="{Binding LineQuantity}" />
+                    <TextBlock Text="Anbardan:" VerticalAlignment="Center" />
+                    <ComboBox ItemsSource="{Binding LineAvailability}" SelectedItem="{Binding LineWarehouse}" Width="240"
+                              ToolTip.Tip="Məhsulun götürüləcəyi anbar. Mötərizədə boş say göstərilir.">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding WarehouseName}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <TextBox Width="70" PlaceholderText="Say" Text="{Binding LineQuantity}" />
                     <Button Content="+ Sətir" Command="{Binding AddLineCommand}" />
                 </StackPanel>
+
+                <!-- #18/#19 — seçilmiş məhsulun anbarlar üzrə mövcudluğu -->
+                <DataGrid ItemsSource="{Binding LineAvailability}" IsReadOnly="True" Height="90"
+                          GridLinesVisibility="Horizontal" BorderThickness="1" BorderBrush="#E0E2EA"
+                          IsVisible="{Binding LineProduct, Converter={x:Static ObjectConverters.IsNotNull}}">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Anbar" Binding="{Binding WarehouseName}" Width="2*" />
+                        <DataGridTextColumn Header="Mövcud" Binding="{Binding Total}" Width="*" />
+                        <DataGridTextColumn Header="Rezervdə" Binding="{Binding Reserved}" Width="*" />
+                        <DataGridTextColumn Header="Kirayədə" Binding="{Binding Rented}" Width="*" />
+                        <DataGridTextColumn Header="Boş" Binding="{Binding Free}" Width="*" />
+                    </DataGrid.Columns>
+                </DataGrid>
 
                 <DataGrid ItemsSource="{Binding DraftLines}" IsReadOnly="True" Height="130"
                           GridLinesVisibility="Horizontal" BorderThickness="1" BorderBrush="#E0E2EA">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Məhsul" Binding="{Binding ProductName}" Width="2*" />
+                        <DataGridTextColumn Header="Anbar" Binding="{Binding WarehouseName}" Width="*" />
                         <DataGridTextColumn Header="Say" Binding="{Binding Quantity}" Width="*" />
                         <DataGridTextColumn Header="Qiymət" Binding="{Binding UnitPrice}" Width="*" />
                         <DataGridTextColumn Header="Cəm" Binding="{Binding LineTotal}" Width="*" />

@@ -18,4 +18,6 @@ public sealed record CreateOrderRequest(
 public sealed record CreateOrderLineRequest(
     Guid ProductId,
     int Quantity,
-    decimal? UnitPrice = null);
+    decimal? UnitPrice = null,
+    // #18 — məhsulun götürüləcəyi anbar (opsional).
+    Guid? WarehouseId = null);

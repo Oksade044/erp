@@ -17,7 +17,9 @@ public sealed class OrderLineConfiguration : IEntityTypeConfiguration<OrderLine>
 
         builder.Property(l => l.ProductName).HasMaxLength(200).IsRequired();
         builder.Property(l => l.Quantity).IsRequired();
+        builder.Property(l => l.WarehouseName).HasMaxLength(200);
         builder.HasIndex(l => l.ProductId);
+        builder.HasIndex(l => l.WarehouseId);
 
         builder.OwnsOne(l => l.UnitPrice, price =>
         {

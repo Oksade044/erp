@@ -32,6 +32,7 @@ public sealed class CreateOrderHandler(
     IRentalOrderRepository orders,
     ICustomerRepository customers,
     IProductRepository products,
+    IWarehouseRepository warehouses,
     ICurrentUser currentUser,
     IUnitOfWork unitOfWork)
     : IRequestHandler<CreateOrderCommand, Result<Guid>>
@@ -68,7 +69,17 @@ public sealed class CreateOrderHandler(
                 ? Money.Create(p, product.RentalPrice.Currency)
                 : product.RentalPrice;
 
-            order.AddLine(product.Id, product.Name, lineDto.Quantity, unitPrice);
+            // #18 — məhsulun götürüləcəyi anbar (opsional).
+            string? warehouseName = null;
+            if (lineDto.WarehouseId is { } whId)
+            {
+                var wh = await warehouses.GetByIdAsync(whId, ct);
+                if (wh is null)
+                    return Result.Failure<Guid>($"Anbar tapılmadı: {whId}");
+                warehouseName = wh.Name;
+            }
+
+            order.AddLine(product.Id, product.Name, lineDto.Quantity, unitPrice, lineDto.WarehouseId, warehouseName);
         }
 
         await orders.AddAsync(order, ct);

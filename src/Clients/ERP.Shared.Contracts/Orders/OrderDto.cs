@@ -30,4 +30,5 @@ public sealed record OrderLineDto(
     int Quantity,
     decimal UnitPrice,
     decimal LineTotal,
-    string Currency);
+    string Currency,
+    string? WarehouseName = null);

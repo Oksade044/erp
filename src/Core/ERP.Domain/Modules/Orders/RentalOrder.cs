@@ -112,7 +112,8 @@ public class RentalOrder : BaseEntity, IAggregateRoot
         };
     }
 
-    public OrderLine AddLine(Guid productId, string productName, int quantity, Money unitPrice)
+    public OrderLine AddLine(Guid productId, string productName, int quantity, Money unitPrice,
+        Guid? warehouseId = null, string? warehouseName = null)
     {
         EnsureDraft();
 
@@ -120,7 +121,7 @@ public class RentalOrder : BaseEntity, IAggregateRoot
         if (existing is not null)
             throw new DomainException($"Bu məhsul artıq sifarişdə var: {productName}. Sayı dəyişin.");
 
-        var line = new OrderLine(productId, productName, quantity, unitPrice);
+        var line = new OrderLine(productId, productName, quantity, unitPrice, warehouseId, warehouseName);
         _lines.Add(line);
         return line;
     }
