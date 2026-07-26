@@ -31,6 +31,7 @@ public partial class MainViewModel : ViewModelBase
     private readonly ReportsViewModel _reports;
     private readonly UsersViewModel _users;
     private readonly FieldPermissionsViewModel _fieldPermissions;
+    private readonly RolesViewModel _roles;
     private readonly AuditViewModel _audit;
     private readonly Action _onLogout;
 
@@ -79,6 +80,7 @@ public partial class MainViewModel : ViewModelBase
         _reports = new ReportsViewModel(api);
         _users = new UsersViewModel(api);
         _fieldPermissions = new FieldPermissionsViewModel(api);
+        _roles = new RolesViewModel(api);
         _audit = new AuditViewModel(api);
 
         Current = _dashboard;
@@ -106,6 +108,7 @@ public partial class MainViewModel : ViewModelBase
             "Hesabatlar" => _reports,
             "İstifadəçilər" => _users,
             "Sahə İcazələri" => _fieldPermissions,
+            "Rollar" => _roles,
             "Audit Jurnalı" => _audit,
             _ => _dashboard
         };
@@ -128,6 +131,7 @@ public partial class MainViewModel : ViewModelBase
             case ReportsViewModel r: r.LoadCommand.Execute(null); break;
             case UsersViewModel u: u.LoadCommand.Execute(null); break;
             case FieldPermissionsViewModel fp: fp.LoadCommand.Execute(null); break;
+            case RolesViewModel rl: rl.LoadCommand.Execute(null); break;
             case AuditViewModel au: au.LoadCommand.Execute(null); break;
         }
     }

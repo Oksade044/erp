@@ -1,0 +1,65 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:ERP.Desktop.ViewModels"
+             xmlns:dto="using:ERP.Shared.Contracts.Users"
+             xmlns:ctrl="using:ERP.Desktop.Controls"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="880" d:DesignHeight="600"
+             x:Class="ERP.Desktop.Views.RolesView"
+             x:DataType="vm:RolesViewModel">
+
+    <Grid RowDefinitions="Auto,Auto,*,Auto" Margin="24">
+
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="8" Margin="0,0,0,16">
+            <TextBlock Text="Rollar &amp; İcazələr" FontSize="24" FontWeight="SemiBold" VerticalAlignment="Center" />
+            <ctrl:InfoHelp Title="Rollar və icazələr (#16)"
+                           Text="Yeni rol yaradın (məs. Satış, Dizayner, Sürücü) və hər rolun hansı bölmələri görüb/dəyişə biləcəyini seçin. İstifadəçilər bu rollara təyin olunur."
+                           Note="Admin rolu qorunur (icazələri azaldıla bilməz). Daxili rollar (Admin/Menecer/Anbardar/Kassir) silinə bilməz, amma icazələri dəyişdirilə bilər." />
+        </StackPanel>
+
+        <!-- Yeni rol -->
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="8" Margin="0,0,0,12">
+            <TextBox Width="220" PlaceholderText="Yeni rol adı (məs. Satış)" Text="{Binding NewRoleName}" />
+            <Button Content="+ Rol yarat" Command="{Binding CreateRoleCommand}" Background="#3B5BDB" Foreground="White" />
+            <Button Content="🗑 Seçilmiş rolu sil" Command="{Binding DeleteRoleCommand}" Background="#E03131" Foreground="White" />
+        </StackPanel>
+
+        <!-- Rollar siyahısı + icazə matrisi -->
+        <Grid Grid.Row="2" ColumnDefinitions="220,16,*">
+            <ListBox Grid.Column="0" ItemsSource="{Binding Roles}" SelectedItem="{Binding SelectedRole}"
+                     BorderThickness="1" BorderBrush="#E0E2EA">
+                <ListBox.ItemTemplate>
+                    <DataTemplate x:DataType="dto:RoleDto">
+                        <StackPanel Margin="4">
+                            <TextBlock Text="{Binding Name}" FontWeight="SemiBold" />
+                            <TextBlock Text="{Binding Permissions.Count, StringFormat={}{0} icazə}" FontSize="11" Foreground="#8A90A6" />
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+
+            <StackPanel Grid.Column="2">
+                <TextBlock Text="Seçilmiş rolun icazələri (qutu seçilidirsə — icazə var):" Margin="0,0,0,8" Foreground="#5A6072" />
+                <TextBlock Text="⚠ Admin rolu qorunur — dəyişdirilə bilməz." Foreground="#C92A2A" FontSize="12"
+                           IsVisible="{Binding !IsEditable}" Margin="0,0,0,6" />
+                <ScrollViewer Height="360" BorderBrush="#E0E2EA" BorderThickness="1" Padding="10">
+                    <ItemsControl ItemsSource="{Binding Permissions}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:PermissionCheck">
+                                <CheckBox Content="{Binding Label}" IsChecked="{Binding IsChecked}"
+                                          IsEnabled="{Binding $parent[ItemsControl].((vm:RolesViewModel)DataContext).IsEditable}"
+                                          Margin="0,2" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+                <Button Content="💾 İcazələri yadda saxla" Command="{Binding SaveCommand}"
+                        Background="#2F9E44" Foreground="White" Margin="0,10,0,0"
+                        IsEnabled="{Binding IsEditable}" HorizontalAlignment="Left" />
+            </StackPanel>
+        </Grid>
+
+        <TextBlock Grid.Row="3" Text="{Binding Status}" Foreground="#5A6072" Margin="0,10,0,0" />
+    </Grid>
+</UserControl>

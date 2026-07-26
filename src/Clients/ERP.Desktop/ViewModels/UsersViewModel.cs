@@ -1,5 +1,6 @@
 using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -20,9 +21,10 @@ public partial class UsersViewModel(ErpApiClient api) : ViewModelBase
     [ObservableProperty] private string? _newUsername;
     [ObservableProperty] private string? _newPassword;
     [ObservableProperty] private string? _newFullName;
-    [ObservableProperty] private string _newRole = "Kassir";
+    [ObservableProperty] private string? _newRole;
 
-    public string[] Roles { get; } = ["Admin", "Menecer", "Anbardar", "Kassir"];
+    /// <summary>Rollar dinamikdir (#16) — API-dən yüklənir.</summary>
+    public ObservableCollection<string> Roles { get; } = [];
 
     [RelayCommand]
     private async Task LoadAsync()
@@ -34,6 +36,14 @@ public partial class UsersViewModel(ErpApiClient api) : ViewModelBase
             Users.Clear();
             var list = await api.GetUsersAsync();
             if (list is not null) foreach (var u in list) Users.Add(u);
+
+            // Rolları dinamik gətir (dropdown üçün).
+            if (Roles.Count == 0)
+            {
+                var roles = await api.GetRolesAsync();
+                if (roles is not null) foreach (var r in roles) Roles.Add(r.Name);
+                NewRole ??= Roles.Contains("Kassir") ? "Kassir" : Roles.FirstOrDefault();
+            }
             Status = $"{Users.Count} istifadəçi";
         }
         catch (Exception ex) { Status = $"Xəta (icazə yoxdur ola bilər): {ex.Message}"; }
@@ -43,9 +53,10 @@ public partial class UsersViewModel(ErpApiClient api) : ViewModelBase
     [RelayCommand]
     private async Task AddAsync()
     {
-        if (string.IsNullOrWhiteSpace(NewUsername) || string.IsNullOrWhiteSpace(NewPassword) || string.IsNullOrWhiteSpace(NewFullName))
+        if (string.IsNullOrWhiteSpace(NewUsername) || string.IsNullOrWhiteSpace(NewPassword)
+            || string.IsNullOrWhiteSpace(NewFullName) || string.IsNullOrWhiteSpace(NewRole))
         {
-            Status = "İstifadəçi adı, parol və ad tələb olunur.";
+            Status = "İstifadəçi adı, parol, ad və rol tələb olunur.";
             return;
         }
 
@@ -53,7 +64,7 @@ public partial class UsersViewModel(ErpApiClient api) : ViewModelBase
         try
         {
             var (ok, error) = await api.CreateUserAsync(new CreateUserRequest(
-                NewUsername!, NewPassword!, NewFullName!, NewRole));
+                NewUsername!, NewPassword!, NewFullName!, NewRole!));
             if (ok)
             {
                 Status = "İstifadəçi yaradıldı.";

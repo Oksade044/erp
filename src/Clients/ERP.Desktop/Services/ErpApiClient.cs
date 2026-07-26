@@ -392,6 +392,31 @@ public sealed class ErpApiClient(HttpClient http)
         return await ReadResultAsync(resp, ct);
     }
 
+    // --- Dinamik rollar (#16) ---
+    public Task<List<RoleDto>?> GetRolesAsync(CancellationToken ct = default) =>
+        http.GetFromJsonAsync<List<RoleDto>>("/api/v1/roles", JsonOpts, ct);
+
+    public Task<List<PermissionInfoDto>?> GetPermissionCatalogAsync(CancellationToken ct = default) =>
+        http.GetFromJsonAsync<List<PermissionInfoDto>>("/api/v1/roles/permissions", JsonOpts, ct);
+
+    public async Task<(bool ok, string? error)> CreateRoleAsync(CreateRoleRequest request, CancellationToken ct = default)
+    {
+        var resp = await http.PostAsJsonAsync("/api/v1/roles", request, JsonOpts, ct);
+        return await ReadResultAsync(resp, ct);
+    }
+
+    public async Task<(bool ok, string? error)> UpdateRolePermissionsAsync(Guid id, UpdateRolePermissionsRequest request, CancellationToken ct = default)
+    {
+        var resp = await http.PutAsJsonAsync($"/api/v1/roles/{id}/permissions", request, JsonOpts, ct);
+        return await ReadResultAsync(resp, ct);
+    }
+
+    public async Task<(bool ok, string? error)> DeleteRoleAsync(Guid id, CancellationToken ct = default)
+    {
+        var resp = await http.DeleteAsync($"/api/v1/roles/{id}", ct);
+        return await ReadResultAsync(resp, ct);
+    }
+
     private static async Task<(bool ok, string? error)> ReadResultAsync(HttpResponseMessage resp, CancellationToken ct)
     {
         if (resp.IsSuccessStatusCode)

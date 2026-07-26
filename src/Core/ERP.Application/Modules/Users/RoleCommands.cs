@@ -74,7 +74,11 @@ public sealed class UpdateRolePermissionsHandler(IRoleRepository roles, IUnitOfW
         if (role is null)
             return Result.Failure($"Rol tapılmadı: {request.Id}");
 
-        role.SetPermissions(CreateRoleHandler.ValidPermissions(request.Request.Permissions));
+        // Təhlükəsizlik: Admin rolu heç vaxt icazələrini itirməsin (özünü kilidləməsin).
+        if (role.Name == "Admin")
+            role.SetPermissions(Permissions.Catalog.Select(c => c.Key));
+        else
+            role.SetPermissions(CreateRoleHandler.ValidPermissions(request.Request.Permissions));
         await unitOfWork.SaveChangesAsync(ct);
         return Result.Success();
     }
