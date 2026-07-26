@@ -45,8 +45,9 @@ public sealed class ConfirmOrderHandler(
                     $"[{order.StartDate:dd.MM.yyyy}–{order.EndDate:dd.MM.yyyy}].");
         }
 
+        // Sifariş izlənilir (GetByIdWithLinesAsync) → mutasiya kifayətdir; Update() çağırsaq
+        // EF bütün sahələri Modified sayar və audit tarixçəsi lüzumsuz dolğun olar.
         order.Confirm(currentUser.FullName ?? currentUser.UserName);
-        orders.Update(order);
 
         // #22 — təsdiq zamanı faktura avtomatik yaradılır (əvvəldən yoxdursa).
         if (!await invoices.ExistsForOrderAsync(order.Id, ct))
