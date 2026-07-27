@@ -64,6 +64,9 @@ public partial class NewOrderViewModel(MobileApiClient api) : ObservableObject
     }
 
     [RelayCommand]
+    private void ToggleCreatingCustomer() => CreatingCustomer = !CreatingCustomer;
+
+    [RelayCommand]
     private void PickCustomer(CustomerDto? c)
     {
         SelectedCustomer = c;
