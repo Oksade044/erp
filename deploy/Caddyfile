@@ -1,0 +1,8 @@
+# Caddy reverse proxy — mobil tətbiq və brauzer üçün avtomatik HTTPS.
+# {$DOMAIN} docker-compose-dəki DOMAIN dəyişənindən gəlir (məs. erp.sizindomen.az).
+# Caddy Let's Encrypt sertifikatını avtomatik alır və yeniləyir.
+
+{$DOMAIN} {
+	reverse_proxy api:8080
+	encode gzip
+}

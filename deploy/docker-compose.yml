@@ -45,9 +45,29 @@ services:
       Database__Provider: Postgres
       ConnectionStrings__Default: "Host=postgres;Port=5432;Database=erp;Username=erp;Password=${POSTGRES_PASSWORD:-erp_dev_password}"
       Jwt__Key: ${JWT_KEY:-serverde-bu-acar-secret-store-dan-gelmelidir-en-azi-32-bayt!!}
+    expose:
+      - "8080"
+    restart: unless-stopped
+
+  # Reverse proxy — mobil tətbiq üçün avtomatik HTTPS (Let's Encrypt).
+  # DOMAIN dəyişənini VPS domeninizə təyin edin (məs. erp.sizindomen.az).
+  caddy:
+    image: caddy:2-alpine
+    container_name: erp-caddy
+    depends_on:
+      - api
+    environment:
+      DOMAIN: ${DOMAIN:-erp.example.com}
     ports:
-      - "8080:8080"
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - erp-caddy-data:/data
+      - erp-caddy-config:/config
     restart: unless-stopped
 
 volumes:
   erp-pgdata:
+  erp-caddy-data:
+  erp-caddy-config:

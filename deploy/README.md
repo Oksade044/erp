@@ -40,11 +40,25 @@ API açılışda migration-ları avtomatik tətbiq edir (`DbSeeder.MigrateAsync`
 ## 3. Data köçürmə (mövcud SQLite → Postgres)
 Kiçik həcm üçün: API vasitəsilə yenidən daxiletmə, və ya `pgloader` ilə birbaşa köçürmə.
 
-## 4. Client
-Desktop-da `ApiBaseUrl`-i server ünvanına dəyiş (hazırda `http://localhost:5080`).
+## 4. HTTPS (mobil tətbiq üçün) — Caddy
+`docker-compose.yml`-ə **caddy** servisi əlavə edilib: avtomatik Let's Encrypt HTTPS.
+```powershell
+$env:DOMAIN = "erp.sizindomen.az"   # VPS domeniniz (DNS A qeydi VPS IP-yə yönəlməlidir)
+$env:POSTGRES_PASSWORD = "güclü-parol"
+$env:JWT_KEY = "ən-azı-32-baytlıq-gizli-açar"
+docker compose -f deploy/docker-compose.yml up -d --build
+```
+API artıq birbaşa açıq deyil (`expose`), yalnız Caddy vasitəsilə `https://$DOMAIN`.
+Caddy sertifikatı avtomatik alır/yeniləyir (`deploy/Caddyfile`).
+
+## 5. Client-lər
+- **Desktop:** `ApiBaseUrl`-i server ünvanına dəyiş (hazırda `http://localhost:5080`).
+- **Mobil (ERP İşçi):** giriş ekranında "Server ayarları" → `https://erp.sizindomen.az`.
+  Kod dəyişmir; ünvan `Preferences`-də saxlanılır (bax `src/Clients/ERP.Mobile/README.md`).
 
 ## Qeydlər
 - **RowVersion concurrency**: SQLite-də sadə sütun, Postgres-də `IsRowVersion` (server-side).
   Postgres üçün `xmin` konkurentlik tokeni daha idiomatikdir — server miqrasiyasında nəzərdən keçirin.
-- **Redis**: cache + SignalR backplane üçün hazırdır (TDD §37, §38) — kod inteqrasiyası gələcək iş.
-- **Nginx/TLS**: reverse proxy + Let's Encrypt production üçün əlavə olunmalıdır (TDD §32).
+- **Redis**: cache + SignalR backplane üçün hazırdır (TDD §37, §38).
+- **Push bildiriş (FCM/APNs)**: Firebase layihəsi (`google-services.json`) + Apple APNs açarı
+  tələb olunur (sizin hesablarınız). Verildikdə backend-ə göndərici + mobilə alıcı əlavə olunacaq.
