@@ -14,7 +14,9 @@ public sealed class AppState
     /// </summary>
     public string BaseUrl
     {
-        get => Preferences.Get("api_base_url", "http://10.0.2.2:5080");
+        // Default: bu kompüterin LAN IP-si (eyni Wi-Fi-dakı telefon üçün). Giriş ekranında dəyişilə bilər.
+        // Emulyator üçün http://10.0.2.2:5080; VPS üçün https://domeniniz.
+        get => Preferences.Get("api_base_url", "http://192.168.100.50:5080");
         set => Preferences.Set("api_base_url", value);
     }
 
