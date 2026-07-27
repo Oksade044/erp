@@ -42,7 +42,8 @@ public sealed class CreateUserHandler(
             return Result.Failure<Guid>($"Belə rol yoxdur: {dto.Role}");
 
         var (hash, salt) = hasher.Hash(dto.Password);
-        var user = User.Create(username, hash, salt, dto.FullName, role.Name);
+        // Admin təyin etdiyi şifrə admin paneldə görünsün deyə saxlanılır (daxili tələb).
+        var user = User.Create(username, hash, salt, dto.FullName, role.Name, visiblePassword: dto.Password);
 
         await users.AddAsync(user, ct);
         await unitOfWork.SaveChangesAsync(ct);

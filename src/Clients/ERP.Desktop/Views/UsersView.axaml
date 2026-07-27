@@ -35,6 +35,7 @@
                 <DataGridTextColumn Header="İstifadəçi adı" Binding="{Binding Username}" Width="*" />
                 <DataGridTextColumn Header="Tam ad" Binding="{Binding FullName}" Width="2*" />
                 <DataGridTextColumn Header="Rol" Binding="{Binding Role}" Width="Auto" />
+                <DataGridTextColumn Header="Şifrə (admin)" Binding="{Binding VisiblePassword}" Width="Auto" />
                 <DataGridCheckBoxColumn Header="Aktiv" Binding="{Binding IsActive}" Width="Auto" />
             </DataGrid.Columns>
         </DataGrid>

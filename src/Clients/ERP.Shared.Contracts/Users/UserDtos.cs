@@ -1,13 +1,17 @@
 namespace ERP.Shared.Contracts.Users;
 
-/// <summary>İstifadəçi cavab DTO-su (parol heç vaxt qaytarılmır). TDD §12.</summary>
+/// <summary>
+/// İstifadəçi cavab DTO-su. VisiblePassword yalnız admin panelinə (users.manage) qaytarılır —
+/// admin işçiyə şifrəni çatdıra bilsin (daxili tələb). TDD §12.
+/// </summary>
 public sealed record UserDto(
     Guid Id,
     string Username,
     string FullName,
     string Role,
     bool IsActive,
-    DateTimeOffset CreatedAt);
+    DateTimeOffset CreatedAt,
+    string? VisiblePassword = null);
 
 /// <summary>Yeni istifadəçi yaratmaq üçün request. Role: "Admin" | "Menecer" | "Anbardar" | "Kassir".</summary>
 public sealed record CreateUserRequest(
