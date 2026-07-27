@@ -47,10 +47,9 @@ public partial class MyOrdersViewModel(MobileApiClient api) : ObservableObject
     }
 
     [RelayCommand]
-    private async Task SetFilterAsync(string filter) { Filter = filter; }
+    private void SetFilter(string filter) => Filter = filter;
 
-    [RelayCommand]
-    private async Task OpenAsync(OrderDto? order)
+    public async Task OpenAsync(OrderDto? order)
     {
         if (order is null) return;
         await Shell.Current.GoToAsync($"{nameof(OrderDetailPage)}?id={order.Id}");

@@ -11,7 +11,7 @@ namespace ERP.Infrastructure.Pdf;
 /// </summary>
 public sealed class InvoicePdfService : IInvoicePdfService
 {
-    public byte[] Generate(InvoiceDto inv, IReadOnlyList<InvoicePdfLine> lines)
+    public byte[] Generate(InvoiceDto inv, IReadOnlyList<InvoicePdfLine> lines, InvoicePdfSettlement? settlement = null)
     {
         var document = Document.Create(container =>
         {
@@ -126,6 +126,39 @@ public sealed class InvoicePdfService : IInvoicePdfService
                                 .SemiBold().FontColor(Colors.Blue.Darken1);
                         });
                     });
+
+                    // Depozit & hesablaşma bloku (yalnız depozit varsa)
+                    if (settlement is not null)
+                    {
+                        col.Item().PaddingTop(14).Background(Colors.Grey.Lighten4).Padding(10).Column(c =>
+                        {
+                            c.Item().Text("Depozit və hesablaşma").SemiBold().FontSize(12).FontColor(Colors.Blue.Darken2);
+                            c.Item().PaddingTop(4).Row(r =>
+                            {
+                                r.RelativeItem().Text("Alınan depozit:").FontColor(Colors.Grey.Darken1);
+                                r.AutoItem().Text($"{settlement.Deposit:0.00} {settlement.Currency}");
+                            });
+                            if (settlement.DamageCharge > 0)
+                                c.Item().Row(r =>
+                                {
+                                    r.RelativeItem().Text("Zədə tutulması:").FontColor(Colors.Red.Darken1);
+                                    r.AutoItem().Text($"−{settlement.DamageCharge:0.00} {settlement.Currency}").FontColor(Colors.Red.Darken1);
+                                });
+                            if (settlement.PenaltyCharge > 0)
+                                c.Item().Row(r =>
+                                {
+                                    r.RelativeItem().Text("Cərimə tutulması:").FontColor(Colors.Red.Darken1);
+                                    r.AutoItem().Text($"−{settlement.PenaltyCharge:0.00} {settlement.Currency}").FontColor(Colors.Red.Darken1);
+                                });
+                            c.Item().PaddingVertical(3).LineHorizontal(1).LineColor(Colors.Grey.Lighten2);
+                            c.Item().Row(r =>
+                            {
+                                r.RelativeItem().Text("Müştəriyə qaytarılan depozit:").SemiBold();
+                                r.AutoItem().Text($"{settlement.DepositRefund:0.00} {settlement.Currency}").SemiBold().FontColor(Colors.Green.Darken1);
+                            });
+                            c.Item().PaddingTop(2).Text($"Depozit statusu: {settlement.DepositStatus}").FontColor(Colors.Grey.Darken1);
+                        });
+                    }
 
                     // Ödəniş tarixçəsi
                     if (inv.Payments.Count > 0)

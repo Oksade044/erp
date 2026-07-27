@@ -66,8 +66,7 @@ public partial class NewOrderViewModel(MobileApiClient api) : ObservableObject
     [RelayCommand]
     private void ToggleCreatingCustomer() => CreatingCustomer = !CreatingCustomer;
 
-    [RelayCommand]
-    private void PickCustomer(CustomerDto? c)
+    public void PickCustomer(CustomerDto? c)
     {
         SelectedCustomer = c;
         if (c is not null) { CustomerSearch = c.Name; CustomerResults.Clear(); }
@@ -86,8 +85,7 @@ public partial class NewOrderViewModel(MobileApiClient api) : ObservableObject
         Status = "Müştəri yaradıldı və seçildi.";
     }
 
-    [RelayCommand]
-    private async Task PickProductAsync(ProductDto? p)
+    public async Task PickProductAsync(ProductDto? p)
     {
         SelectedProduct = p;
         ProductResults.Clear();
@@ -117,8 +115,7 @@ public partial class NewOrderViewModel(MobileApiClient api) : ObservableObject
         ProductStock.Clear(); SelectedWarehouse = null;
     }
 
-    [RelayCommand]
-    private void RemoveLine(DraftLine? line)
+    public void RemoveLine(DraftLine? line)
     {
         if (line is null) return;
         DraftLines.Remove(line);

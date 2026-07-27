@@ -5,75 +5,135 @@
              xmlns:dto="clr-namespace:ERP.Shared.Contracts.Orders;assembly=ERP.Shared.Contracts"
              x:Class="ERP.Mobile.Views.OrderDetailPage"
              x:DataType="vm:OrderDetailViewModel"
-             Title="Sifariş detalı">
+             Title="Sifariş detalı"
+             BackgroundColor="#F1F3F5">
     <ScrollView>
-        <VerticalStackLayout Padding="16" Spacing="12">
-            <Label Text="{Binding Order.CustomerName}" FontSize="20" FontAttributes="Bold" />
-            <Label Text="{Binding Order.OrderNumber}" TextColor="Gray" FontSize="12" />
+        <VerticalStackLayout Padding="14" Spacing="12">
 
-            <Border StrokeShape="RoundRectangle 10" Padding="12" BackgroundColor="#F8F9FA">
-                <VerticalStackLayout Spacing="4">
-                    <Label Text="{Binding Order.Status, StringFormat='Status: {0}'}" FontAttributes="Bold" />
-                    <Label Text="{Binding Order.OrderType, StringFormat='Növ: {0}'}" />
-                    <Label Text="{Binding Order.StartDate, StringFormat='Başlama: {0:dd.MM.yyyy}'}" />
-                    <Label Text="{Binding Order.EndDate, StringFormat='Bitmə: {0:dd.MM.yyyy}'}" />
-                    <Label Text="{Binding Order.Total, StringFormat='Məbləğ: {0:0.00} AZN'}" FontAttributes="Bold" />
-                    <Label Text="{Binding Order.DepositStatus, StringFormat='Depozit: {0}'}" />
+            <!-- Başlıq kartı -->
+            <Border Style="{StaticResource Card}">
+                <VerticalStackLayout Spacing="2">
+                    <Label Text="{Binding Order.CustomerName}" FontSize="19" FontAttributes="Bold" />
+                    <Label Text="{Binding Order.OrderNumber}" TextColor="Gray" FontSize="12" />
+                    <HorizontalStackLayout Spacing="6" Margin="0,6,0,0">
+                        <Border BackgroundColor="#E7F5FF" Stroke="Transparent" StrokeShape="RoundRectangle 6" Padding="8,3">
+                            <Label Text="{Binding Order.Status}" FontSize="12" TextColor="#1971C2" FontAttributes="Bold" />
+                        </Border>
+                        <Border BackgroundColor="#F3F0FF" Stroke="Transparent" StrokeShape="RoundRectangle 6" Padding="8,3">
+                            <Label Text="{Binding Order.OrderType}" FontSize="12" TextColor="#7048E8" />
+                        </Border>
+                    </HorizontalStackLayout>
                 </VerticalStackLayout>
             </Border>
 
-            <Label Text="Məhsullar" FontAttributes="Bold" />
-            <CollectionView ItemsSource="{Binding Lines}" SelectionMode="None" HeightRequest="140">
-                <CollectionView.ItemTemplate>
-                    <DataTemplate x:DataType="dto:OrderLineDto">
-                        <Grid ColumnDefinitions="*,Auto" Padding="4">
-                            <Label Text="{Binding ProductName}" />
-                            <Label Grid.Column="1" Text="{Binding Quantity, StringFormat='× {0}'}" />
-                        </Grid>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
+            <!-- Məlumat kartı -->
+            <Border Style="{StaticResource Card}">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="Məlumat" Style="{StaticResource SectionTitle}" />
+                    <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="6" ColumnSpacing="10">
+                        <Label Grid.Row="0" Grid.Column="0" Text="Başlama:" TextColor="Gray" />
+                        <Label Grid.Row="0" Grid.Column="1" Text="{Binding Order.StartDate, StringFormat='{0:dd.MM.yyyy}'}" />
+                        <Label Grid.Row="1" Grid.Column="0" Text="Bitmə:" TextColor="Gray" />
+                        <Label Grid.Row="1" Grid.Column="1" Text="{Binding Order.EndDate, StringFormat='{0:dd.MM.yyyy}'}" />
+                        <Label Grid.Row="2" Grid.Column="0" Text="Məbləğ:" TextColor="Gray" />
+                        <Label Grid.Row="2" Grid.Column="1" Text="{Binding Order.Total, StringFormat='{0:0.00} AZN'}" FontAttributes="Bold" />
+                        <Label Grid.Row="3" Grid.Column="0" Text="Depozit:" TextColor="Gray" />
+                        <Label Grid.Row="3" Grid.Column="1" Text="{Binding Order.DepositStatus}" />
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Məhsullar -->
+            <Border Style="{StaticResource Card}">
+                <VerticalStackLayout Spacing="6">
+                    <Label Text="Məhsullar" Style="{StaticResource SectionTitle}" />
+                    <CollectionView ItemsSource="{Binding Lines}" SelectionMode="None">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="dto:OrderLineDto">
+                                <Grid ColumnDefinitions="*,Auto,Auto" Padding="0,5" ColumnSpacing="8">
+                                    <Label Text="{Binding ProductName}" VerticalOptions="Center" />
+                                    <Label Grid.Column="1" Text="{Binding Quantity, StringFormat='{0} əd'}" VerticalOptions="Center" TextColor="Gray" FontSize="12" />
+                                    <Label Grid.Column="2" Text="{Binding LineTotal, StringFormat='{0:0.00}'}" VerticalOptions="Center" FontAttributes="Bold" />
+                                </Grid>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </VerticalStackLayout>
+            </Border>
 
             <!-- Status əməliyyatları -->
-            <Label Text="Status dəyişmə" FontAttributes="Bold" />
-            <HorizontalStackLayout Spacing="8">
-                <Button Text="Təsdiqlə" Command="{Binding ConfirmCommand}" FontSize="12" />
-                <Button Text="Təhvil ver" Command="{Binding DeliverCommand}" FontSize="12" />
-                <Button Text="Qaytar" Command="{Binding ReturnCommand}" FontSize="12" />
-                <Button Text="Ləğv et" Command="{Binding CancelCommand}" FontSize="12" BackgroundColor="#C92A2A" />
-            </HorizontalStackLayout>
+            <Border Style="{StaticResource Card}">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="Status dəyişmə" Style="{StaticResource SectionTitle}" />
+                    <Label Text="Sifarişin mərhələsini dəyişin. Yalnız uyğun addım işləyir." FontSize="12" TextColor="Gray" />
+                    <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="8" RowSpacing="8">
+                        <Button Grid.Row="0" Grid.Column="0" Text="Təsdiqlə" Command="{Binding ConfirmCommand}" BackgroundColor="#1971C2" />
+                        <Button Grid.Row="0" Grid.Column="1" Text="Təhvil ver" Command="{Binding DeliverCommand}" BackgroundColor="#0CA678" />
+                        <Button Grid.Row="1" Grid.Column="0" Text="Qaytar" Command="{Binding ReturnCommand}" BackgroundColor="#F08C00" />
+                        <Button Grid.Row="1" Grid.Column="1" Text="Ləğv et" Command="{Binding CancelCommand}" BackgroundColor="#C92A2A" />
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
 
-            <!-- Depozit / hesablaşma -->
-            <Label Text="Depozit / hesablaşma" FontAttributes="Bold" />
-            <HorizontalStackLayout Spacing="8">
-                <Entry Placeholder="Depozit" Keyboard="Numeric" Text="{Binding DepositAmount}" WidthRequest="110" />
-                <Button Text="Depozit təyin et" Command="{Binding SetDepositCommand}" FontSize="12" />
-            </HorizontalStackLayout>
-            <HorizontalStackLayout Spacing="8">
-                <Entry Placeholder="Zədə" Keyboard="Numeric" Text="{Binding DamageCharge}" WidthRequest="90" />
-                <Entry Placeholder="Cərimə" Keyboard="Numeric" Text="{Binding PenaltyCharge}" WidthRequest="90" />
-                <Button Text="Hesablaş" Command="{Binding SettleCommand}" FontSize="12" />
-            </HorizontalStackLayout>
+            <!-- Depozit -->
+            <Border Style="{StaticResource Card}">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="Depozit (girov)" Style="{StaticResource SectionTitle}" />
+                    <Label Text="Müştəridən alınan girov məbləği (təhvildən əvvəl)." FontSize="12" TextColor="Gray" />
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8" VerticalOptions="Center">
+                        <Label Grid.Column="0" Text="Məbləğ (AZN):" VerticalOptions="Center" />
+                        <Entry Grid.Column="1" Keyboard="Numeric" Text="{Binding DepositAmount}" Placeholder="0.00" />
+                        <Button Grid.Column="2" Text="Təyin et" Command="{Binding SetDepositCommand}" Padding="12,0" />
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Hesablaşma (qaytarmadan sonra) -->
+            <Border Style="{StaticResource Card}">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="Hesablaşma (zədə / cərimə)" Style="{StaticResource SectionTitle}" />
+                    <Label Text="Qaytarılan məhsulda zədə və ya cərimə varsa yazın — depozitdən çıxılır, qalıq müştəriyə qaytarılır." FontSize="12" TextColor="Gray" />
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8" RowSpacing="8" RowDefinitions="Auto,Auto">
+                        <Label Grid.Row="0" Grid.Column="0" Text="Zədə (AZN):" VerticalOptions="Center" WidthRequest="110" />
+                        <Entry Grid.Row="0" Grid.Column="1" Keyboard="Numeric" Text="{Binding DamageCharge}" Placeholder="0.00" />
+                        <Label Grid.Row="1" Grid.Column="0" Text="Cərimə (AZN):" VerticalOptions="Center" WidthRequest="110" />
+                        <Entry Grid.Row="1" Grid.Column="1" Keyboard="Numeric" Text="{Binding PenaltyCharge}" Placeholder="0.00" />
+                    </Grid>
+                    <Button Text="Hesablaşmanı yaz" Command="{Binding SettleCommand}" BackgroundColor="#495057" />
+                </VerticalStackLayout>
+            </Border>
 
             <!-- Faktura / ödəniş -->
-            <Border StrokeShape="RoundRectangle 10" Padding="12" BackgroundColor="#E7F5FF" IsVisible="{Binding Invoice, Converter={StaticResource NotNull}}">
-                <VerticalStackLayout Spacing="6">
-                    <Label Text="{Binding Invoice.InvoiceNumber, StringFormat='Faktura: {0}'}" FontAttributes="Bold" />
-                    <Label Text="{Binding Invoice.GrandTotal, StringFormat='Yekun: {0:0.00} AZN'}" />
-                    <Label Text="{Binding Invoice.Balance, StringFormat='Qalıq borc: {0:0.00} AZN'}" TextColor="#C92A2A" />
-                    <HorizontalStackLayout Spacing="8">
-                        <Entry Placeholder="Ödəniş" Keyboard="Numeric" Text="{Binding PaymentAmount}" WidthRequest="100" />
-                        <Picker ItemsSource="{Binding PaymentMethods}" SelectedItem="{Binding PaymentMethod}" WidthRequest="110" />
-                    </HorizontalStackLayout>
-                    <HorizontalStackLayout Spacing="8">
-                        <Button Text="Ödəniş əlavə et" Command="{Binding AddPaymentCommand}" FontSize="12" />
-                        <Button Text="PDF aç" Command="{Binding OpenPdfCommand}" FontSize="12" BackgroundColor="#495057" />
-                    </HorizontalStackLayout>
+            <Border Style="{StaticResource Card}" IsVisible="{Binding Invoice, Converter={StaticResource NotNull}}">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="Faktura və ödəniş" Style="{StaticResource SectionTitle}" />
+                    <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto" RowSpacing="5" ColumnSpacing="10">
+                        <Label Grid.Row="0" Grid.Column="0" Text="Faktura №:" TextColor="Gray" />
+                        <Label Grid.Row="0" Grid.Column="1" Text="{Binding Invoice.InvoiceNumber}" />
+                        <Label Grid.Row="1" Grid.Column="0" Text="Yekun:" TextColor="Gray" />
+                        <Label Grid.Row="1" Grid.Column="1" Text="{Binding Invoice.GrandTotal, StringFormat='{0:0.00} AZN'}" />
+                        <Label Grid.Row="2" Grid.Column="0" Text="Qalıq borc:" TextColor="Gray" />
+                        <Label Grid.Row="2" Grid.Column="1" Text="{Binding Invoice.Balance, StringFormat='{0:0.00} AZN'}" TextColor="#C92A2A" FontAttributes="Bold" />
+                    </Grid>
+                    <BoxView HeightRequest="1" Color="#E9ECEF" />
+                    <Label Text="Yeni ödəniş" FontAttributes="Bold" FontSize="13" />
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8" VerticalOptions="Center">
+                        <Label Grid.Column="0" Text="Məbləğ:" VerticalOptions="Center" WidthRequest="70" />
+                        <Entry Grid.Column="1" Keyboard="Numeric" Text="{Binding PaymentAmount}" Placeholder="0.00" />
+                    </Grid>
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8" VerticalOptions="Center">
+                        <Label Grid.Column="0" Text="Üsul:" VerticalOptions="Center" WidthRequest="70" />
+                        <Picker Grid.Column="1" ItemsSource="{Binding PaymentMethods}" SelectedItem="{Binding PaymentMethod}" />
+                    </Grid>
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                        <Button Text="Ödəniş əlavə et" Command="{Binding AddPaymentCommand}" BackgroundColor="#0CA678" />
+                        <Button Grid.Column="1" Text="PDF faktura" Command="{Binding OpenPdfCommand}" BackgroundColor="#495057" />
+                    </Grid>
                 </VerticalStackLayout>
             </Border>
 
             <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" />
-            <Label Text="{Binding Status}" TextColor="#1971C2" IsVisible="{Binding Status, Converter={StaticResource NotNull}}" />
+            <Label Text="{Binding Status}" TextColor="#1971C2" FontAttributes="Bold" HorizontalOptions="Center" IsVisible="{Binding Status, Converter={StaticResource NotNull}}" />
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>

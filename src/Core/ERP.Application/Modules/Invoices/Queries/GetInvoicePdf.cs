@@ -23,9 +23,20 @@ public sealed class GetInvoicePdfHandler(
 
         // Fakturanın bağlı olduğu sifarişin sətirlərini + hər məhsulun şəklini gətir (PDF üçün).
         var lines = new List<InvoicePdfLine>();
+        InvoicePdfSettlement? settlement = null;
         var order = await orders.GetByIdWithLinesAsync(invoice.OrderId, ct);
         if (order is not null)
         {
+            // Depozit qoyulubsa hesablaşma blokunu PDF-ə əlavə et.
+            if ((order.Deposit?.Amount ?? 0m) > 0m)
+                settlement = new InvoicePdfSettlement(
+                    Deposit: order.Deposit!.Amount,
+                    DepositStatus: order.DepositStatus.ToString(),
+                    DamageCharge: order.DamageCharge?.Amount ?? 0m,
+                    PenaltyCharge: order.PenaltyCharge?.Amount ?? 0m,
+                    DepositRefund: order.DepositRefund.Amount,
+                    Currency: order.Deposit.Currency);
+
             foreach (var line in order.Lines)
             {
                 var product = await products.GetByIdAsync(line.ProductId, ct);
@@ -44,7 +55,7 @@ public sealed class GetInvoicePdfHandler(
             }
         }
 
-        return Result.Success(pdf.Generate(invoice.ToDto(), lines));
+        return Result.Success(pdf.Generate(invoice.ToDto(), lines, settlement));
     }
 
     private async Task<byte[]?> ReadImageAsync(string key, CancellationToken ct)
