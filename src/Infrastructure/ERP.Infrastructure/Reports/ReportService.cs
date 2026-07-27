@@ -267,4 +267,42 @@ public sealed class ReportService(AppDbContext context) : IReportService
             .OrderByDescending(r => r.TotalCharges)
             .ToList();
     }
+
+    public async Task<IReadOnlyList<RentalCalendarEntryDto>> GetRentalCalendarAsync(
+        DateOnly from, DateOnly to, CancellationToken ct = default)
+    {
+        // Yalnız icarə (satış deyil) və ləğv olunmamış; dövrlə kəsişən sifarişlər.
+        // Kəsişmə: sifariş [Start,End] ∩ [from,to] ≠ ∅  →  Start <= to && End >= from.
+        var orders = await context.Orders
+            .Where(o => o.OrderType == OrderType.İcarə
+                        && o.Status != OrderStatus.Ləğv
+                        && o.StartDate <= to && o.EndDate >= from)
+            .Select(o => new
+            {
+                o.Id,
+                o.OrderNumber,
+                o.CustomerName,
+                o.StartDate,
+                o.EndDate,
+                o.Status,
+                Lines = o.Lines.Select(l => new { l.Quantity, Amount = l.UnitPrice.Amount })
+            })
+            .ToListAsync(ct);
+
+        return orders
+            .Select(o => new RentalCalendarEntryDto(
+                OrderId: o.Id,
+                OrderNumber: o.OrderNumber,
+                CustomerName: o.CustomerName,
+                StartDate: o.StartDate,
+                EndDate: o.EndDate,
+                Status: o.Status.ToString(),
+                Total: o.Lines.Sum(l => l.Amount * l.Quantity),
+                Currency: DefaultCurrency,
+                DeliversInRange: o.StartDate >= from && o.StartDate <= to,
+                ReturnsInRange: o.EndDate >= from && o.EndDate <= to))
+            .OrderBy(r => r.StartDate)
+            .ThenBy(r => r.OrderNumber)
+            .ToList();
+    }
 }

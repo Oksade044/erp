@@ -65,4 +65,23 @@ public class ReportQueryHandlersTests
         Assert.Single(result);
         Assert.Equal(80m, result[0].TotalCharges);
     }
+
+    [Fact]
+    public async Task RentalCalendar_delegates_with_period()
+    {
+        var from = new DateOnly(2026, 7, 1);
+        var to = new DateOnly(2026, 7, 31);
+        IReadOnlyList<RentalCalendarEntryDto> rows =
+            [new(Guid.NewGuid(), "ORD-1", "Aysel",
+                new DateOnly(2026, 7, 10), new DateOnly(2026, 7, 12),
+                "Təsdiqlənmiş", 250m, "AZN", true, true)];
+        _reports.GetRentalCalendarAsync(from, to, Arg.Any<CancellationToken>()).Returns(rows);
+
+        var handler = new GetRentalCalendarHandler(_reports);
+        var result = await handler.Handle(new GetRentalCalendarQuery(from, to), default);
+
+        Assert.Single(result);
+        Assert.True(result[0].DeliversInRange);
+        await _reports.Received(1).GetRentalCalendarAsync(from, to, Arg.Any<CancellationToken>());
+    }
 }

@@ -49,6 +49,15 @@ public static class ReportEndpoints
             return Results.Ok(await sender.Send(new GetEmployeePerformanceQuery(f, t)));
         });
 
+        // İcarə təqvimi — dövr üzrə. Default: cari ay.
+        group.MapGet("/rental-calendar", async (ISender sender, DateOnly? from, DateOnly? to) =>
+        {
+            var f = from ?? new DateOnly(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1);
+            var t = to ?? new DateOnly(DateTime.UtcNow.Year, DateTime.UtcNow.Month,
+                DateTime.DaysInMonth(DateTime.UtcNow.Year, DateTime.UtcNow.Month));
+            return Results.Ok(await sender.Send(new GetRentalCalendarQuery(f, t)));
+        });
+
         return app;
     }
 }

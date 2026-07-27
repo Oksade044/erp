@@ -27,4 +27,8 @@ public interface IReportService
     /// <summary>İşçi performansı — verilmiş dövrdə əməkdaş üzrə sifariş sayı + dövriyyə (#24).</summary>
     Task<IReadOnlyList<EmployeePerformanceRowDto>> GetEmployeePerformanceAsync(
         DateOnly from, DateOnly to, CancellationToken ct = default);
+
+    /// <summary>İcarə təqvimi — verilmiş dövrlə kəsişən icarə sifarişləri (planlaşdırma).</summary>
+    Task<IReadOnlyList<RentalCalendarEntryDto>> GetRentalCalendarAsync(
+        DateOnly from, DateOnly to, CancellationToken ct = default);
 }

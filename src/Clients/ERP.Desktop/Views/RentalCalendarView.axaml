@@ -1,0 +1,56 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:ERP.Desktop.ViewModels"
+             xmlns:ctrl="using:ERP.Desktop.Controls"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="850" d:DesignHeight="640"
+             x:Class="ERP.Desktop.Views.RentalCalendarView"
+             x:DataType="vm:RentalCalendarViewModel">
+
+    <Grid RowDefinitions="Auto,Auto,*" Margin="24">
+
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12" Margin="0,0,0,16">
+            <TextBlock Text="İcarə Təqvimi" FontSize="24" FontWeight="SemiBold" VerticalAlignment="Center" />
+            <ctrl:InfoHelp Title="İcarə Təqvimi"
+                           Text="Seçilmiş dövrdə planlaşdırılmış icarələr: hansı gün avadanlıq çıxır (təhvil) və qayıdır. Ləğv olunmuş və satış sifarişləri göstərilmir."
+                           Note="Tarix aralığını dəyişin — avtomatik yenilənir. Sətrə iki dəfə klik → sifariş detalı." />
+        </StackPanel>
+
+        <!-- Dövr seçimi + xülasə -->
+        <Border Grid.Row="1" Background="#F5F6FA" CornerRadius="8" Padding="14,10" Margin="0,0,0,14">
+            <StackPanel Orientation="Horizontal" Spacing="12">
+                <TextBlock Text="Dövr:" VerticalAlignment="Center" FontWeight="SemiBold" />
+                <DatePicker SelectedDate="{Binding From}" ToolTip.Tip="Başlanğıc tarixi" />
+                <TextBlock Text="—" VerticalAlignment="Center" />
+                <DatePicker SelectedDate="{Binding To}" ToolTip.Tip="Bitmə tarixi" />
+                <Button Content="⟳ Yenilə" Command="{Binding LoadCommand}" VerticalAlignment="Center" />
+                <Border Background="#E7F5FF" CornerRadius="6" Padding="10,4">
+                    <TextBlock VerticalAlignment="Center" Foreground="#1971C2">
+                        <Run Text="🚚 Təhvil:" /><Run Text="{Binding DeliveriesInRange}" FontWeight="Bold" />
+                    </TextBlock>
+                </Border>
+                <Border Background="#EBFBEE" CornerRadius="6" Padding="10,4">
+                    <TextBlock VerticalAlignment="Center" Foreground="#2F9E44">
+                        <Run Text="↩ Qaytarma:" /><Run Text="{Binding ReturnsInRange}" FontWeight="Bold" />
+                    </TextBlock>
+                </Border>
+                <TextBlock Text="{Binding Status}" Foreground="#8A90A6" VerticalAlignment="Center" />
+            </StackPanel>
+        </Border>
+
+        <DataGrid Grid.Row="2" x:Name="CalendarGrid" ItemsSource="{Binding Entries}"
+                  SelectedItem="{Binding Selected}" IsReadOnly="True"
+                  GridLinesVisibility="Horizontal" BorderThickness="1" BorderBrush="#E0E2EA"
+                  DoubleTapped="OnRowDoubleTapped">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Sifariş №" Binding="{Binding OrderNumber}" Width="Auto" />
+                <DataGridTextColumn Header="Müştəri" Binding="{Binding CustomerName}" Width="2*" />
+                <DataGridTextColumn Header="Başlama (təhvil)" Binding="{Binding StartDate}" Width="Auto" />
+                <DataGridTextColumn Header="Bitmə (qaytarma)" Binding="{Binding EndDate}" Width="Auto" />
+                <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="Auto" />
+                <DataGridTextColumn Header="Məbləğ" Binding="{Binding Total, StringFormat='{}{0:0.00} AZN'}" Width="Auto" />
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</UserControl>

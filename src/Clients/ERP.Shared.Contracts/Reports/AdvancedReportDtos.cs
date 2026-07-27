@@ -18,6 +18,22 @@ public sealed record EmployeePerformanceRowDto(
     decimal TotalRevenue,
     string Currency);
 
+/// <summary>
+/// İcarə təqvimi sətri — verilmiş dövrlə kəsişən icarə sifarişləri (planlaşdırma üçün).
+/// DeliversInRange/ReturnsInRange dövr daxilində təhvil/qaytarma olub-olmadığını göstərir.
+/// </summary>
+public sealed record RentalCalendarEntryDto(
+    Guid OrderId,
+    string OrderNumber,
+    string CustomerName,
+    DateOnly StartDate,
+    DateOnly EndDate,
+    string Status,
+    decimal Total,
+    string Currency,
+    bool DeliversInRange,
+    bool ReturnsInRange);
+
 /// <summary>Zədə/itki hesabatı sətri — hesablaşması aparılmış, tutulması olan sifarişlər.</summary>
 public sealed record DamageReportRowDto(
     string OrderNumber,

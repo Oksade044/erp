@@ -58,6 +58,8 @@
                             CommandParameter="Stok" Classes="nav" />
                     <Button Content="📈  Hesabatlar" Command="{Binding NavigateCommand}"
                             CommandParameter="Hesabatlar" Classes="nav" />
+                    <Button Content="📅  İcarə Təqvimi" Command="{Binding NavigateCommand}"
+                            CommandParameter="İcarə Təqvimi" Classes="nav" />
                     <Button Content="🔑  İstifadəçilər" Command="{Binding NavigateCommand}"
                             CommandParameter="İstifadəçilər" Classes="nav"
                             IsVisible="{Binding CanManageUsers}" />

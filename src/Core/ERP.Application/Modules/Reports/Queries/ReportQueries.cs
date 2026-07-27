@@ -87,3 +87,14 @@ public sealed class GetEmployeePerformanceHandler(IReportService reports)
     public Task<IReadOnlyList<EmployeePerformanceRowDto>> Handle(GetEmployeePerformanceQuery request, CancellationToken ct) =>
         reports.GetEmployeePerformanceAsync(request.From, request.To, ct);
 }
+
+// --- İcarə təqvimi ---
+public sealed record GetRentalCalendarQuery(DateOnly From, DateOnly To)
+    : IRequest<IReadOnlyList<RentalCalendarEntryDto>>;
+
+public sealed class GetRentalCalendarHandler(IReportService reports)
+    : IRequestHandler<GetRentalCalendarQuery, IReadOnlyList<RentalCalendarEntryDto>>
+{
+    public Task<IReadOnlyList<RentalCalendarEntryDto>> Handle(GetRentalCalendarQuery request, CancellationToken ct) =>
+        reports.GetRentalCalendarAsync(request.From, request.To, ct);
+}

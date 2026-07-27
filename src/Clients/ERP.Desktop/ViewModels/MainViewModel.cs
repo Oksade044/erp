@@ -29,6 +29,7 @@ public partial class MainViewModel : ViewModelBase
     private readonly WarehousesViewModel _warehouses;
     private readonly StockViewModel _stock;
     private readonly ReportsViewModel _reports;
+    private readonly RentalCalendarViewModel _rentalCalendar;
     private readonly UsersViewModel _users;
     private readonly FieldPermissionsViewModel _fieldPermissions;
     private readonly RolesViewModel _roles;
@@ -80,6 +81,7 @@ public partial class MainViewModel : ViewModelBase
         _warehouses = new WarehousesViewModel(api);
         _stock = new StockViewModel(api);
         _reports = new ReportsViewModel(api);
+        _rentalCalendar = new RentalCalendarViewModel(api);
         _users = new UsersViewModel(api);
         _fieldPermissions = new FieldPermissionsViewModel(api);
         _roles = new RolesViewModel(api);
@@ -108,6 +110,7 @@ public partial class MainViewModel : ViewModelBase
             "Anbarlar" => _warehouses,
             "Stok" => _stock,
             "Hesabatlar" => _reports,
+            "İcarə Təqvimi" => _rentalCalendar,
             "İstifadəçilər" => _users,
             "Sahə İcazələri" => _fieldPermissions,
             "Rollar" => _roles,
@@ -131,6 +134,7 @@ public partial class MainViewModel : ViewModelBase
             case WarehousesViewModel w: w.LoadCommand.Execute(null); break;
             case StockViewModel st: st.LoadCommand.Execute(null); break;
             case ReportsViewModel r: r.LoadCommand.Execute(null); break;
+            case RentalCalendarViewModel rc: rc.LoadCommand.Execute(null); break;
             case UsersViewModel u: u.LoadCommand.Execute(null); break;
             case FieldPermissionsViewModel fp: fp.LoadCommand.Execute(null); break;
             case RolesViewModel rl: rl.LoadCommand.Execute(null); break;
