@@ -81,6 +81,16 @@ public sealed class ErpApiClient(HttpClient http)
         return await ReadResultAsync(resp, ct);
     }
 
+    // #15 — təchizatçı defteri (borc/ödəniş + danışıq + sənəd)
+    public Task<SupplierLedgerDto?> GetSupplierLedgerAsync(Guid supplierId, CancellationToken ct = default) =>
+        http.GetFromJsonAsync<SupplierLedgerDto>($"/api/v1/suppliers/{supplierId}/ledger", JsonOpts, ct);
+
+    public async Task<(bool ok, string? error)> AddSupplierEntryAsync(Guid supplierId, AddSupplierEntryRequest request, CancellationToken ct = default)
+    {
+        var resp = await http.PostAsJsonAsync($"/api/v1/suppliers/{supplierId}/ledger", request, JsonOpts, ct);
+        return await ReadResultAsync(resp, ct);
+    }
+
     // --- Məhsullar ---
     public Task<PagedResult<ProductDto>?> GetProductsAsync(string? search, CancellationToken ct = default) =>
         http.GetFromJsonAsync<PagedResult<ProductDto>>(

@@ -1,0 +1,70 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:ERP.Desktop.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="760" d:DesignHeight="640"
+        x:Class="ERP.Desktop.Views.SupplierLedgerWindow"
+        x:DataType="vm:SupplierLedgerViewModel"
+        Width="760" Height="640" WindowStartupLocation="CenterScreen"
+        Title="Təchizatçı defteri">
+
+    <Grid RowDefinitions="Auto,Auto,Auto,*,Auto" Margin="20">
+
+        <TextBlock Grid.Row="0" Text="{Binding SupplierName, StringFormat=Təchizatçı defteri — {0}}"
+                   FontSize="20" FontWeight="SemiBold" Margin="0,0,0,12" />
+
+        <!-- Balans xülasəsi -->
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="12" Margin="0,0,0,14">
+            <Border Background="#FFF0F0" CornerRadius="8" Padding="16,10">
+                <StackPanel>
+                    <TextBlock Text="ÜMUMİ BORC" FontSize="11" Foreground="#5A6072" />
+                    <TextBlock Text="{Binding TotalDebt, StringFormat={}{0:0.00} AZN}" FontSize="18" FontWeight="Bold" Foreground="#C92A2A" />
+                </StackPanel>
+            </Border>
+            <Border Background="#EBFBEE" CornerRadius="8" Padding="16,10">
+                <StackPanel>
+                    <TextBlock Text="ÖDƏNİLİB" FontSize="11" Foreground="#5A6072" />
+                    <TextBlock Text="{Binding TotalPaid, StringFormat={}{0:0.00} AZN}" FontSize="18" FontWeight="Bold" Foreground="#2F9E44" />
+                </StackPanel>
+            </Border>
+            <Border Background="#E7F5FF" CornerRadius="8" Padding="16,10">
+                <StackPanel>
+                    <TextBlock Text="QALIQ BORC" FontSize="11" Foreground="#5A6072" />
+                    <TextBlock Text="{Binding Balance, StringFormat={}{0:0.00} AZN}" FontSize="18" FontWeight="Bold" Foreground="#1971C2" />
+                </StackPanel>
+            </Border>
+        </StackPanel>
+
+        <!-- Yeni qeyd forması -->
+        <Border Grid.Row="2" Background="#F5F6FA" CornerRadius="8" Padding="14,10" Margin="0,0,0,12">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <TextBlock Text="Növ:" VerticalAlignment="Center" />
+                <ComboBox ItemsSource="{Binding EntryTypes}" SelectedItem="{Binding NewType}" Width="120"
+                          ToolTip.Tip="Borc/Ödəniş üçün məbləğ; Danışıq üçün mətn; Sənəd üçün açıqlama." />
+                <TextBox Width="110" PlaceholderText="Məbləğ" Text="{Binding NewAmount}" />
+                <DatePicker SelectedDate="{Binding NewDate}" />
+                <TextBox Width="220" PlaceholderText="Açıqlama / danışıq" Text="{Binding NewDescription}" />
+                <Button Content="+ Əlavə et" Command="{Binding AddEntryCommand}"
+                        Background="#3B5BDB" Foreground="White" />
+            </StackPanel>
+        </Border>
+
+        <!-- Tarixçə -->
+        <DataGrid Grid.Row="3" ItemsSource="{Binding Entries}" IsReadOnly="True"
+                  GridLinesVisibility="Horizontal" BorderThickness="1" BorderBrush="#E0E2EA">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Tarix" Binding="{Binding Date}" Width="Auto" />
+                <DataGridTextColumn Header="Növ" Binding="{Binding Type}" Width="Auto" />
+                <DataGridTextColumn Header="Məbləğ" Binding="{Binding Amount, StringFormat='{}{0:0.00}'}" Width="Auto" />
+                <DataGridTextColumn Header="Açıqlama" Binding="{Binding Description}" Width="*" />
+                <DataGridCheckBoxColumn Header="Sənəd" Binding="{Binding HasDocument}" Width="Auto" />
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <StackPanel Grid.Row="4" Orientation="Horizontal" Spacing="12" Margin="0,12,0,0">
+            <Button Content="⟳ Yenilə" Command="{Binding RefreshCommand}" />
+            <TextBlock Text="{Binding Status}" Foreground="#8A90A6" VerticalAlignment="Center" />
+        </StackPanel>
+    </Grid>
+</Window>

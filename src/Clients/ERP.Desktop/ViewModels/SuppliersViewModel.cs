@@ -12,6 +12,12 @@ public partial class SuppliersViewModel(ErpApiClient api) : ViewModelBase
 {
     public ObservableCollection<SupplierDto> Suppliers { get; } = [];
 
+    [ObservableProperty] private SupplierDto? _selected;
+
+    /// <summary>Seçilmiş təchizatçının defter (borc/tarixçə) VM-i — kod-arxasından çağırılır (#15).</summary>
+    public SupplierLedgerViewModel? CreateLedger() =>
+        Selected is null ? null : new SupplierLedgerViewModel(api, Selected.Id, Selected.Name);
+
     [ObservableProperty] private string? _search;
 
     /// <summary>Canlı axtarış — yazıldıqca süzülür (Enter da işləyir).</summary>

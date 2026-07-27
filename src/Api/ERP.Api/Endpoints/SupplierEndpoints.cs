@@ -1,4 +1,5 @@
 using ERP.Application.Common.Messaging;
+using ERP.Application.Modules.Suppliers;
 using ERP.Application.Modules.Suppliers.Commands;
 using ERP.Application.Modules.Suppliers.Queries;
 using ERP.Domain.Modules.Users;
@@ -40,6 +41,21 @@ public static class SupplierEndpoints
         {
             var result = await sender.Send(new UpdateSupplierCommand(id, request));
             return result.IsSuccess ? Results.NoContent() : Results.BadRequest(new { error = result.Error });
+        }).RequireAuthorization(Permissions.SuppliersEdit);
+
+        // #15 — təchizatçı defteri (borc/ödəniş + danışıq + sənəd tarixçəsi).
+        group.MapGet("/{id:guid}/ledger", async (Guid id, ISender sender) =>
+        {
+            var result = await sender.Send(new GetSupplierLedgerQuery(id));
+            return result.IsSuccess ? Results.Ok(result.Value) : Results.NotFound(new { error = result.Error });
+        }).RequireAuthorization(Permissions.SuppliersView);
+
+        group.MapPost("/{id:guid}/ledger", async (Guid id, AddSupplierEntryRequest request, ISender sender) =>
+        {
+            var result = await sender.Send(new AddSupplierEntryCommand(id, request));
+            return result.IsSuccess
+                ? Results.Created($"/api/v1/suppliers/{id}/ledger", new { id = result.Value })
+                : Results.BadRequest(new { error = result.Error });
         }).RequireAuthorization(Permissions.SuppliersEdit);
 
         return app;

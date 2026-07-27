@@ -38,6 +38,8 @@
                         </TextBox.KeyBindings>
                     </TextBox>
                     <Button Content="🔍 Axtar" Command="{Binding LoadCommand}" ToolTip.Tip="Axtarışı işə salır (Enter ilə eynidir)" />
+                    <Button Content="📒 Defter / Tarixçə" Click="OnOpenLedger"
+                            ToolTip.Tip="Seçilmiş təchizatçının borc/ödəniş və danışıq tarixçəsi (sətrə iki klik də açır)" />
                 </StackPanel>
                 <TextBlock Text="Yeni təchizatçı əlavə et" FontWeight="SemiBold" Margin="0,4,0,0" />
                 <WrapPanel>
@@ -88,7 +90,8 @@
         </Border>
 
         <!-- Siyahı -->
-        <DataGrid Grid.Row="2" ItemsSource="{Binding Suppliers}" IsReadOnly="True"
+        <DataGrid Grid.Row="2" ItemsSource="{Binding Suppliers}" SelectedItem="{Binding Selected}"
+                  IsReadOnly="True" DoubleTapped="OnSupplierDoubleTapped"
                   GridLinesVisibility="Horizontal" BorderThickness="1" BorderBrush="#E0E2EA">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Ad" Binding="{Binding Name}" Width="*" />
