@@ -31,4 +31,12 @@ public interface IReportService
     /// <summary>İcarə təqvimi — verilmiş dövrlə kəsişən icarə sifarişləri (planlaşdırma).</summary>
     Task<IReadOnlyList<RentalCalendarEntryDto>> GetRentalCalendarAsync(
         DateOnly from, DateOnly to, CancellationToken ct = default);
+
+    /// <summary>İşçiyə xas dashboard (mobil) — yalnız həmin işçinin yaratdığı sifarişlər üzrə.</summary>
+    Task<ERP.Shared.Contracts.Mobile.EmployeeDashboardDto> GetEmployeeDashboardAsync(
+        string employeeName, CancellationToken ct = default);
+
+    /// <summary>İşçinin maliyyə statistikası (mobil "Maliyyəm") — dövr üzrə dövriyyə.</summary>
+    Task<ERP.Shared.Contracts.Mobile.EmployeeFinanceDto> GetEmployeeFinanceAsync(
+        string employeeName, CancellationToken ct = default);
 }

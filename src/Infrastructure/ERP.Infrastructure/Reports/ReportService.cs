@@ -305,4 +305,75 @@ public sealed class ReportService(AppDbContext context) : IReportService
             .ThenBy(r => r.OrderNumber)
             .ToList();
     }
+
+    public async Task<ERP.Shared.Contracts.Mobile.EmployeeDashboardDto> GetEmployeeDashboardAsync(
+        string employeeName, CancellationToken ct = default)
+    {
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        var monthStart = new DateOnly(today.Year, today.Month, 1);
+
+        // Yalnız bu işçinin yaratdığı sifarişlər (CreatedByName snapshot).
+        var orders = (await context.Orders
+                .Where(o => o.CreatedByName == employeeName)
+                .Select(o => new
+                {
+                    o.Status,
+                    o.StartDate,
+                    o.EndDate,
+                    o.CreatedAt,
+                    Total = o.Lines.Sum(l => l.UnitPrice.Amount * l.Quantity)
+                })
+                .ToListAsync(ct));
+
+        var deliveriesToday = orders.Count(o => o.StartDate == today && o.Status == OrderStatus.Təsdiqlənmiş);
+        var returnsToday = orders.Count(o => o.EndDate == today && o.Status == OrderStatus.TəhvilVerilmiş);
+        var active = orders.Count(o => o.Status == OrderStatus.TəhvilVerilmiş);
+        var pending = orders.Count(o => o.Status is OrderStatus.Qaralama or OrderStatus.Təsdiqlənmiş);
+        var thisMonth = orders.Where(o => DateOnly.FromDateTime(o.CreatedAt.UtcDateTime) >= monthStart).ToList();
+
+        return new ERP.Shared.Contracts.Mobile.EmployeeDashboardDto(
+            EmployeeName: employeeName,
+            DeliveriesToday: deliveriesToday,
+            ReturnsToday: returnsToday,
+            ActiveOrders: active,
+            PendingOrders: pending,
+            OrdersThisMonth: thisMonth.Count,
+            RevenueThisMonth: thisMonth.Sum(o => o.Total),
+            Currency: DefaultCurrency);
+    }
+
+    public async Task<ERP.Shared.Contracts.Mobile.EmployeeFinanceDto> GetEmployeeFinanceAsync(
+        string employeeName, CancellationToken ct = default)
+    {
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        var weekStart = today.AddDays(-(((int)today.DayOfWeek + 6) % 7)); // həftənin bazar ertəsi
+        var monthStart = new DateOnly(today.Year, today.Month, 1);
+        var yearStart = new DateOnly(today.Year, 1, 1);
+
+        var orders = await context.Orders
+            .Where(o => o.CreatedByName == employeeName && o.Status != OrderStatus.Ləğv)
+            .Select(o => new
+            {
+                o.CreatedAt,
+                o.OrderType,
+                Total = o.Lines.Sum(l => l.UnitPrice.Amount * l.Quantity)
+            })
+            .ToListAsync(ct);
+
+        decimal SumFrom(DateOnly from) =>
+            orders.Where(o => DateOnly.FromDateTime(o.CreatedAt.UtcDateTime) >= from).Sum(o => o.Total);
+
+        var monthOrders = orders.Where(o => DateOnly.FromDateTime(o.CreatedAt.UtcDateTime) >= monthStart).ToList();
+
+        return new ERP.Shared.Contracts.Mobile.EmployeeFinanceDto(
+            EmployeeName: employeeName,
+            RevenueToday: SumFrom(today),
+            RevenueThisWeek: SumFrom(weekStart),
+            RevenueThisMonth: SumFrom(monthStart),
+            RevenueThisYear: SumFrom(yearStart),
+            OrdersThisMonth: monthOrders.Count,
+            RentalRevenueThisMonth: monthOrders.Where(o => o.OrderType == OrderType.İcarə).Sum(o => o.Total),
+            SaleRevenueThisMonth: monthOrders.Where(o => o.OrderType == OrderType.Satış).Sum(o => o.Total),
+            Currency: DefaultCurrency);
+    }
 }
