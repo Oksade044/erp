@@ -75,6 +75,21 @@ public class RentalOrder : BaseEntity, IAggregateRoot
         }
     }
 
+    /// <summary>Depozitin vəziyyəti (#37) — məbləğ, hesablaşma və tutulmalara görə hesablanır.</summary>
+    public DepositStatus DepositStatus
+    {
+        get
+        {
+            var deposit = Deposit?.Amount ?? 0m;
+            if (deposit <= 0m) return DepositStatus.Yoxdur;
+            if (!IsSettled) return DepositStatus.Alındı;
+            var refund = DepositRefund.Amount;
+            if (refund <= 0m) return DepositStatus.Saxlanıldı;
+            if (refund >= deposit) return DepositStatus.Qaytarıldı;
+            return DepositStatus.Qismən;
+        }
+    }
+
     // EF Core üçün.
     private RentalOrder() { }
 

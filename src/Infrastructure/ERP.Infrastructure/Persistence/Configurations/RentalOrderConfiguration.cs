@@ -72,6 +72,7 @@ public sealed class RentalOrderConfiguration : IEntityTypeConfiguration<RentalOr
         builder.Ignore(o => o.ReservesStock);
         builder.Ignore(o => o.TotalCharges);
         builder.Ignore(o => o.DepositRefund);
+        builder.Ignore(o => o.DepositStatus);
 
         builder.HasQueryFilter(o => !o.IsDeleted);
     }

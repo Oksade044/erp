@@ -53,7 +53,7 @@
 
                     <TextBlock Grid.Row="6" Grid.Column="0" Text="Depozit / Tutulma / Qaytarma:" Foreground="#5A6072" />
                     <TextBlock Grid.Row="6" Grid.Column="1">
-                        <Run Text="{Binding Order.Deposit}" /><Run Text=" / " /><Run Text="{Binding Order.TotalCharges}" /><Run Text=" / " /><Run Text="{Binding Order.DepositRefund}" />
+                        <Run Text="{Binding Order.Deposit}" /><Run Text=" / " /><Run Text="{Binding Order.TotalCharges}" /><Run Text=" / " /><Run Text="{Binding Order.DepositRefund}" /><Run Text="  ·  " /><Run Text="{Binding Order.DepositStatus}" Foreground="#1971C2" FontWeight="SemiBold" />
                     </TextBlock>
 
                     <TextBlock Grid.Row="7" Grid.Column="0" Text="Qeyd:" Foreground="#5A6072" />

@@ -18,6 +18,7 @@ public sealed record OrderDto(
     decimal PenaltyCharge,
     decimal TotalCharges,
     decimal DepositRefund,
+    string DepositStatus,
     bool IsSettled,
     string? SettlementNotes,
     string? CreatedByName,

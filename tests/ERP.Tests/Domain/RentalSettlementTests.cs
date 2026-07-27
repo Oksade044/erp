@@ -53,4 +53,30 @@ public class RentalSettlementTests
             new DateOnly(2026, 7, 1), new DateOnly(2026, 7, 3));
         Assert.Throws<DomainException>(() => o.Settle(Money.Create(10m), Money.Zero()));
     }
+
+    [Fact]
+    public void DepositStatus_reflects_lifecycle()
+    {
+        var noDeposit = DeliveredOrder();
+        Assert.Equal(DepositStatus.Yoxdur, noDeposit.DepositStatus);
+
+        var received = DeliveredOrder();
+        received.SetDeposit(Money.Create(200m));
+        Assert.Equal(DepositStatus.Alındı, received.DepositStatus);   // hələ hesablaşılmayıb
+
+        var returned = DeliveredOrder();
+        returned.SetDeposit(Money.Create(200m));
+        returned.Settle(Money.Zero(), Money.Zero());
+        Assert.Equal(DepositStatus.Qaytarıldı, returned.DepositStatus); // tutulma yox → tam qaytarıldı
+
+        var partial = DeliveredOrder();
+        partial.SetDeposit(Money.Create(200m));
+        partial.Settle(Money.Create(50m), Money.Create(30m));
+        Assert.Equal(DepositStatus.Qismən, partial.DepositStatus);     // 80 tutuldu, 120 qaldı
+
+        var retained = DeliveredOrder();
+        retained.SetDeposit(Money.Create(50m));
+        retained.Settle(Money.Create(80m), Money.Zero());
+        Assert.Equal(DepositStatus.Saxlanıldı, retained.DepositStatus); // tutulma depoziti udub
+    }
 }

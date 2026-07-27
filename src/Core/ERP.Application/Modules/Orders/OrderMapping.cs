@@ -23,6 +23,7 @@ public static class OrderMapping
         PenaltyCharge: o.PenaltyCharge?.Amount ?? 0m,
         TotalCharges: o.TotalCharges.Amount,
         DepositRefund: o.DepositRefund.Amount,
+        DepositStatus: o.DepositStatus.ToString(),
         IsSettled: o.IsSettled,
         SettlementNotes: o.SettlementNotes,
         CreatedByName: o.CreatedByName,

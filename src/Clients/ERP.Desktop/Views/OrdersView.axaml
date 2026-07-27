@@ -292,6 +292,7 @@
                             <StackPanel Margin="8,2" VerticalAlignment="Center">
                                 <TextBlock Text="{Binding Total, StringFormat=Məbləğ: {0:0.00}}" FontWeight="SemiBold" FontSize="12" />
                                 <TextBlock Text="{Binding Deposit, StringFormat=Depozit: {0:0.00}}" FontSize="11" Foreground="#5A6072" />
+                                <TextBlock Text="{Binding DepositStatus, StringFormat=Depozit: {0}}" FontSize="11" Foreground="#1971C2" FontWeight="SemiBold" />
                                 <TextBlock Text="{Binding TotalCharges, StringFormat=Tutulma: {0:0.00}}" FontSize="11" Foreground="#E8590C" />
                                 <TextBlock Text="{Binding DepositRefund, StringFormat=Qaytarma: {0:0.00}}" FontSize="11" Foreground="#2B8A3E" />
                             </StackPanel>
