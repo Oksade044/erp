@@ -29,6 +29,16 @@ public sealed class AuditInterceptor(ICurrentUser currentUser) : SaveChangesInte
         return base.SavingChanges(eventData, result);
     }
 
+    /// <summary>
+    /// Audit üçün əhəmiyyətsiz (texniki) sahələr — dəyişikliyi biznes hadisəsi sayılmır.
+    /// Yalnız bunlar dəyişibsə audit qeydi yaradılmır (məs. login-də token rotasiyası).
+    /// </summary>
+    private static readonly HashSet<string> TechnicalFields =
+    [
+        "UpdatedAt", "UpdatedBy", "IsDeleted", "DeletedAt", "DeletedBy",
+        "RowVersion", "RefreshToken", "RefreshTokenExpiresAt", "LastLoginAt"
+    ];
+
     private void Apply(DbContext? context)
     {
         if (context is null) return;
@@ -45,13 +55,20 @@ public sealed class AuditInterceptor(ICurrentUser currentUser) : SaveChangesInte
                 case EntityState.Added:
                     entry.Entity.CreatedAt = now;
                     entry.Entity.CreatedBy = user;
-                    logs.Add(BuildLog(entry, now, user, "Yaradıldı"));
+                    logs.Add(BuildLog(entry, now, user, "Yaradıldı", null));
                     break;
 
                 case EntityState.Modified:
                     entry.Entity.UpdatedAt = now;
                     entry.Entity.UpdatedBy = user;
-                    logs.Add(BuildLog(entry, now, user, "Dəyişdirildi"));
+                    // Yalnız texniki sahələr dəyişibsə (məs. token rotasiyası) — audit yazma.
+                    var changed = entry.Properties
+                        .Where(p => p.IsModified && !TechnicalFields.Contains(p.Metadata.Name))
+                        .Select(p => p.Metadata.Name)
+                        .ToList();
+                    if (changed.Count == 0) break;
+                    logs.Add(BuildLog(entry, now, user, "Dəyişdirildi",
+                        "Dəyişən sahələr: " + string.Join(", ", changed)));
                     break;
 
                 case EntityState.Deleted:
@@ -60,7 +77,7 @@ public sealed class AuditInterceptor(ICurrentUser currentUser) : SaveChangesInte
                     entry.Entity.IsDeleted = true;
                     entry.Entity.DeletedAt = now;
                     entry.Entity.DeletedBy = user;
-                    logs.Add(BuildLog(entry, now, user, "Silindi"));
+                    logs.Add(BuildLog(entry, now, user, "Silindi", null));
                     break;
             }
         }
@@ -70,21 +87,8 @@ public sealed class AuditInterceptor(ICurrentUser currentUser) : SaveChangesInte
             context.Set<AuditLog>().AddRange(logs);
     }
 
-    private static AuditLog BuildLog(EntityEntry<BaseEntity> entry, DateTimeOffset now, string user, string action)
-    {
-        // Soft-delete-i dəyişiklik kimi yazmayaq — silmə üçün ayrıca summary.
-        string? summary = null;
-        if (action == "Dəyişdirildi")
-        {
-            var changed = entry.Properties
-                .Where(p => p.IsModified && p.Metadata.Name is not ("UpdatedAt" or "UpdatedBy"
-                    or "IsDeleted" or "DeletedAt" or "DeletedBy"))
-                .Select(p => p.Metadata.Name)
-                .ToList();
-            summary = changed.Count > 0 ? "Dəyişən sahələr: " + string.Join(", ", changed) : null;
-        }
-
-        return AuditLog.Create(now, user, action, entry.Entity.GetType().Name,
+    private static AuditLog BuildLog(EntityEntry<BaseEntity> entry, DateTimeOffset now,
+        string user, string action, string? summary) =>
+        AuditLog.Create(now, user, action, entry.Entity.GetType().Name,
             entry.Entity.Id.ToString(), summary);
-    }
 }
