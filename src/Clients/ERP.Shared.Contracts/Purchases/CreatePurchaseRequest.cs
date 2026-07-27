@@ -5,7 +5,9 @@ public sealed record CreatePurchaseRequest(
     Guid SupplierId,
     DateOnly OrderDate,
     IReadOnlyList<CreatePurchaseLineRequest> Lines,
-    string? Notes = null);
+    string? Notes = null,
+    // Qəbul zamanı malın daxil olacağı anbar (opsional).
+    Guid? WarehouseId = null);
 
 /// <summary>Alış sətri — məhsul + say + vahid alış qiyməti.</summary>
 public sealed record CreatePurchaseLineRequest(

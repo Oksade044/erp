@@ -23,6 +23,9 @@ public class PurchaseOrder : BaseEntity, IAggregateRoot
     public PurchaseStatus Status { get; private set; } = PurchaseStatus.Qaralama;
     public string? Notes { get; private set; }
 
+    /// <summary>Qəbul zamanı malın daxil olacağı anbar (opsional; verilibsə StockLevel-ə yazılır).</summary>
+    public Guid? WarehouseId { get; private set; }
+
     public IReadOnlyList<PurchaseLine> Lines => _lines.AsReadOnly();
 
     /// <summary>Alışın ümumi məbləği (bütün sətirlərin cəmi).</summary>
@@ -44,7 +47,8 @@ public class PurchaseOrder : BaseEntity, IAggregateRoot
         Guid supplierId,
         string supplierName,
         DateOnly orderDate,
-        string? notes = null)
+        string? notes = null,
+        Guid? warehouseId = null)
     {
         if (string.IsNullOrWhiteSpace(purchaseNumber))
             throw new DomainException("Alış nömrəsi tələb olunur.");
@@ -55,7 +59,8 @@ public class PurchaseOrder : BaseEntity, IAggregateRoot
 
         return new PurchaseOrder(purchaseNumber, supplierId, supplierName.Trim(), orderDate)
         {
-            Notes = notes?.Trim()
+            Notes = notes?.Trim(),
+            WarehouseId = warehouseId
         };
     }
 

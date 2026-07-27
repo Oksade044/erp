@@ -45,7 +45,7 @@ public sealed class CreatePurchaseHandler(
             return Result.Failure<Guid>($"Təchizatçı tapılmadı: {dto.SupplierId}");
 
         var number = $"ALS-{DateTime.UtcNow:yyyyMMdd}-{Guid.NewGuid().ToString("N")[..6].ToUpperInvariant()}";
-        var purchase = PurchaseOrder.Create(number, supplier.Id, supplier.Name, dto.OrderDate, dto.Notes);
+        var purchase = PurchaseOrder.Create(number, supplier.Id, supplier.Name, dto.OrderDate, dto.Notes, dto.WarehouseId);
 
         foreach (var lineDto in dto.Lines)
         {

@@ -8,6 +8,7 @@ using ERP.Desktop.Services;
 using ERP.Shared.Contracts.Products;
 using ERP.Shared.Contracts.Purchases;
 using ERP.Shared.Contracts.Suppliers;
+using ERP.Shared.Contracts.Warehouses;
 
 namespace ERP.Desktop.ViewModels;
 
@@ -34,9 +35,12 @@ public partial class PurchasesViewModel(ErpApiClient api) : ViewModelBase
     [ObservableProperty] private bool _showNewPurchase;
     public ObservableCollection<SupplierDto> AllSuppliers { get; } = [];
     public ObservableCollection<ProductDto> AllProducts { get; } = [];
+    public ObservableCollection<WarehouseDto> AllWarehouses { get; } = [];
     public ObservableCollection<DraftPurchaseLine> DraftLines { get; } = [];
 
     [ObservableProperty] private SupplierDto? _newSupplier;
+    /// <summary>Qəbul zamanı malın daxil olacağı anbar (opsional; seçilibsə StockLevel-ə yazılır).</summary>
+    [ObservableProperty] private WarehouseDto? _newWarehouse;
     [ObservableProperty] private DateTimeOffset _newOrderDate = DateTimeOffset.Now;
     [ObservableProperty] private ProductDto? _lineProduct;
     [ObservableProperty] private int _lineQuantity = 1;
@@ -54,6 +58,8 @@ public partial class PurchasesViewModel(ErpApiClient api) : ViewModelBase
             if (sups is not null) foreach (var s in sups.Items) AllSuppliers.Add(s);
             var prods = await api.GetProductsAsync(null);
             if (prods is not null) foreach (var p in prods.Items) AllProducts.Add(p);
+            var whs = await api.GetWarehousesAsync(null);
+            if (whs is not null) foreach (var w in whs.Items) AllWarehouses.Add(w);
         }
     }
 
@@ -86,7 +92,8 @@ public partial class PurchasesViewModel(ErpApiClient api) : ViewModelBase
         var request = new CreatePurchaseRequest(
             SupplierId: NewSupplier.Id,
             OrderDate: DateOnly.FromDateTime(NewOrderDate.DateTime),
-            Lines: DraftLines.Select(l => new CreatePurchaseLineRequest(l.ProductId, l.Quantity, l.UnitCost)).ToList());
+            Lines: DraftLines.Select(l => new CreatePurchaseLineRequest(l.ProductId, l.Quantity, l.UnitCost)).ToList(),
+            WarehouseId: NewWarehouse?.Id);
 
         var (ok, error) = await api.CreatePurchaseAsync(request);
         if (ok)
@@ -94,6 +101,7 @@ public partial class PurchasesViewModel(ErpApiClient api) : ViewModelBase
             Status = "Alış yaradıldı (Qaralama).";
             DraftLines.Clear();
             NewSupplier = null;
+            NewWarehouse = null;
             ShowNewPurchase = false;
             OnPropertyChanged(nameof(DraftTotal));
             await LoadAsync();

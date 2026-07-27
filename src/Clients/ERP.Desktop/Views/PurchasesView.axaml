@@ -42,6 +42,13 @@
                     </ComboBox>
                     <TextBlock Text="Tarix:" VerticalAlignment="Center" Margin="12,0,0,0" />
                     <DatePicker SelectedDate="{Binding NewOrderDate}" />
+                    <TextBlock Text="Anbar:" VerticalAlignment="Center" Margin="12,0,0,0" />
+                    <ComboBox ItemsSource="{Binding AllWarehouses}" SelectedItem="{Binding NewWarehouse}" Width="180"
+                              ToolTip.Tip="Mal qəbul edildikdə hansı anbara daxil olacaq (stok həmin anbarda görünəcək). Boş buraxsanız yalnız ümumi say artır.">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate><TextBlock Text="{Binding Name}" /></DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
                 </StackPanel>
 
                 <StackPanel Orientation="Horizontal" Spacing="8">
