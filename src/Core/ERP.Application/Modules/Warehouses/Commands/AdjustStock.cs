@@ -30,6 +30,8 @@ public sealed class AdjustStockHandler(
     IProductRepository products,
     IWarehouseRepository warehouses,
     IStockNotifier notifier,
+    IAuditLogWriter audit,
+    ICurrentUser currentUser,
     IUnitOfWork unitOfWork)
     : IRequestHandler<AdjustStockCommand, Result<Guid>>
 {
@@ -40,10 +42,19 @@ public sealed class AdjustStockHandler(
         var existing = await stockLevels.GetAsync(dto.ProductId, dto.WarehouseId, ct);
         if (existing is not null)
         {
+            // #43 anti-oğurluq — stok düzəlişi (əvvəl→sonra) açıq audit qeydi.
+            var oldQty = existing.Quantity;
             existing.SetQuantity(dto.Quantity);
             existing.SetMinQuantity(dto.MinQuantity);
             existing.SetCondition(dto.InRepair, dto.Damaged);
             stockLevels.Update(existing);
+            audit.Add(
+                currentUser.FullName ?? currentUser.UserName ?? "system",
+                "Stok düzəlişi",
+                "StockLevel",
+                existing.ProductName,
+                $"{existing.ProductName} @ {existing.WarehouseName}: say {oldQty} → {dto.Quantity}" +
+                $" (təmir {dto.InRepair}, zədəli {dto.Damaged})");
             await unitOfWork.SaveChangesAsync(ct);
             await notifier.NotifyStockChangedAsync(existing.ToNotification(), ct);
             return Result.Success(existing.Id);

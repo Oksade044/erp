@@ -22,6 +22,8 @@ public sealed class AddPaymentValidator : AbstractValidator<AddPaymentCommand>
 
 public sealed class AddPaymentHandler(
     IInvoiceRepository invoices,
+    IAuditLogWriter audit,
+    ICurrentUser currentUser,
     IUnitOfWork unitOfWork)
     : IRequestHandler<AddPaymentCommand, Result>
 {
@@ -41,6 +43,16 @@ public sealed class AddPaymentHandler(
         // Yeni ödənişi açıq "Added" kimi izlə (client-set Guid açar səbəbindən EF onu
         // default halda "Modified" sayardı → yenilənmə 0 sətir → concurrency xətası).
         invoices.AttachNewPayment(payment);
+
+        // #43 anti-oğurluq — pul qəbulu açıq audit qeydi (kim, nə qədər, hansı üsul, hansı faktura).
+        audit.Add(
+            currentUser.FullName ?? currentUser.UserName ?? "system",
+            "Ödəniş qəbulu",
+            "Invoice",
+            invoice.InvoiceNumber,
+            $"{amount.Amount:0.00} {amount.Currency} ({method}) qəbul edildi — faktura {invoice.InvoiceNumber}" +
+            (string.IsNullOrWhiteSpace(dto.Note) ? "" : $", qeyd: {dto.Note}"));
+
         await unitOfWork.SaveChangesAsync(ct);
 
         return Result.Success();
