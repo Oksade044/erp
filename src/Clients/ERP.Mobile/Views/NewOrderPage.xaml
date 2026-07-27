@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:ERP.Mobile.ViewModels"
+             xmlns:cdto="clr-namespace:ERP.Shared.Contracts.Customers;assembly=ERP.Shared.Contracts"
+             xmlns:pdto="clr-namespace:ERP.Shared.Contracts.Products;assembly=ERP.Shared.Contracts"
+             xmlns:wdto="clr-namespace:ERP.Shared.Contracts.Warehouses;assembly=ERP.Shared.Contracts"
+             x:Class="ERP.Mobile.Views.NewOrderPage"
+             x:DataType="vm:NewOrderViewModel"
+             Title="Yeni sifariş">
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="10">
+
+            <Label Text="Müştəri" FontAttributes="Bold" />
+            <Entry Placeholder="Müştəri axtar (ad/telefon)" Text="{Binding CustomerSearch}" />
+            <CollectionView ItemsSource="{Binding CustomerResults}" SelectionMode="None">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="cdto:CustomerDto">
+                        <Grid Padding="6" ColumnDefinitions="*,Auto">
+                            <Label Text="{Binding Name}" />
+                            <Button Grid.Column="1" Text="Seç" FontSize="11" Padding="8,2"
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:NewOrderViewModel}}, Path=PickCustomerCommand}" CommandParameter="{Binding .}" />
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+            <Label Text="{Binding SelectedCustomer.Name, StringFormat='Seçilmiş: {0}'}" TextColor="#2F9E44" IsVisible="{Binding SelectedCustomer, Converter={StaticResource NotNull}}" />
+            <Button Text="+ Yeni müştəri" FontSize="12" Command="{Binding ToggleCreatingCustomerCommand}" />
+
+            <VerticalStackLayout IsVisible="{Binding CreatingCustomer}" Spacing="6" BackgroundColor="#F8F9FA" Padding="10">
+                <Entry Placeholder="Ad" Text="{Binding NewCustomerName}" />
+                <Entry Placeholder="Telefon" Text="{Binding NewCustomerPhone}" Keyboard="Telephone" />
+                <Entry Placeholder="Ünvan" Text="{Binding NewCustomerAddress}" />
+                <Button Text="Müştəri yarat" Command="{Binding CreateCustomerCommand}" FontSize="12" />
+            </VerticalStackLayout>
+
+            <BoxView HeightRequest="1" Color="#E0E2EA" Margin="0,6" />
+
+            <Label Text="Tarixlər və növ" FontAttributes="Bold" />
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                <DatePicker Date="{Binding StartDate}" />
+                <DatePicker Grid.Column="1" Date="{Binding EndDate}" />
+            </Grid>
+            <Picker ItemsSource="{Binding OrderTypes}" SelectedItem="{Binding OrderType}" />
+
+            <BoxView HeightRequest="1" Color="#E0E2EA" Margin="0,6" />
+
+            <Label Text="Məhsul əlavə et" FontAttributes="Bold" />
+            <Entry Placeholder="Məhsul axtar (yazdıqca)" Text="{Binding ProductSearch}" />
+            <CollectionView ItemsSource="{Binding ProductResults}" SelectionMode="None">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="pdto:ProductDto">
+                        <Grid Padding="6" ColumnDefinitions="*,Auto,Auto">
+                            <Label Text="{Binding Name}" VerticalOptions="Center" />
+                            <Label Grid.Column="1" Text="{Binding RentalPrice, StringFormat='{0:0.00}'}" VerticalOptions="Center" Margin="0,0,8,0" TextColor="Gray" />
+                            <Button Grid.Column="2" Text="Seç" FontSize="11" Padding="8,2"
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:NewOrderViewModel}}, Path=PickProductCommand}" CommandParameter="{Binding .}" />
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <VerticalStackLayout IsVisible="{Binding SelectedProduct, Converter={StaticResource NotNull}}" Spacing="6" BackgroundColor="#F8F9FA" Padding="10">
+                <Label Text="{Binding SelectedProduct.Name, StringFormat='Seçilmiş: {0}'}" FontAttributes="Bold" />
+                <Label Text="Anbar (mövcud say):" FontSize="12" TextColor="Gray" />
+                <Picker ItemsSource="{Binding ProductStock}" SelectedItem="{Binding SelectedWarehouse}" ItemDisplayBinding="{Binding WarehouseName}" />
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                    <Entry Placeholder="Say" Keyboard="Numeric" Text="{Binding LineQuantity}" />
+                    <Entry Grid.Column="1" Placeholder="Qiymət" Keyboard="Numeric" Text="{Binding LineUnitPrice}" />
+                </Grid>
+                <Button Text="Sətri əlavə et" Command="{Binding AddLineCommand}" FontSize="12" />
+            </VerticalStackLayout>
+
+            <Label Text="Sifariş sətirləri" FontAttributes="Bold" Margin="0,6,0,0" />
+            <CollectionView ItemsSource="{Binding DraftLines}" SelectionMode="None">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="vm:DraftLine">
+                        <Grid Padding="6" ColumnDefinitions="*,Auto">
+                            <Label Text="{Binding Display}" VerticalOptions="Center" FontSize="13" />
+                            <Button Grid.Column="1" Text="✕" FontSize="11" Padding="8,2" BackgroundColor="#C92A2A"
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:NewOrderViewModel}}, Path=RemoveLineCommand}" CommandParameter="{Binding .}" />
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+            <Label Text="{Binding DraftTotal, StringFormat='Ümumi: {0:0.00} AZN'}" FontAttributes="Bold" HorizontalOptions="End" />
+
+            <Button Text="✓ Sifarişi yarat" Command="{Binding CreateOrderCommand}" BackgroundColor="#2F9E44" Margin="0,8" />
+            <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" />
+            <Label Text="{Binding Status}" TextColor="#1971C2" IsVisible="{Binding Status, Converter={StaticResource NotNull}}" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

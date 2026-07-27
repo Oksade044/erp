@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:ERP.Mobile.ViewModels"
+             xmlns:dto="clr-namespace:ERP.Shared.Contracts.Orders;assembly=ERP.Shared.Contracts"
+             x:Class="ERP.Mobile.Views.OrderDetailPage"
+             x:DataType="vm:OrderDetailViewModel"
+             Title="Sifariş detalı">
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="12">
+            <Label Text="{Binding Order.CustomerName}" FontSize="20" FontAttributes="Bold" />
+            <Label Text="{Binding Order.OrderNumber}" TextColor="Gray" FontSize="12" />
+
+            <Border StrokeShape="RoundRectangle 10" Padding="12" BackgroundColor="#F8F9FA">
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="{Binding Order.Status, StringFormat='Status: {0}'}" FontAttributes="Bold" />
+                    <Label Text="{Binding Order.OrderType, StringFormat='Növ: {0}'}" />
+                    <Label Text="{Binding Order.StartDate, StringFormat='Başlama: {0:dd.MM.yyyy}'}" />
+                    <Label Text="{Binding Order.EndDate, StringFormat='Bitmə: {0:dd.MM.yyyy}'}" />
+                    <Label Text="{Binding Order.Total, StringFormat='Məbləğ: {0:0.00} AZN'}" FontAttributes="Bold" />
+                    <Label Text="{Binding Order.DepositStatus, StringFormat='Depozit: {0}'}" />
+                </VerticalStackLayout>
+            </Border>
+
+            <Label Text="Məhsullar" FontAttributes="Bold" />
+            <CollectionView ItemsSource="{Binding Lines}" SelectionMode="None" HeightRequest="140">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="dto:OrderLineDto">
+                        <Grid ColumnDefinitions="*,Auto" Padding="4">
+                            <Label Text="{Binding ProductName}" />
+                            <Label Grid.Column="1" Text="{Binding Quantity, StringFormat='× {0}'}" />
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <!-- Status əməliyyatları -->
+            <Label Text="Status dəyişmə" FontAttributes="Bold" />
+            <HorizontalStackLayout Spacing="8">
+                <Button Text="Təsdiqlə" Command="{Binding ConfirmCommand}" FontSize="12" />
+                <Button Text="Təhvil ver" Command="{Binding DeliverCommand}" FontSize="12" />
+                <Button Text="Qaytar" Command="{Binding ReturnCommand}" FontSize="12" />
+                <Button Text="Ləğv et" Command="{Binding CancelCommand}" FontSize="12" BackgroundColor="#C92A2A" />
+            </HorizontalStackLayout>
+
+            <!-- Depozit / hesablaşma -->
+            <Label Text="Depozit / hesablaşma" FontAttributes="Bold" />
+            <HorizontalStackLayout Spacing="8">
+                <Entry Placeholder="Depozit" Keyboard="Numeric" Text="{Binding DepositAmount}" WidthRequest="110" />
+                <Button Text="Depozit təyin et" Command="{Binding SetDepositCommand}" FontSize="12" />
+            </HorizontalStackLayout>
+            <HorizontalStackLayout Spacing="8">
+                <Entry Placeholder="Zədə" Keyboard="Numeric" Text="{Binding DamageCharge}" WidthRequest="90" />
+                <Entry Placeholder="Cərimə" Keyboard="Numeric" Text="{Binding PenaltyCharge}" WidthRequest="90" />
+                <Button Text="Hesablaş" Command="{Binding SettleCommand}" FontSize="12" />
+            </HorizontalStackLayout>
+
+            <!-- Faktura / ödəniş -->
+            <Border StrokeShape="RoundRectangle 10" Padding="12" BackgroundColor="#E7F5FF" IsVisible="{Binding Invoice, Converter={StaticResource NotNull}}">
+                <VerticalStackLayout Spacing="6">
+                    <Label Text="{Binding Invoice.InvoiceNumber, StringFormat='Faktura: {0}'}" FontAttributes="Bold" />
+                    <Label Text="{Binding Invoice.GrandTotal, StringFormat='Yekun: {0:0.00} AZN'}" />
+                    <Label Text="{Binding Invoice.Balance, StringFormat='Qalıq borc: {0:0.00} AZN'}" TextColor="#C92A2A" />
+                    <HorizontalStackLayout Spacing="8">
+                        <Entry Placeholder="Ödəniş" Keyboard="Numeric" Text="{Binding PaymentAmount}" WidthRequest="100" />
+                        <Picker ItemsSource="{Binding PaymentMethods}" SelectedItem="{Binding PaymentMethod}" WidthRequest="110" />
+                    </HorizontalStackLayout>
+                    <HorizontalStackLayout Spacing="8">
+                        <Button Text="Ödəniş əlavə et" Command="{Binding AddPaymentCommand}" FontSize="12" />
+                        <Button Text="PDF aç" Command="{Binding OpenPdfCommand}" FontSize="12" BackgroundColor="#495057" />
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+            </Border>
+
+            <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" />
+            <Label Text="{Binding Status}" TextColor="#1971C2" IsVisible="{Binding Status, Converter={StaticResource NotNull}}" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
