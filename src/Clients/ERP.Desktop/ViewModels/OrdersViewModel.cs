@@ -28,10 +28,14 @@ public partial class OrdersViewModel : ViewModelBase
     /// <summary>Admin/Menecer sifarişi başqa məsul əməkdaşın adına yarada bilər.</summary>
     public bool CanChooseCreator { get; }
 
-    public OrdersViewModel(ErpApiClient api, bool canChooseCreator = false)
+    /// <summary>"Yaradan" sütununun görünürlüyü — sahə icazəsindən (order.creator).</summary>
+    public bool CanViewCreator { get; }
+
+    public OrdersViewModel(ErpApiClient api, bool canChooseCreator = false, bool canViewCreator = true)
     {
         this.api = api;
         CanChooseCreator = canChooseCreator;
+        CanViewCreator = canViewCreator;
     }
 
     public ObservableCollection<OrderDto> Orders { get; } = [];
@@ -40,6 +44,11 @@ public partial class OrdersViewModel : ViewModelBase
 
     /// <summary>Canlı axtarış — yazıldıqca süzülür (Enter da işləyir).</summary>
     partial void OnSearchChanged(string? value) => DebounceReload(LoadAsync);
+
+    // #42 — sifariş növünə görə süzgəc (İcarə / Satış / Hamısı).
+    public string[] TypeFilters { get; } = ["Hamısı", "İcarə", "Satış"];
+    [ObservableProperty] private string _selectedTypeFilter = "Hamısı";
+    partial void OnSelectedTypeFilterChanged(string value) => LoadCommand.Execute(null);
     [ObservableProperty] private bool _isBusy;
     [ObservableProperty] private string? _status;
     [ObservableProperty] private OrderDto? _selected;
@@ -284,8 +293,10 @@ public partial class OrdersViewModel : ViewModelBase
             var result = await api.GetOrdersAsync(Search);
             Orders.Clear();
             if (result is not null)
-                foreach (var o in result.Items) Orders.Add(o);
-            Status = $"{Orders.Count} sifariş";
+                foreach (var o in result.Items)
+                    if (SelectedTypeFilter == "Hamısı" || o.OrderType == SelectedTypeFilter)
+                        Orders.Add(o);
+            Status = $"{Orders.Count} sifariş" + (SelectedTypeFilter == "Hamısı" ? "" : $" ({SelectedTypeFilter})");
         }
         catch (System.Exception ex)
         {

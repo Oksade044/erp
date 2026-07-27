@@ -67,12 +67,14 @@ public partial class MainViewModel : ViewModelBase
         _dashboard = new DashboardViewModel(api);
         _customers = new CustomersViewModel(api);
         _products = new ProductsViewModel(api, canViewCost: CanViewField("product.cost"));
-        _orders = new OrdersViewModel(api, canChooseCreator: auth.Role is "Admin" or "Menecer");
+        _orders = new OrdersViewModel(api,
+            canChooseCreator: auth.Role is "Admin" or "Menecer",
+            canViewCreator: CanViewField("order.creator"));
         _invoices = new InvoicesViewModel(api);
         _suppliers = new SuppliersViewModel(api);
         _purchases = new PurchasesViewModel(api);
         _finance = new FinanceViewModel(api);
-        _employees = new EmployeesViewModel(api);
+        _employees = new EmployeesViewModel(api, canViewSalary: CanViewField("employee.salary"));
         _attendance = new AttendanceViewModel(api);
         _payroll = new PayrollViewModel(api);
         _warehouses = new WarehousesViewModel(api);

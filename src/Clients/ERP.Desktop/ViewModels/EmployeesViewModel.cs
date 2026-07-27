@@ -9,9 +9,12 @@ using ERP.Shared.Contracts.Hr;
 namespace ERP.Desktop.ViewModels;
 
 /// <summary>İşçilər (HR) ekranı — siyahı, axtarış və yeni işçi əlavəsi (API üzərindən).</summary>
-public partial class EmployeesViewModel(ErpApiClient api) : ViewModelBase
+public partial class EmployeesViewModel(ErpApiClient api, bool canViewSalary = true) : ViewModelBase
 {
     public ObservableCollection<EmployeeDto> Employees { get; } = [];
+
+    /// <summary>Maaş sütunu/sahəsinin görünürlüyü — sahə icazəsindən (employee.salary).</summary>
+    public bool CanViewSalary { get; } = canViewSalary;
 
     [ObservableProperty] private string? _search;
 

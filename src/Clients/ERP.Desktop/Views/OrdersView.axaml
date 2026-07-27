@@ -45,6 +45,9 @@
                         </TextBox.KeyBindings>
                     </TextBox>
             <Button Content="🔍 Axtar" Command="{Binding LoadCommand}" ToolTip.Tip="Axtarışı işə salır (Enter ilə eynidir)" />
+            <TextBlock Text="Növ:" VerticalAlignment="Center" />
+            <ComboBox ItemsSource="{Binding TypeFilters}" SelectedItem="{Binding SelectedTypeFilter}" Width="110"
+                      ToolTip.Tip="Sifariş növünə görə süzgəc: İcarə, Satış və ya hamısı." />
             <Button Content="➕ Yeni Sifariş" Command="{Binding ToggleNewOrderCommand}"
                     Background="#3B5BDB" Foreground="White"
                     ToolTip.Tip="Yeni icarə sifarişi forması açır (müştəri, tarixlər, məhsul sətirləri)" />
@@ -253,7 +256,7 @@
             </StackPanel>
         </Border>
 
-        <DataGrid Grid.Row="4" ItemsSource="{Binding Orders}" SelectedItem="{Binding Selected}"
+        <DataGrid Grid.Row="4" x:Name="OrdersGrid" ItemsSource="{Binding Orders}" SelectedItem="{Binding Selected}"
                   IsReadOnly="True" GridLinesVisibility="Horizontal"
                   BorderThickness="1" BorderBrush="#E0E2EA"
                   DoubleTapped="OnOrderDoubleTapped">

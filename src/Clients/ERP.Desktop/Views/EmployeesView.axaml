@@ -39,7 +39,8 @@
                     <TextBox Width="160" PlaceholderText="E-poçt" Text="{Binding NewEmail}" />
                     <TextBlock Text="İşə qəbul:" VerticalAlignment="Center" />
                     <DatePicker SelectedDate="{Binding NewHireDate}" />
-                    <TextBox Width="120" PlaceholderText="Əməkhaqqı" Text="{Binding NewSalary}" />
+                    <TextBox Width="120" PlaceholderText="Əməkhaqqı" Text="{Binding NewSalary}"
+                             IsVisible="{Binding CanViewSalary}" />
                     <Button Content="+ Əlavə et" Command="{Binding AddCommand}"
                             Background="#3B5BDB" Foreground="White" />
                 </StackPanel>
@@ -47,7 +48,7 @@
         </Border>
 
         <!-- Siyahı -->
-        <DataGrid Grid.Row="2" ItemsSource="{Binding Employees}" IsReadOnly="True"
+        <DataGrid Grid.Row="2" x:Name="EmployeesGrid" ItemsSource="{Binding Employees}" IsReadOnly="True"
                   GridLinesVisibility="Horizontal" BorderThickness="1" BorderBrush="#E0E2EA">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="№" Binding="{Binding EmployeeNumber}" Width="Auto" />

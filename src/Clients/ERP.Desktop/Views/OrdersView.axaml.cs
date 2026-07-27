@@ -6,7 +6,18 @@ namespace ERP.Desktop.Views;
 
 public partial class OrdersView : UserControl
 {
-    public OrdersView() => InitializeComponent();
+    public OrdersView()
+    {
+        InitializeComponent();
+        // Sahə icazəsi (order.creator) — "Yaradan" sütunu yalnız icazə varsa görünür.
+        DataContextChanged += (_, _) =>
+        {
+            if (DataContext is not OrdersViewModel vm) return;
+            foreach (var col in OrdersGrid.Columns)
+                if (col.Header as string == "Yaradan")
+                    col.IsVisible = vm.CanViewCreator;
+        };
+    }
 
     /// <summary>Seçilmiş sifarişin tam detal kartını açır (#21).</summary>
     private void OnOrderDetail(object? sender, RoutedEventArgs e) => OpenDetail();
