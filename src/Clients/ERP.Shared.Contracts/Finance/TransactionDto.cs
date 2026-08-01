@@ -11,4 +11,5 @@ public sealed record TransactionDto(
     DateOnly Date,
     string Method,
     string? Description,
-    DateTimeOffset CreatedAt);
+    DateTimeOffset CreatedAt,
+    string? PerformedBy = null);

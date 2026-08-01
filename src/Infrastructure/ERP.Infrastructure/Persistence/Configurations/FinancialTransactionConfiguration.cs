@@ -24,6 +24,7 @@ public sealed class FinancialTransactionConfiguration : IEntityTypeConfiguration
             .IsRequired();
 
         builder.Property(t => t.Category).HasMaxLength(100).IsRequired();
+        builder.Property(t => t.PerformedBy).HasMaxLength(200);
         builder.Property(t => t.Date).IsRequired();
         builder.Property(t => t.Description).HasMaxLength(2000);
 

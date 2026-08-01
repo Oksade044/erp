@@ -18,7 +18,8 @@ public static class FinanceMapping
         Date: t.Date,
         Method: t.Method.ToString(),
         Description: t.Description,
-        CreatedAt: t.CreatedAt);
+        CreatedAt: t.CreatedAt,
+        PerformedBy: t.PerformedBy);
 
     public static TransactionType ParseType(string? type)
     {

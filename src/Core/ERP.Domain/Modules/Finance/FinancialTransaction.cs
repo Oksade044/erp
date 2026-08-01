@@ -23,6 +23,9 @@ public class FinancialTransaction : BaseEntity, IAggregateRoot
     public PaymentMethod Method { get; private set; }
     public string? Description { get; private set; }
 
+    /// <summary>Əməliyyatı edən (#4 Kassa): "Mərkəz" və ya təmsilçi adı.</summary>
+    public string? PerformedBy { get; private set; }
+
     /// <summary>Mədaxil üçün +, məxaric üçün − işarəli məbləğ (balans hesablaması üçün).</summary>
     public decimal SignedAmount => Type == TransactionType.Mədaxil ? Amount.Amount : -Amount.Amount;
 
@@ -47,7 +50,8 @@ public class FinancialTransaction : BaseEntity, IAggregateRoot
         Money amount,
         DateOnly date,
         PaymentMethod method,
-        string? description = null)
+        string? description = null,
+        string? performedBy = null)
     {
         if (string.IsNullOrWhiteSpace(number))
             throw new DomainException("Əməliyyat nömrəsi tələb olunur.");
@@ -58,7 +62,8 @@ public class FinancialTransaction : BaseEntity, IAggregateRoot
 
         return new FinancialTransaction(number, type, category.Trim(), amount, date, method)
         {
-            Description = description?.Trim()
+            Description = description?.Trim(),
+            PerformedBy = string.IsNullOrWhiteSpace(performedBy) ? "Mərkəz" : performedBy.Trim()
         };
     }
 

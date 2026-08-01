@@ -1,0 +1,94 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:ERP.Desktop.ViewModels"
+             xmlns:ctrl="using:ERP.Desktop.Controls"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="960" d:DesignHeight="680"
+             x:Class="ERP.Desktop.Views.KassaView"
+             x:DataType="vm:KassaViewModel">
+
+    <Grid RowDefinitions="Auto,Auto,*,Auto" Margin="24">
+        <!-- Başlıq + tarix aralığı -->
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12" Margin="0,0,0,12">
+            <TextBlock Text="Kassa" FontSize="22" FontWeight="SemiBold" VerticalAlignment="Center" />
+            <ctrl:InfoHelp Title="Kassa (#4)"
+                           Text="Nağd əməliyyatlar: solda daxil olan, sağda çıxan pullar. Tarix aralığı seçin; altda gəlir/xərc/balans cəmi görünür. Maliyyə modulundan ayrıdır."
+                           Note="Əməliyyat növü, valyuta (AZN/USD/EUR) və edən (Mərkəz/Təmsilçi) seçilir." />
+            <TextBlock Text="Dövr:" VerticalAlignment="Center" Margin="10,0,0,0" />
+            <DatePicker SelectedDate="{Binding From}" />
+            <TextBlock Text="—" VerticalAlignment="Center" />
+            <DatePicker SelectedDate="{Binding To}" />
+            <Button Content="⟳ Göstər" Command="{Binding LoadCommand}" />
+            <TextBlock Text="{Binding Status}" Foreground="#8A90A6" VerticalAlignment="Center" />
+        </StackPanel>
+
+        <!-- Yeni əməliyyat -->
+        <Border Grid.Row="1" Background="#F5F6FA" CornerRadius="8" Padding="14,10" Margin="0,0,0,12">
+            <WrapPanel>
+                <ComboBox ItemsSource="{Binding Operations}" SelectedItem="{Binding NewOp}" Width="240" Margin="0,0,8,6"
+                          PlaceholderText="Əməliyyat növü">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate x:DataType="vm:KassaOp"><TextBlock Text="{Binding Name}" /></DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+                <TextBox Width="110" PlaceholderText="Məbləğ" Text="{Binding NewAmount}" Margin="0,0,8,6" />
+                <ComboBox ItemsSource="{Binding Currencies}" SelectedItem="{Binding NewCurrency}" Width="80" Margin="0,0,8,6" />
+                <ComboBox ItemsSource="{Binding Methods}" SelectedItem="{Binding NewMethod}" Width="100" Margin="0,0,8,6" />
+                <TextBox Width="140" PlaceholderText="Edən (Mərkəz)" Text="{Binding NewPerformedBy}" Margin="0,0,8,6" />
+                <DatePicker SelectedDate="{Binding NewDate}" Margin="0,0,8,6" />
+                <TextBox Width="180" PlaceholderText="Qeyd" Text="{Binding NewNote}" Margin="0,0,8,6" />
+                <Button Content="Əlavə et" Command="{Binding AddCommand}" Background="#3B5BDB" Foreground="White" Margin="0,0,0,6" />
+            </WrapPanel>
+        </Border>
+
+        <!-- Sol daxil / sağ çıxan -->
+        <Grid Grid.Row="2" ColumnDefinitions="*,16,*">
+            <StackPanel Grid.Column="0">
+                <TextBlock Text="↓ Daxil olan (Mədaxil)" FontWeight="SemiBold" FontSize="15" Foreground="#2B8A3E" Margin="0,0,0,8" />
+                <DataGrid ItemsSource="{Binding Incoming}" IsReadOnly="True"
+                          GridLinesVisibility="Horizontal" BorderThickness="1" BorderBrush="#E0E2EA">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Tarix" Binding="{Binding Date}" Width="Auto" />
+                        <DataGridTextColumn Header="Növ" Binding="{Binding Category}" Width="*" />
+                        <DataGridTextColumn Header="Məbləğ" Binding="{Binding Amount, StringFormat='{}{0:0.00}'}" Width="Auto" />
+                        <DataGridTextColumn Header="Val." Binding="{Binding Currency}" Width="Auto" />
+                        <DataGridTextColumn Header="Edən" Binding="{Binding PerformedBy}" Width="Auto" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </StackPanel>
+
+            <StackPanel Grid.Column="2">
+                <TextBlock Text="↑ Çıxan (Məxaric)" FontWeight="SemiBold" FontSize="15" Foreground="#C92A2A" Margin="0,0,0,8" />
+                <DataGrid ItemsSource="{Binding Outgoing}" IsReadOnly="True"
+                          GridLinesVisibility="Horizontal" BorderThickness="1" BorderBrush="#E0E2EA">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Tarix" Binding="{Binding Date}" Width="Auto" />
+                        <DataGridTextColumn Header="Növ" Binding="{Binding Category}" Width="*" />
+                        <DataGridTextColumn Header="Məbləğ" Binding="{Binding Amount, StringFormat='{}{0:0.00}'}" Width="Auto" />
+                        <DataGridTextColumn Header="Val." Binding="{Binding Currency}" Width="Auto" />
+                        <DataGridTextColumn Header="Edən" Binding="{Binding PerformedBy}" Width="Auto" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </StackPanel>
+        </Grid>
+
+        <!-- Cəmi -->
+        <Border Grid.Row="3" Background="#111827" CornerRadius="10" Padding="18,12" Margin="0,14,0,0">
+            <Grid ColumnDefinitions="*,*,*">
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="GƏLİR" FontSize="11" Foreground="#9CA3AF" />
+                    <TextBlock Text="{Binding TotalIncome, StringFormat='{}{0:0.00} AZN'}" FontSize="20" FontWeight="Bold" Foreground="#34D399" />
+                </StackPanel>
+                <StackPanel Grid.Column="1">
+                    <TextBlock Text="XƏRC" FontSize="11" Foreground="#9CA3AF" />
+                    <TextBlock Text="{Binding TotalExpense, StringFormat='{}{0:0.00} AZN'}" FontSize="20" FontWeight="Bold" Foreground="#F87171" />
+                </StackPanel>
+                <StackPanel Grid.Column="2">
+                    <TextBlock Text="BALANS" FontSize="11" Foreground="#9CA3AF" />
+                    <TextBlock Text="{Binding Balance, StringFormat='{}{0:0.00} AZN'}" FontSize="20" FontWeight="Bold" Foreground="White" />
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

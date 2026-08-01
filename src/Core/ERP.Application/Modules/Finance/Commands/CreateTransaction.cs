@@ -33,11 +33,11 @@ public sealed class CreateTransactionHandler(
 
         var type = FinanceMapping.ParseType(dto.Type);
         var method = FinanceMapping.ParseMethod(dto.Method);
-        var amount = Money.Create(dto.Amount);
+        var amount = Money.Create(dto.Amount, dto.Currency);
 
         var number = $"TRX-{DateTime.UtcNow:yyyyMMdd}-{Guid.NewGuid().ToString("N")[..6].ToUpperInvariant()}";
         var transaction = FinancialTransaction.Create(
-            number, type, dto.Category, amount, dto.Date, method, dto.Description);
+            number, type, dto.Category, amount, dto.Date, method, dto.Description, dto.PerformedBy);
 
         await transactions.AddAsync(transaction, ct);
         await unitOfWork.SaveChangesAsync(ct);

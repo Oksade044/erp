@@ -10,4 +10,7 @@ public sealed record CreateTransactionRequest(
     decimal Amount,
     DateOnly Date,
     string Method,
-    string? Description = null);
+    string? Description = null,
+    // #4 Kassa — valyuta və əməliyyatı edən (Mərkəz / təmsilçi).
+    string Currency = "AZN",
+    string? PerformedBy = null);
