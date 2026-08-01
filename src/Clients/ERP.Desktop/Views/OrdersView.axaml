@@ -179,14 +179,15 @@
                     </DataGrid.Columns>
                 </DataGrid>
 
-                <DataGrid ItemsSource="{Binding DraftLines}" IsReadOnly="True" Height="130"
-                          GridLinesVisibility="Horizontal" BorderThickness="1" BorderBrush="#E0E2EA">
+                <DataGrid ItemsSource="{Binding DraftLines}" IsReadOnly="False" Height="130"
+                          GridLinesVisibility="Horizontal" BorderThickness="1" BorderBrush="#E0E2EA"
+                          ToolTip.Tip="Say və Qiymət xanalarına iki dəfə klik edərək dəyişin (#6)">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Məhsul" Binding="{Binding ProductName}" Width="2*" />
-                        <DataGridTextColumn Header="Anbar" Binding="{Binding WarehouseName}" Width="*" />
-                        <DataGridTextColumn Header="Say" Binding="{Binding Quantity}" Width="*" />
-                        <DataGridTextColumn Header="Qiymət" Binding="{Binding UnitPrice}" Width="*" />
-                        <DataGridTextColumn Header="Cəm" Binding="{Binding LineTotal}" Width="*" />
+                        <DataGridTextColumn Header="Məhsul" Binding="{Binding ProductName}" Width="2*" IsReadOnly="True" />
+                        <DataGridTextColumn Header="Anbar" Binding="{Binding WarehouseName}" Width="*" IsReadOnly="True" />
+                        <DataGridTextColumn Header="Say ✎" Binding="{Binding Quantity}" Width="*" />
+                        <DataGridTextColumn Header="Qiymət ✎" Binding="{Binding UnitPrice}" Width="*" />
+                        <DataGridTextColumn Header="Cəm" Binding="{Binding LineTotal}" Width="*" IsReadOnly="True" />
                         <DataGridTemplateColumn Header="" Width="Auto">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate x:CompileBindings="False">

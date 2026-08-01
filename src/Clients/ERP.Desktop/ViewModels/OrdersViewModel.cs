@@ -13,11 +13,31 @@ using ERP.Shared.Contracts.Products;
 
 namespace ERP.Desktop.ViewModels;
 
-/// <summary>Sifariş yaradarkən müvəqqəti sətir (UI-da göstərilir).</summary>
-public sealed record DraftLine(Guid ProductId, string ProductName, int Quantity, decimal UnitPrice,
-    Guid? WarehouseId = null, string? WarehouseName = null)
+/// <summary>Sifariş yaradarkən müvəqqəti sətir (#6 — say/qiymət cədvəldə redaktə olunur).</summary>
+public sealed partial class DraftLine : ObservableObject
 {
+    public Guid ProductId { get; }
+    public string ProductName { get; }
+    public Guid? WarehouseId { get; }
+    public string? WarehouseName { get; }
+
+    [ObservableProperty] private int _quantity;
+    [ObservableProperty] private decimal _unitPrice;
+
+    public DraftLine(Guid productId, string productName, int quantity, decimal unitPrice,
+        Guid? warehouseId = null, string? warehouseName = null)
+    {
+        ProductId = productId;
+        ProductName = productName;
+        _quantity = quantity;
+        _unitPrice = unitPrice;
+        WarehouseId = warehouseId;
+        WarehouseName = warehouseName;
+    }
+
     public decimal LineTotal => Quantity * UnitPrice;
+    partial void OnQuantityChanged(int value) => OnPropertyChanged(nameof(LineTotal));
+    partial void OnUnitPriceChanged(decimal value) => OnPropertyChanged(nameof(LineTotal));
 }
 
 /// <summary>Sifarişlər ekranı — siyahı, təsdiq/ləğv/təhvil, faktura, və yeni sifariş yaratma.</summary>
@@ -233,11 +253,18 @@ public partial class OrdersViewModel : ViewModelBase
         foreach (var p in picked)
         {
             if (DraftLines.Any(l => l.ProductId == p.Id)) continue;
-            DraftLines.Add(new DraftLine(p.Id, p.Name, 1, p.RentalPrice));
+            DraftLines.Add(Track(new DraftLine(p.Id, p.Name, 1, p.RentalPrice)));
             added++;
         }
         OnPropertyChanged(nameof(DraftTotal));
         Status = added > 0 ? $"{added} məhsul əlavə olundu." : "Yeni məhsul seçilmədi.";
+    }
+
+    /// <summary>Sətir say/qiymət dəyişdikdə ümumi cəmi yeniləyir (#6).</summary>
+    private DraftLine Track(DraftLine line)
+    {
+        line.PropertyChanged += (_, _) => OnPropertyChanged(nameof(DraftTotal));
+        return line;
     }
 
     [RelayCommand]
@@ -255,8 +282,8 @@ public partial class OrdersViewModel : ViewModelBase
         }
 
         // #29/#30 — istifadəçinin daxil etdiyi (dəyişdirilə bilən) vahid qiymət istifadə olunur.
-        DraftLines.Add(new DraftLine(LineProduct.Id, LineProduct.Name, LineQuantity, LineUnitPrice,
-            LineWarehouse?.WarehouseId, LineWarehouse?.WarehouseName));
+        DraftLines.Add(Track(new DraftLine(LineProduct.Id, LineProduct.Name, LineQuantity, LineUnitPrice,
+            LineWarehouse?.WarehouseId, LineWarehouse?.WarehouseName)));
         OnPropertyChanged(nameof(DraftTotal));
         LineQuantity = 1;
     }
