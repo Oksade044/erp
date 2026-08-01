@@ -56,6 +56,7 @@ public partial class MainViewModel : ViewModelBase
         var purchases = new PurchasesViewModel(api);
         var finance = new FinanceViewModel(api);
         var kassa = new KassaViewModel(api);
+        var categories = new CategoriesViewModel(api);
         var employees = new EmployeesViewModel(api, canViewSalary: CanViewField("employee.salary"));
         var representatives = new RepresentativesViewModel(api);
         var attendance = new AttendanceViewModel(api);
@@ -75,6 +76,7 @@ public partial class MainViewModel : ViewModelBase
             ["İdarə Paneli"] = ("\U0001F4CA", "İdarə Paneli", dashboard),
             ["Müştərilər"] = ("\U0001F465", "Müştərilər", customers),
             ["Məhsullar"] = ("\U0001F4E6", "Məhsullar", products),
+            ["Kateqoriyalar"] = ("\U0001F3F7", "Kateqoriyalar", categories),
             ["Sifarişlər"] = ("\U0001F9FE", "Sifarişlər", orders),
             ["Fakturalar"] = ("\U0001F9FE", "Fakturalar", invoices),
             ["Təchizatçılar"] = ("\U0001F69A", "Təchizatçılar", suppliers),
@@ -117,7 +119,8 @@ public partial class MainViewModel : ViewModelBase
             Item("İcarə Təqvimi", "İcarə Təqvimi"),
         ], isExpanded: true));
         Menu.Add(new NavGroup("MALLAR", [
-            Item("Məhsullar", "Məhsullar"),
+            Item("Məhsullar", "Məhsullar (siyahı)"),
+            Item("Kateqoriyalar", "Kateqoriyalar"),
             Item("Stok", "Anbar stokları"),
             Item("Anbarlar", "Anbarlar"),
             Item("Alışlar", "Alışlar"),
@@ -180,6 +183,7 @@ public partial class MainViewModel : ViewModelBase
             case PurchasesViewModel v: v.LoadCommand.Execute(null); break;
             case FinanceViewModel v: v.LoadCommand.Execute(null); break;
             case KassaViewModel v: v.LoadCommand.Execute(null); break;
+            case CategoriesViewModel v: v.LoadCommand.Execute(null); break;
             case EmployeesViewModel v: v.LoadCommand.Execute(null); break;
             case RepresentativesViewModel v: v.LoadCommand.Execute(null); break;
             case AttendanceViewModel v: v.LoadCommand.Execute(null); break;

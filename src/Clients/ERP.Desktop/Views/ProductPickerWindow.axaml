@@ -52,7 +52,7 @@
 
         <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right" Margin="0,12,0,0">
             <Button Content="Bağla" Click="OnCancel" />
-            <Button Content="✓ Əlavə et" Command="{Binding ConfirmCommand}" Click="OnConfirm"
+            <Button Content="✓ Əlavə et" Click="OnConfirm"
                     Background="#2F9E44" Foreground="White" />
         </StackPanel>
     </Grid>

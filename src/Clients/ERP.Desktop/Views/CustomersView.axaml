@@ -2,6 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:ERP.Desktop.ViewModels"
              xmlns:ctrl="using:ERP.Desktop.Controls"
+             xmlns:local="using:ERP.Desktop"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="850" d:DesignHeight="620"
@@ -72,6 +73,7 @@
 
         <!-- Siyahı -->
         <DataGrid Grid.Row="2" ItemsSource="{Binding Customers}" IsReadOnly="True"
+                  CanUserResizeColumns="True" local:GridColumnPersistence.Key="customers"
                   GridLinesVisibility="Horizontal" BorderThickness="1" BorderBrush="#E0E2EA">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Ad" Binding="{Binding Name}" Width="2*" />

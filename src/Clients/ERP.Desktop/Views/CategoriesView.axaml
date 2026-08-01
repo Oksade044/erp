@@ -1,0 +1,36 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:ERP.Desktop.ViewModels"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="640" d:DesignHeight="560"
+             x:Class="ERP.Desktop.Views.CategoriesView"
+             x:DataType="vm:CategoriesViewModel">
+
+    <Grid RowDefinitions="Auto,Auto,*,Auto" Margin="24">
+        <TextBlock Grid.Row="0" Text="Kateqoriyalar" FontSize="22" FontWeight="SemiBold" Margin="0,0,0,14" />
+
+        <Border Grid.Row="1" Background="#F5F6FA" CornerRadius="8" Padding="14,10" Margin="0,0,0,14">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <TextBlock Text="Yeni kateqoriya:" FontWeight="SemiBold" VerticalAlignment="Center" />
+                <TextBox Width="240" PlaceholderText="Məs: Stol, Stul, Aksesuar, Şamlıq" Text="{Binding NewName}">
+                    <TextBox.KeyBindings>
+                        <KeyBinding Gesture="Enter" Command="{Binding AddCommand}" />
+                    </TextBox.KeyBindings>
+                </TextBox>
+                <Button Content="+ Yarat" Command="{Binding AddCommand}" Background="#3B5BDB" Foreground="White" />
+                <Button Content="⟳ Yenilə" Command="{Binding LoadCommand}" />
+            </StackPanel>
+        </Border>
+
+        <DataGrid Grid.Row="2" ItemsSource="{Binding Categories}" IsReadOnly="True"
+                  CanUserResizeColumns="True" GridLinesVisibility="Horizontal" BorderThickness="1" BorderBrush="#E0E2EA">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Ad" Binding="{Binding Name}" Width="2*" />
+                <DataGridCheckBoxColumn Header="Aktiv" Binding="{Binding IsActive}" Width="Auto" />
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <TextBlock Grid.Row="3" Text="{Binding Status}" Foreground="#5A6072" Margin="0,10,0,0" />
+    </Grid>
+</UserControl>

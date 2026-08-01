@@ -2,6 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:ERP.Desktop.ViewModels"
              xmlns:conv="using:ERP.Desktop.Converters"
+             xmlns:local="using:ERP.Desktop"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="980" d:DesignHeight="720"
@@ -282,11 +283,12 @@
         <!-- Siyahı + şəkil -->
         <Grid Grid.Row="3" ColumnDefinitions="*,Auto">
             <DataGrid Grid.Column="0" ItemsSource="{Binding Products}" SelectedItem="{Binding Selected}"
-                      IsReadOnly="True" GridLinesVisibility="Horizontal" BorderThickness="1" BorderBrush="#E0E2EA"
+                      IsReadOnly="True" CanUserResizeColumns="True" local:GridColumnPersistence.Key="products"
+                      GridLinesVisibility="Horizontal" BorderThickness="1" BorderBrush="#E0E2EA"
                       DoubleTapped="OnProductDoubleTapped">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="SKU (kod)" Binding="{Binding Sku}" Width="Auto" />
-                    <DataGridTextColumn Header="Ad" Binding="{Binding Name}" Width="2*" />
+                    <DataGridTextColumn Header="Ad" Binding="{Binding Name}" Width="260" MinWidth="120" />
                     <DataGridTextColumn Header="Vahid" Binding="{Binding Unit}" Width="Auto" />
                     <DataGridTextColumn Header="Kateqoriya" Binding="{Binding Category}" Width="*" />
                     <DataGridTextColumn Header="İcarə qiyməti" Binding="{Binding RentalPrice}" Width="Auto" />

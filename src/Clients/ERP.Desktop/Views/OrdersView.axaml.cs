@@ -1,3 +1,4 @@
+using System.Linq;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using ERP.Desktop.ViewModels;
@@ -34,8 +35,12 @@ public partial class OrdersView : UserControl
         var window = new ProductPickerWindow { DataContext = picker };
         await picker.InitAsync();
         var ok = await window.ShowDialog<bool>(owner);
-        if (ok && picker.Confirmed)
-            vm.AddPickedProducts(picker.Picked);
+        if (ok)
+        {
+            // #1 düzəlişi — seçilmişləri birbaşa oxu (Command/Click yarışından qaçmaq üçün).
+            var chosen = picker.Products.Where(p => p.IsSelected).Select(p => p.Product).ToList();
+            vm.AddPickedProducts(chosen);
+        }
     }
 
     private void OpenDetail()
