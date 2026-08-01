@@ -189,6 +189,22 @@ public sealed class InvoicePdfService : IInvoicePdfService
                             }
                         });
                     }
+
+                    // #15 — təhvil verən / təhvil alan (əl ilə doldurulan xanalar; avtomatik dolmur)
+                    col.Item().PaddingTop(36).Row(row =>
+                    {
+                        row.RelativeItem().Column(c =>
+                        {
+                            c.Item().PaddingBottom(2).LineHorizontal(1).LineColor(Colors.Grey.Medium);
+                            c.Item().Text("Təhvil verən (ad, soyad, imza)").FontSize(9).FontColor(Colors.Grey.Darken1);
+                        });
+                        row.ConstantItem(40);
+                        row.RelativeItem().Column(c =>
+                        {
+                            c.Item().PaddingBottom(2).LineHorizontal(1).LineColor(Colors.Grey.Medium);
+                            c.Item().Text("Təhvil alan (ad, soyad, imza)").FontSize(9).FontColor(Colors.Grey.Darken1);
+                        });
+                    });
                 });
 
                 page.Footer().AlignCenter().Text(t =>

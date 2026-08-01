@@ -29,6 +29,19 @@ public partial class InvoicesViewModel(ErpApiClient api) : ViewModelBase
 
     public string[] PaymentMethods { get; } = ["Nağd", "Köçürmə", "Kart"];
 
+    // #9 — filtrlər (tarix aralığı, status, valyuta)
+    [ObservableProperty] private DateTimeOffset _fromDate = DateTimeOffset.Now.AddMonths(-3);
+    [ObservableProperty] private DateTimeOffset _toDate = DateTimeOffset.Now;
+    [ObservableProperty] private string _statusFilter = "Hamısı";
+    [ObservableProperty] private string _currencyFilter = "Hamısı";
+    public string[] StatusFilters { get; } = ["Hamısı", "Ödənilməmiş", "QismənÖdənilmiş", "Ödənilmiş"];
+    public string[] CurrencyFilters { get; } = ["Hamısı", "AZN", "USD", "EUR"];
+
+    partial void OnStatusFilterChanged(string value) => _ = LoadAsync();
+    partial void OnCurrencyFilterChanged(string value) => _ = LoadAsync();
+    partial void OnFromDateChanged(DateTimeOffset value) => _ = LoadAsync();
+    partial void OnToDateChanged(DateTimeOffset value) => _ = LoadAsync();
+
     [RelayCommand]
     private async Task LoadAsync()
     {
@@ -37,10 +50,18 @@ public partial class InvoicesViewModel(ErpApiClient api) : ViewModelBase
         try
         {
             var result = await api.GetInvoicesAsync(Search);
+            var from = DateOnly.FromDateTime(FromDate.DateTime);
+            var to = DateOnly.FromDateTime(ToDate.DateTime);
             Invoices.Clear();
             if (result is not null)
-                foreach (var i in result.Items) Invoices.Add(i);
-            Status = $"{Invoices.Count} faktura";
+                foreach (var i in result.Items)
+                {
+                    if (i.IssueDate < from || i.IssueDate > to) continue;
+                    if (StatusFilter != "Hamısı" && i.Status != StatusFilter) continue;
+                    if (CurrencyFilter != "Hamısı" && i.Currency != CurrencyFilter) continue;
+                    Invoices.Add(i);
+                }
+            Status = $"{Invoices.Count} faktura ({from:dd.MM.yyyy} – {to:dd.MM.yyyy})";
         }
         catch (Exception ex) { Status = $"Xəta: {ex.Message}"; }
         finally { IsBusy = false; }

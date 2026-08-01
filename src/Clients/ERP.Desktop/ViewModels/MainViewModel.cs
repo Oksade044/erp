@@ -156,9 +156,10 @@ public partial class MainViewModel : ViewModelBase
         {
             existing = new WorkspaceTab(key, s.icon, s.title, s.vm, new RelayCommand<WorkspaceTab>(CloseTab));
             Tabs.Add(existing);
-            LoadContent(s.vm);
         }
         SelectedTab = existing;
+        // Hər açılışda məzmunu yenilə — məs. başqa bölmədə yaradılan sifariş siyahıda dərhal görünsün.
+        LoadContent(s.vm);
     }
 
     partial void OnSelectedTabChanged(WorkspaceTab? value)

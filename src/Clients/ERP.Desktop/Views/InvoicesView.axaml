@@ -36,6 +36,14 @@
                         </TextBox.KeyBindings>
                     </TextBox>
                     <Button Content="🔍 Axtar" Command="{Binding LoadCommand}" ToolTip.Tip="Axtarışı işə salır (Enter ilə eynidir)" />
+                    <TextBlock Text="Dövr:" VerticalAlignment="Center" Margin="8,0,0,0" />
+                    <DatePicker SelectedDate="{Binding FromDate}" />
+                    <TextBlock Text="—" VerticalAlignment="Center" />
+                    <DatePicker SelectedDate="{Binding ToDate}" />
+                    <TextBlock Text="Status:" VerticalAlignment="Center" />
+                    <ComboBox ItemsSource="{Binding StatusFilters}" SelectedItem="{Binding StatusFilter}" Width="150" />
+                    <TextBlock Text="Valyuta:" VerticalAlignment="Center" />
+                    <ComboBox ItemsSource="{Binding CurrencyFilters}" SelectedItem="{Binding CurrencyFilter}" Width="90" />
                     <Button Content="📄 PDF aç" Command="{Binding OpenPdfCommand}"
                             Background="#1971C2" Foreground="White"
                             ToolTip.Tip="Seçilmiş fakturanın PDF qəbzini açır (məhsul şəkilləri, sətirlər, ödəniş tarixçəsi)" />
