@@ -23,6 +23,16 @@ public partial class OrdersView : UserControl
     /// <summary>Seçilmiş sifarişin tam detal kartını açır (#21).</summary>
     private void OnOrderDetail(object? sender, RoutedEventArgs e) => OpenDetail();
 
+    /// <summary>#7 — cədvəldə seçilmiş (Ctrl/Shift) bir neçə qaralama sifarişi birdəfəyə təsdiqləyir.</summary>
+    private async void OnConfirmSelected(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is not OrdersViewModel vm) return;
+        var selected = OrdersGrid.SelectedItems?.Cast<ERP.Shared.Contracts.Orders.OrderDto>().ToList()
+                       ?? new System.Collections.Generic.List<ERP.Shared.Contracts.Orders.OrderDto>();
+        if (selected.Count == 0) return;
+        await vm.ConfirmManyAsync(selected);
+    }
+
     private void OnOrderDoubleTapped(object? sender, RoutedEventArgs e) => OpenDetail();
 
     /// <summary>Kateqoriya-məhsul seçim pəncərəsini açır (#5); seçilənləri sifariş sətirlərinə əlavə edir.</summary>

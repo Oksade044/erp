@@ -98,16 +98,10 @@
                                       ToolTip.Tip="Say ilə: eyni əşyadan çox (200 stul). Fərdi: hər nüsxə ayrıca izlənir." />
                         </StackPanel>
                         <StackPanel Width="220" Margin="0,0,12,10">
-                            <TextBlock Text="Kateqoriya (seç və ya yeni yaz)" FontSize="12" Foreground="#5A6072" />
-                            <StackPanel Orientation="Horizontal" Spacing="4">
-                                <AutoCompleteBox Width="165" PlaceholderText="Məs: Mebel"
-                                                 ItemsSource="{Binding CategoryNames}"
-                                                 Text="{Binding NewCategory}"
-                                                 FilterMode="ContainsOrdinal" MinimumPrefixLength="0"
-                                                 ToolTip.Tip="Mövcud kateqoriyadan seçin və ya yeni ad yazın — məhsul əlavə olunanda avtomatik yaranır." />
-                                <Button Content="＋" Command="{Binding AddCategoryCommand}" Width="32"
-                                        ToolTip.Tip="Yazılan kateqoriyanı indi yarat (məhsulsuz)" />
-                            </StackPanel>
+                            <TextBlock Text="Kateqoriya (siyahıdan seç)" FontSize="12" Foreground="#5A6072" />
+                            <ComboBox Width="200" ItemsSource="{Binding CategoryNames}" SelectedItem="{Binding NewCategory}"
+                                      PlaceholderText="Kateqoriya seç..."
+                                      ToolTip.Tip="Kateqoriyalar 'Mallar → Kateqoriyalar' bölməsində yaradılır (#2b)." />
                         </StackPanel>
                         <StackPanel Width="130" Margin="0,0,12,10">
                             <TextBlock Text="Ölçü vahidi" FontSize="12" Foreground="#5A6072" />

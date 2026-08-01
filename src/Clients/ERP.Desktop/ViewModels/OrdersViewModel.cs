@@ -268,6 +268,19 @@ public partial class OrdersViewModel : ViewModelBase
     /// <summary>Kateqoriya-məhsul seçim pəncərəsi üçün VM (kod-arxasından açılır, #5).</summary>
     public ProductPickerViewModel CreatePicker() => new(api);
 
+    /// <summary>#7 — seçilmiş bir neçə sifarişi eyni anda təsdiqlə (yalnız qaralama olanlar).</summary>
+    public async Task ConfirmManyAsync(System.Collections.Generic.IEnumerable<OrderDto> selected)
+    {
+        int done = 0, fail = 0;
+        foreach (var o in selected.Where(o => o.Status == "Qaralama"))
+        {
+            var (ok, _) = await api.ConfirmOrderAsync(o.Id);
+            if (ok) done++; else fail++;
+        }
+        Status = $"{done} sifariş təsdiqləndi" + (fail > 0 ? $", {fail} alınmadı" : "") + ".";
+        await LoadAsync();
+    }
+
     /// <summary>Seçim pəncərəsindən gələn məhsulları sifariş sətirlərinə əlavə edir (say 1).</summary>
     public void AddPickedProducts(System.Collections.Generic.IEnumerable<ERP.Shared.Contracts.Products.ProductDto> picked)
     {

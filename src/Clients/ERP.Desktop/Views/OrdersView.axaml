@@ -66,6 +66,9 @@
             <Button Content="✕ Ləğv" Command="{Binding CancelCommand}"
                     Background="#E03131" Foreground="White"
                     ToolTip.Tip="Sifarişi ləğv edir və rezervi boşaldır. Təhvil verilmiş sifariş ləğv edilə bilməz." />
+            <Button Content="✓✓ Seçilənləri təsdiqlə" Click="OnConfirmSelected"
+                    Background="#0CA678" Foreground="White"
+                    ToolTip.Tip="Cədvəldə Ctrl/Shift ilə bir neçə qaralama sifariş seçin və hamısını birdəfəyə təsdiqləyin (#7)." />
             <Button Content="💰 Faktura" Command="{Binding CreateInvoiceCommand}"
                     Background="#F08C00" Foreground="White"
                     ToolTip.Tip="Bu sifariş üçün faktura yaradır. Ödəniş və PDF 'Fakturalar' bölməsindədir." />
@@ -240,6 +243,7 @@
 
         <DataGrid Grid.Row="4" x:Name="OrdersGrid" ItemsSource="{Binding Orders}" SelectedItem="{Binding Selected}"
                   IsReadOnly="True" CanUserResizeColumns="True" local:GridColumnPersistence.Key="orders"
+                  SelectionMode="Extended"
                   GridLinesVisibility="Horizontal" IsVisible="{Binding ListMode}"
                   BorderThickness="1" BorderBrush="#E0E2EA"
                   DoubleTapped="OnOrderDoubleTapped">
