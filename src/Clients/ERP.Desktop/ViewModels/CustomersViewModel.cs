@@ -51,17 +51,14 @@ public partial class CustomersViewModel(ErpApiClient api) : ViewModelBase
                 foreach (var c in result.Items) Customers.Add(c);
             Status = $"{Customers.Count} müştəri";
 
-            // Təmsilçi siyahısını doldur (#1 Əlaqələndirmə): Mərkəz + işçilər.
-            if (RepresentativeNames.Count <= 1)
+            // Təmsilçi siyahısını təzələ (#4 — yeni işçi dərhal görünsün).
+            try
             {
-                try
-                {
-                    var emps = await api.GetEmployeesAsync(null);
-                    if (emps is not null)
-                        foreach (var e in emps.Items) if (!RepresentativeNames.Contains(e.FullName)) RepresentativeNames.Add(e.FullName);
-                }
-                catch { /* siyahı boş qala bilər */ }
+                var emps = await api.GetEmployeesAsync(null);
+                if (emps is not null)
+                    foreach (var e in emps.Items) if (!RepresentativeNames.Contains(e.FullName)) RepresentativeNames.Add(e.FullName);
             }
+            catch { /* siyahı boş qala bilər */ }
         }
         catch (System.Exception ex)
         {

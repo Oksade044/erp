@@ -237,21 +237,24 @@ public partial class OrdersViewModel : ViewModelBase
         if (ShowNewOrder) await EnsureFormDataAsync();
     }
 
-    /// <summary>Sifariş forması üçün müştəri/məhsul/əməkdaş siyahılarını bir dəfə yükləyir.</summary>
-    private async Task EnsureFormDataAsync()
+    /// <summary>Sifariş forması üçün müştəri/məhsul/əməkdaş siyahılarını təzələyir (#6 — hər dəfə yenilənir).</summary>
+    public async Task EnsureFormDataAsync()
     {
-        if (AllCustomers.Count == 0)
-        {
-            var custs = await api.GetCustomersAsync(null);
-            if (custs is not null) foreach (var c in custs.Items) AllCustomers.Add(c);
-            var prods = await api.GetProductsAsync(null);
-            if (prods is not null) foreach (var p in prods.Items) AllProducts.Add(p);
+        var selCustomerId = NewCustomer?.Id;
+        var custs = await api.GetCustomersAsync(null);
+        AllCustomers.Clear();
+        if (custs is not null) foreach (var c in custs.Items) AllCustomers.Add(c);
+        if (selCustomerId is { } id) NewCustomer = AllCustomers.FirstOrDefault(c => c.Id == id);
 
-            if (CanChooseCreator && AllEmployees.Count == 0)
-            {
-                var emps = await api.GetEmployeesAsync(null);
-                if (emps is not null) foreach (var e in emps.Items) AllEmployees.Add(e);
-            }
+        var prods = await api.GetProductsAsync(null);
+        AllProducts.Clear();
+        if (prods is not null) foreach (var p in prods.Items) AllProducts.Add(p);
+
+        if (CanChooseCreator)
+        {
+            var emps = await api.GetEmployeesAsync(null);
+            AllEmployees.Clear();
+            if (emps is not null) foreach (var e in emps.Items) AllEmployees.Add(e);
         }
     }
 
@@ -349,6 +352,9 @@ public partial class OrdersViewModel : ViewModelBase
     [RelayCommand]
     private async Task LoadAsync()
     {
+        // Yaratma rejimində siyahı deyil, forma dropdown-larını təzələ (#6).
+        if (CreateMode) { await EnsureFormDataAsync(); return; }
+
         IsBusy = true;
         Status = "Yüklənir...";
         try

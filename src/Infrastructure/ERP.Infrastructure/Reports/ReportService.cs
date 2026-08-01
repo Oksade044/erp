@@ -32,6 +32,8 @@ public sealed class ReportService(AppDbContext context) : IReportService
         // Pul cəmləri client tərəfdə (SQLite decimal aqreqasiyası etibarsızdır).
         var totalInvoiced = (await context.Invoices.Select(i => i.TotalAmount.Amount).ToListAsync(ct)).Sum();
         var totalPaid = (await context.Set<Payment>().Select(p => p.Amount.Amount).ToListAsync(ct)).Sum();
+        // #5 — müştərilərin bizə olan borcu da "alınacaqlar"a daxildir.
+        var customerDebt = (await context.Customers.Where(c => c.Debt != null).Select(c => c.Debt!.Amount).ToListAsync(ct)).Sum();
 
         // #20 — bugünkü əməliyyatlar (DateOnly SQLite-də WHERE-də təhlükəsizdir).
         var today = DateOnly.FromDateTime(DateTime.UtcNow);
@@ -61,7 +63,7 @@ public sealed class ReportService(AppDbContext context) : IReportService
             CancelledOrders: cancelled,
             TotalInvoiced: totalInvoiced,
             TotalPaid: totalPaid,
-            TotalOutstanding: totalInvoiced - totalPaid,
+            TotalOutstanding: (totalInvoiced - totalPaid) + customerDebt,
             Currency: DefaultCurrency,
             DeliveriesToday: deliveriesToday,
             ReturnsToday: returnsToday,

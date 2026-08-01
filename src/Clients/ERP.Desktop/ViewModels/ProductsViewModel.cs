@@ -245,13 +245,11 @@ public partial class ProductsViewModel : ViewModelBase
                 foreach (var p in result.Items) Products.Add(p);
             Status = $"{Products.Count} məhsul";
 
-            // Anbar siyahısını bir dəfə yüklə (yeni məhsul formasında seçim üçün).
-            if (Warehouses.Count == 0)
-            {
-                var whs = await _api.GetWarehousesAsync(null);
-                if (whs is not null)
-                    foreach (var w in whs.Items) Warehouses.Add(w);
-            }
+            // Anbar siyahısını həmişə təzələ (#4 — yeni anbar dərhal görünsün).
+            var whs = await _api.GetWarehousesAsync(null);
+            Warehouses.Clear();
+            if (whs is not null)
+                foreach (var w in whs.Items) Warehouses.Add(w);
 
             // Kateqoriyaları həmişə təzələ (yeni əlavə olunanlar dərhal görünsün).
             var cats = await _api.GetCategoriesAsync();
@@ -281,6 +279,10 @@ public partial class ProductsViewModel : ViewModelBase
             var initialStocks = NewStocks
                 .Select(r => new InitialStockRequest(r.WarehouseId, r.Quantity, r.MinQuantity))
                 .ToList();
+
+            // #2a düzəliş — istifadəçi anbar+say seçib amma "əlavə et" basmayıbsa, avtomatik daxil et.
+            if (AddWarehouse is not null && AddQty > 0 && initialStocks.All(s => s.WarehouseId != AddWarehouse.Id))
+                initialStocks.Add(new InitialStockRequest(AddWarehouse.Id, AddQty, AddMin));
 
             var (ok, id, error) = await _api.CreateProductAsync(new CreateProductRequest(
                 Name: NewName!,

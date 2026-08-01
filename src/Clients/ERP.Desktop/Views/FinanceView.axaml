@@ -53,8 +53,8 @@
             <Button Content="Axtar / Yenilə" Command="{Binding LoadCommand}" />
         </StackPanel>
 
-        <!-- Yeni əməliyyat forması -->
-        <Border Grid.Row="3" Background="#F5F6FA" CornerRadius="8" Padding="16" Margin="0,0,0,16">
+        <!-- Yeni əməliyyat forması — #10: Maliyyə yalnız oxudur, əlavə Kassa bölməsindədir -->
+        <Border Grid.Row="3" Background="#F5F6FA" CornerRadius="8" Padding="16" Margin="0,0,0,16" IsVisible="False">
             <StackPanel Orientation="Horizontal" Spacing="8">
                 <ComboBox ItemsSource="{Binding TransactionTypes}" SelectedItem="{Binding NewTransactionType}" Width="110" />
                 <TextBox Width="160" PlaceholderText="Kateqoriya *" Text="{Binding NewCategory}" />

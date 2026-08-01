@@ -34,6 +34,7 @@ public partial class RentalCalendarViewModel : ViewModelBase
 
     [ObservableProperty] private int _deliveriesInRange;
     [ObservableProperty] private int _returnsInRange;
+    [ObservableProperty] private decimal _rangeTotal;
 
     [RelayCommand]
     private async Task LoadAsync()
@@ -52,6 +53,7 @@ public partial class RentalCalendarViewModel : ViewModelBase
 
             DeliveriesInRange = Entries.Count(e => e.DeliversInRange);
             ReturnsInRange = Entries.Count(e => e.ReturnsInRange);
+            RangeTotal = Entries.Sum(e => e.Total);
             Status = Entries.Count == 0
                 ? "Bu dövrdə planlaşdırılmış icarə yoxdur."
                 : $"{Entries.Count} icarə — sətrə iki dəfə klik edib detala baxın.";
