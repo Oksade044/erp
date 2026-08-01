@@ -1,5 +1,6 @@
 using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -23,6 +24,8 @@ public partial class StockViewModel(ErpApiClient api) : ViewModelBase
 
     public ObservableCollection<StockLevelDto> Levels { get; } = [];
     [ObservableProperty] private StockLevelDto? _selectedLevel;
+    // #3 — sətir seçiləndə redaktə sahələrini avtomatik doldur (yerindəcə dəyişmək üçün).
+    partial void OnSelectedLevelChanged(StockLevelDto? value) { if (value is not null) FillAdjustFromSelected(); }
 
     /// <summary>Seçilmiş stok sətrinin məhsul tarixçəsi VM-i (kod-arxasından çağırılır).</summary>
     public ProductHistoryViewModel? CreateHistory() =>
@@ -35,6 +38,27 @@ public partial class StockViewModel(ErpApiClient api) : ViewModelBase
     /// <summary>Canlı axtarış — yazıldıqca süzülür (Enter da işləyir).</summary>
     partial void OnSearchChanged(string? value) => DebounceReload(LoadAsync);
     [ObservableProperty] private bool _lowOnly;
+    // #3 — anbar filtri (yuxarıda) + transfer paneli
+    [ObservableProperty] private WarehouseDto? _warehouseFilter;
+    partial void OnWarehouseFilterChanged(WarehouseDto? value) => _ = LoadAsync();
+    [ObservableProperty] private bool _showTransfer;
+    partial void OnLowOnlyChanged(bool value) => _ = LoadAsync();
+
+    [RelayCommand]
+    private void ToggleTransfer() => ShowTransfer = !ShowTransfer;
+
+    /// <summary>#3 — cədvəldə sətrə 2 klik: adjust formasını doldur (yerindəcə redaktə).</summary>
+    public void FillAdjustFromSelected()
+    {
+        if (SelectedLevel is null) return;
+        AdjProduct = AllProducts.FirstOrDefault(p => p.Id == SelectedLevel.ProductId);
+        AdjWarehouse = AllWarehouses.FirstOrDefault(w => w.Id == SelectedLevel.WarehouseId);
+        AdjQuantity = SelectedLevel.Quantity;
+        AdjMinQuantity = SelectedLevel.MinQuantity;
+        AdjInRepair = SelectedLevel.InRepair;
+        AdjDamaged = SelectedLevel.Damaged;
+        Status = $"Redaktə: {SelectedLevel.ProductName} @ {SelectedLevel.WarehouseName} — sayı dəyişib 'Təyin et' basın.";
+    }
     [ObservableProperty] private bool _isBusy;
     [ObservableProperty] private string? _status;
 
@@ -92,22 +116,22 @@ public partial class StockViewModel(ErpApiClient api) : ViewModelBase
         Status = "Yüklənir...";
         try
         {
-            if (AllProducts.Count == 0)
-            {
-                var prods = await api.GetProductsAsync(null);
-                if (prods is not null) foreach (var p in prods.Items) AllProducts.Add(p);
-            }
-            if (AllWarehouses.Count == 0)
-            {
-                var whs = await api.GetWarehousesAsync(null);
-                if (whs is not null) foreach (var w in whs.Items) AllWarehouses.Add(w);
-            }
+            // Anbar/məhsul siyahılarını təzələ (#4 — yeni əlavələr dərhal görünsün).
+            var prods = await api.GetProductsAsync(null);
+            AllProducts.Clear();
+            if (prods is not null) foreach (var p in prods.Items) AllProducts.Add(p);
+            var whs = await api.GetWarehousesAsync(null);
+            AllWarehouses.Clear();
+            if (whs is not null) foreach (var w in whs.Items) AllWarehouses.Add(w);
 
             var result = await api.GetStockLevelsAsync(Search, LowOnly);
             Levels.Clear();
             if (result is not null)
-                foreach (var l in result.Items) Levels.Add(l);
-            Status = $"{Levels.Count} səviyyə" + (LowOnly ? " (yalnız aşağı)" : "");
+                foreach (var l in result.Items)
+                    if (WarehouseFilter is null || l.WarehouseId == WarehouseFilter.Id)
+                        Levels.Add(l);
+            Status = $"{Levels.Count} səviyyə" + (LowOnly ? " (yalnız aşağı)" : "")
+                     + (WarehouseFilter is not null ? $" — {WarehouseFilter.Name}" : "");
         }
         catch (System.Exception ex)
         {
