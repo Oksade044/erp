@@ -8,8 +8,12 @@ using ERP.Shared.Contracts.Customers;
 namespace ERP.Desktop.ViewModels;
 
 /// <summary>Müştərilər ekranı — siyahı, axtarış və yeni müştəri əlavəsi (API üzərindən).</summary>
-public partial class CustomersViewModel(ErpApiClient api) : ViewModelBase
+public partial class CustomersViewModel(ErpApiClient api, bool createMode = false) : ViewModelBase
 {
+    /// <summary>#11 — yalnız müştəri yaratma ekranı (siyahı ayrı bölmədədir).</summary>
+    public bool CreateMode { get; } = createMode;
+    public bool ListMode => !createMode;
+
     public ObservableCollection<CustomerDto> Customers { get; } = [];
 
     [ObservableProperty] private string? _search;

@@ -46,7 +46,8 @@ public partial class MainViewModel : ViewModelBase
         }
 
         var dashboard = new DashboardViewModel(api);
-        var customers = new CustomersViewModel(api);
+        var customers = new CustomersViewModel(api, createMode: false);
+        var customersCreate = new CustomersViewModel(api, createMode: true);
         var products = new ProductsViewModel(api, canViewCost: CanViewField("product.cost"), createMode: false);
         var productsCreate = new ProductsViewModel(api, canViewCost: CanViewField("product.cost"), createMode: true);
         var canChoose = auth.Role is "Admin" or "Menecer";
@@ -59,7 +60,8 @@ public partial class MainViewModel : ViewModelBase
         var finance = new FinanceViewModel(api);
         var kassa = new KassaViewModel(api);
         var categories = new CategoriesViewModel(api);
-        var employees = new EmployeesViewModel(api, canViewSalary: CanViewField("employee.salary"));
+        var employees = new EmployeesViewModel(api, canViewSalary: CanViewField("employee.salary"), createMode: false);
+        var employeesCreate = new EmployeesViewModel(api, canViewSalary: CanViewField("employee.salary"), createMode: true);
         var representatives = new RepresentativesViewModel(api);
         var attendance = new AttendanceViewModel(api);
         var payroll = new PayrollViewModel(api);
@@ -76,7 +78,8 @@ public partial class MainViewModel : ViewModelBase
         _sections = new()
         {
             ["İdarə Paneli"] = ("\U0001F4CA", "İdarə Paneli", dashboard),
-            ["Müştərilər"] = ("\U0001F465", "Müştərilər", customers),
+            ["Müştərilər"] = ("\U0001F465", "Müştəri siyahısı", customers),
+            ["Müştəri Yarat"] = ("\U00002795", "Yeni müştəri", customersCreate),
             ["Məhsullar"] = ("\U0001F4E6", "Məhsul siyahısı", products),
             ["Məhsul Yarat"] = ("\U00002795", "Yeni məhsul", productsCreate),
             ["Kateqoriyalar"] = ("\U0001F3F7", "Kateqoriyalar", categories),
@@ -87,7 +90,8 @@ public partial class MainViewModel : ViewModelBase
             ["Alışlar"] = ("\U0001F6D2", "Alışlar", purchases),
             ["Maliyyə"] = ("\U0001F4B5", "Maliyyə", finance),
             ["Kassa"] = ("\U0001F4B0", "Kassa", kassa),
-            ["İşçilər"] = ("\U0001F464", "Təmsilçilər", employees),
+            ["İşçilər"] = ("\U0001F464", "Təmsilçi siyahısı", employees),
+            ["Təmsilçi Yarat"] = ("\U00002795", "Yeni təmsilçi", employeesCreate),
             ["Təmsilçi Borcları"] = ("\U0001F4B0", "Təmsilçi borcları", representatives),
             ["Davamiyyət"] = ("\U0001F552", "Davamiyyət", attendance),
             ["Əməkhaqqı"] = ("\U0001F4B3", "Əməkhaqqı", payroll),
@@ -110,9 +114,13 @@ public partial class MainViewModel : ViewModelBase
         }
 
         Menu.Add(new NavGroup("İDARƏ PANELİ", [Item("İdarə Paneli", "Ümumi baxış")], isExpanded: true));
-        Menu.Add(new NavGroup("KARTLAR", [Item("Müştərilər", "Müştərilər")], isExpanded: true));
+        Menu.Add(new NavGroup("KARTLAR", [
+            Item("Müştəri Yarat", "➕ Yeni müştəri"),
+            Item("Müştərilər", "Müştəri siyahısı"),
+        ], isExpanded: true));
         Menu.Add(new NavGroup("TƏMSİLÇİLƏR", [
-            Item("İşçilər", "Təmsilçilər"),
+            Item("Təmsilçi Yarat", "➕ Yeni təmsilçi"),
+            Item("İşçilər", "Təmsilçi siyahısı"),
             Item("Təmsilçi Borcları", "Borclar / Hesab"),
             Item("Davamiyyət", "Davamiyyət"),
             Item("Əməkhaqqı", "Əməkhaqqı"),
