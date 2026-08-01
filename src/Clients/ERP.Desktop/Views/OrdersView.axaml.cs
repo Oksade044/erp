@@ -24,6 +24,20 @@ public partial class OrdersView : UserControl
 
     private void OnOrderDoubleTapped(object? sender, RoutedEventArgs e) => OpenDetail();
 
+    /// <summary>Kateqoriya-məhsul seçim pəncərəsini açır (#5); seçilənləri sifariş sətirlərinə əlavə edir.</summary>
+    private async void OnOpenPicker(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is not OrdersViewModel vm) return;
+        if (TopLevel.GetTopLevel(this) is not Window owner) return;
+
+        var picker = vm.CreatePicker();
+        var window = new ProductPickerWindow { DataContext = picker };
+        await picker.InitAsync();
+        var ok = await window.ShowDialog<bool>(owner);
+        if (ok && picker.Confirmed)
+            vm.AddPickedProducts(picker.Picked);
+    }
+
     private void OpenDetail()
     {
         if (DataContext is not OrdersViewModel vm) return;

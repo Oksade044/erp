@@ -1,0 +1,59 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:ERP.Desktop.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="760" d:DesignHeight="560"
+        x:Class="ERP.Desktop.Views.ProductPickerWindow"
+        x:DataType="vm:ProductPickerViewModel"
+        Width="760" Height="560" WindowStartupLocation="CenterOwner"
+        Title="Məhsul seçimi">
+
+    <Grid RowDefinitions="Auto,*,Auto" Margin="16">
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="10" Margin="0,0,0,12">
+            <TextBlock Text="Kateqoriyadan məhsul seç" FontSize="17" FontWeight="SemiBold" VerticalAlignment="Center" />
+            <TextBox Width="240" PlaceholderText="Sürətli axtarış (ad/SKU)..." Text="{Binding Search}" />
+            <TextBlock Text="{Binding Status}" Foreground="#8A90A6" VerticalAlignment="Center" />
+        </StackPanel>
+
+        <Grid Grid.Row="1" ColumnDefinitions="200,12,*">
+            <!-- Sol: kateqoriyalar (görünməyə davam edir) -->
+            <Border Grid.Column="0" BorderBrush="#E0E2EA" BorderThickness="1" CornerRadius="8">
+                <ListBox ItemsSource="{Binding Categories}" SelectedItem="{Binding SelectedCategory}" Background="Transparent">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate><TextBlock Text="{Binding}" Padding="4" /></DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Border>
+
+            <!-- Sağ: məhsullar (checkbox çox-seçim) -->
+            <Border Grid.Column="2" BorderBrush="#E0E2EA" BorderThickness="1" CornerRadius="8">
+                <ScrollViewer>
+                    <ItemsControl ItemsSource="{Binding Products}" Margin="6">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:PickProduct">
+                                <Border Padding="8,6" Margin="0,2" Background="#F8F9FA" CornerRadius="6">
+                                    <Grid ColumnDefinitions="Auto,*,Auto">
+                                        <CheckBox Grid.Column="0" IsChecked="{Binding IsSelected}" VerticalAlignment="Center" />
+                                        <StackPanel Grid.Column="1" Margin="6,0">
+                                            <TextBlock Text="{Binding Name}" FontWeight="SemiBold" />
+                                            <TextBlock Text="{Binding Sku}" FontSize="11" Foreground="#8A90A6" />
+                                        </StackPanel>
+                                        <TextBlock Grid.Column="2" Text="{Binding RentalPrice, StringFormat='{}{0:0.00} AZN'}"
+                                                   VerticalAlignment="Center" Foreground="#5A6072" />
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </Border>
+        </Grid>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right" Margin="0,12,0,0">
+            <Button Content="Bağla" Click="OnCancel" />
+            <Button Content="✓ Əlavə et" Command="{Binding ConfirmCommand}" Click="OnConfirm"
+                    Background="#2F9E44" Foreground="White" />
+        </StackPanel>
+    </Grid>
+</Window>

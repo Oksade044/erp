@@ -223,6 +223,23 @@ public partial class OrdersViewModel : ViewModelBase
     public OrderDetailViewModel? CreateDetail() =>
         Selected is null ? null : new OrderDetailViewModel(api, Selected);
 
+    /// <summary>Kateqoriya-məhsul seçim pəncərəsi üçün VM (kod-arxasından açılır, #5).</summary>
+    public ProductPickerViewModel CreatePicker() => new(api);
+
+    /// <summary>Seçim pəncərəsindən gələn məhsulları sifariş sətirlərinə əlavə edir (say 1).</summary>
+    public void AddPickedProducts(System.Collections.Generic.IEnumerable<ERP.Shared.Contracts.Products.ProductDto> picked)
+    {
+        int added = 0;
+        foreach (var p in picked)
+        {
+            if (DraftLines.Any(l => l.ProductId == p.Id)) continue;
+            DraftLines.Add(new DraftLine(p.Id, p.Name, 1, p.RentalPrice));
+            added++;
+        }
+        OnPropertyChanged(nameof(DraftTotal));
+        Status = added > 0 ? $"{added} məhsul əlavə olundu." : "Yeni məhsul seçilmədi.";
+    }
+
     [RelayCommand]
     private void AddLine()
     {
