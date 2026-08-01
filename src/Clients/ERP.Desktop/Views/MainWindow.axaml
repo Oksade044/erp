@@ -3,58 +3,88 @@
         xmlns:vm="using:ERP.Desktop.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="720"
+        mc:Ignorable="d" d:DesignWidth="1240" d:DesignHeight="760"
         x:Class="ERP.Desktop.Views.MainWindow"
         x:DataType="vm:MainViewModel"
         Icon="/Assets/avalonia-logo.ico"
-        Width="1200" Height="720"
+        Width="1240" Height="760"
         RequestedThemeVariant="Light"
-        Background="#F4F5F7"
+        Background="#F3F4F6"
         Title="{Binding Title}">
 
-    <Grid ColumnDefinitions="240,*">
+    <Grid ColumnDefinitions="256,*">
 
-        <!-- SOL: tree-menyu -->
-        <Border Grid.Column="0" Background="White" BorderBrush="#E5E7EB" BorderThickness="0,0,1,0">
+        <!-- ══════════ SOL: SIDEBAR ══════════ -->
+        <Border Grid.Column="0" BorderBrush="#E5E7EB" BorderThickness="0,0,1,0">
+            <Border.Background>
+                <LinearGradientBrush StartPoint="0%,0%" EndPoint="0%,100%">
+                    <GradientStop Color="#FFFFFF" Offset="0" />
+                    <GradientStop Color="#FAFAFC" Offset="1" />
+                </LinearGradientBrush>
+            </Border.Background>
             <DockPanel LastChildFill="True">
+
                 <!-- Loqo -->
-                <Border DockPanel.Dock="Top" Padding="18,16,18,12" BorderBrush="#EEF0F2" BorderThickness="0,0,0,1">
-                    <StackPanel Spacing="1">
-                        <TextBlock Text="ERP" FontSize="20" FontWeight="Bold" Foreground="#111827" />
-                        <TextBlock Text="İdarəetmə paneli" FontSize="11" Foreground="#9CA3AF" />
+                <Border DockPanel.Dock="Top" Padding="18,18,18,14">
+                    <StackPanel Orientation="Horizontal" Spacing="11">
+                        <Border Width="38" Height="38" CornerRadius="10">
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
+                                    <GradientStop Color="#6366F1" Offset="0" />
+                                    <GradientStop Color="#4F46E5" Offset="1" />
+                                </LinearGradientBrush>
+                            </Border.Background>
+                            <TextBlock Text="E" FontSize="20" FontWeight="Bold" Foreground="White"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <StackPanel VerticalAlignment="Center" Spacing="0">
+                            <TextBlock Text="ERP Sistemi" FontSize="15" FontWeight="Bold" Foreground="#111827" />
+                            <TextBlock Text="İdarəetmə paneli" FontSize="11" Foreground="#9CA3AF" />
+                        </StackPanel>
                     </StackPanel>
                 </Border>
 
-                <!-- İstifadəçi + çıxış -->
-                <Border DockPanel.Dock="Bottom" Padding="14,10" BorderBrush="#EEF0F2" BorderThickness="0,1,0,0">
-                    <DockPanel LastChildFill="True">
-                        <Button DockPanel.Dock="Right" Content="Çıxış" Command="{Binding LogoutCommand}"
-                                Padding="10,5" FontSize="12" Background="#F3F4F6" Foreground="#374151" />
-                        <TextBlock Text="{Binding CurrentUser}" Foreground="#6B7280" FontSize="11"
-                                   VerticalAlignment="Center" TextWrapping="Wrap" />
-                    </DockPanel>
+                <!-- Alt: istifadəçi kartı -->
+                <Border DockPanel.Dock="Bottom" Padding="12,10" Margin="10,0,10,10"
+                        Background="#F9FAFB" CornerRadius="12" BorderBrush="#EEF0F2" BorderThickness="1">
+                    <Grid ColumnDefinitions="Auto,*,Auto" >
+                        <Border Grid.Column="0" Width="34" Height="34" CornerRadius="17" Background="#4F46E5">
+                            <TextBlock Text="{Binding UserInitial}" Foreground="White" FontWeight="Bold"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <StackPanel Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center" Spacing="0">
+                            <TextBlock Text="{Binding CurrentUser}" FontSize="12" FontWeight="SemiBold"
+                                       Foreground="#374151" TextTrimming="CharacterEllipsis" />
+                            <TextBlock Text="Aktiv sessiya" FontSize="10" Foreground="#9CA3AF" />
+                        </StackPanel>
+                        <Button Grid.Column="2" Content="⎋" Command="{Binding LogoutCommand}"
+                                ToolTip.Tip="Çıxış" Background="Transparent" Foreground="#9CA3AF"
+                                FontSize="16" Padding="8,2" BorderThickness="0" />
+                    </Grid>
                 </Border>
 
-                <!-- Qruplar -->
+                <!-- Menyu qrupları -->
                 <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                    <ItemsControl ItemsSource="{Binding Menu}" Margin="8,8">
+                    <ItemsControl ItemsSource="{Binding Menu}" Margin="10,4,10,8">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate x:DataType="vm:NavGroup">
-                                <Expander IsExpanded="{Binding IsExpanded}" IsVisible="{Binding HasVisible}"
-                                          Classes="nav" Margin="0,1">
-                                    <Expander.Header>
-                                        <TextBlock Text="{Binding Title}" FontSize="11" FontWeight="SemiBold"
-                                                   Foreground="#9CA3AF" />
-                                    </Expander.Header>
+                                <StackPanel IsVisible="{Binding HasVisible}" Margin="0,2,0,6">
+                                    <TextBlock Text="{Binding Title}" FontSize="10" FontWeight="Bold"
+                                               Foreground="#9CA3AF" Margin="10,4,0,4" />
                                     <ItemsControl ItemsSource="{Binding Items}">
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate x:DataType="vm:NavItem">
-                                                <Button Content="{Binding Label}" Command="{Binding Command}"
-                                                        IsVisible="{Binding IsVisible}" Classes="navitem" />
+                                                <Button Classes="navitem" Classes.active="{Binding IsActive}"
+                                                        Command="{Binding Command}" IsVisible="{Binding IsVisible}">
+                                                    <Grid ColumnDefinitions="22,*">
+                                                        <TextBlock Text="{Binding Icon}" FontSize="14" VerticalAlignment="Center" />
+                                                        <TextBlock Grid.Column="1" Text="{Binding Label}" VerticalAlignment="Center" />
+                                                    </Grid>
+                                                </Button>
                                             </DataTemplate>
                                         </ItemsControl.ItemTemplate>
                                     </ItemsControl>
-                                </Expander>
+                                </StackPanel>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
@@ -62,22 +92,24 @@
             </DockPanel>
         </Border>
 
-        <!-- SAĞ: tab iş sahəsi -->
+        <!-- ══════════ SAĞ: TAB İŞ SAHƏSİ ══════════ -->
         <TabControl Grid.Column="1" ItemsSource="{Binding Tabs}" SelectedItem="{Binding SelectedTab}"
                     Padding="0" Margin="0" Background="Transparent">
             <TabControl.ItemTemplate>
                 <DataTemplate x:DataType="vm:WorkspaceTab">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
+                    <StackPanel Orientation="Horizontal" Spacing="7">
+                        <TextBlock Text="{Binding Icon}" FontSize="13" VerticalAlignment="Center" />
                         <TextBlock Text="{Binding Title}" VerticalAlignment="Center" FontSize="13" />
                         <Button Content="✕" Command="{Binding CloseCommand}" CommandParameter="{Binding}"
-                                Classes="tabclose" />
+                                Classes="tabclose" VerticalAlignment="Center" />
                     </StackPanel>
                 </DataTemplate>
             </TabControl.ItemTemplate>
             <TabControl.ContentTemplate>
                 <DataTemplate x:DataType="vm:WorkspaceTab">
-                    <Border Background="White" Margin="10" CornerRadius="10" BorderBrush="#E5E7EB" BorderThickness="1">
-                        <ContentControl Content="{Binding Content}" />
+                    <Border Background="White" Margin="12" CornerRadius="14" BorderBrush="#E5E7EB" BorderThickness="1"
+                            BoxShadow="0 1 3 0 #11000000">
+                        <ContentControl Content="{Binding Content}" ClipToBounds="True" />
                     </Border>
                 </DataTemplate>
             </TabControl.ContentTemplate>
@@ -85,37 +117,56 @@
     </Grid>
 
     <Window.Styles>
-        <!-- Qrup Expander: sadə, çərçivəsiz -->
-        <Style Selector="Expander.nav">
-            <Setter Property="Background" Value="Transparent" />
-            <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="Padding" Value="0" />
-        </Style>
-        <Style Selector="Expander.nav ToggleButton">
-            <Setter Property="Padding" Value="10,6" />
-        </Style>
-
-        <!-- Menyu bölmə düymələri -->
+        <!-- ── Menyu bölmə düymələri ── -->
         <Style Selector="Button.navitem">
             <Setter Property="HorizontalAlignment" Value="Stretch" />
             <Setter Property="HorizontalContentAlignment" Value="Left" />
             <Setter Property="Background" Value="Transparent" />
-            <Setter Property="Foreground" Value="#374151" />
-            <Setter Property="Padding" Value="20,7" />
+            <Setter Property="Foreground" Value="#4B5563" />
+            <Setter Property="Padding" Value="12,8" />
+            <Setter Property="Margin" Value="0,1" />
             <Setter Property="FontSize" Value="13" />
-            <Setter Property="CornerRadius" Value="6" />
+            <Setter Property="CornerRadius" Value="9" />
+            <Setter Property="BorderThickness" Value="0" />
         </Style>
         <Style Selector="Button.navitem:pointerover /template/ ContentPresenter">
-            <Setter Property="Background" Value="#F3F4F6" />
+            <Setter Property="Background" Value="#F1F3F5" />
             <Setter Property="TextElement.Foreground" Value="#111827" />
+        </Style>
+        <!-- Aktiv bölmə: açıq indiqo pill + accent mətn -->
+        <Style Selector="Button.navitem.active">
+            <Setter Property="Foreground" Value="#4F46E5" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+        <Style Selector="Button.navitem.active /template/ ContentPresenter">
+            <Setter Property="Background" Value="#EEF2FF" />
+            <Setter Property="TextElement.Foreground" Value="#4F46E5" />
+        </Style>
+
+        <!-- ── Tab başlıqları ── -->
+        <Style Selector="TabControl">
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+        <Style Selector="TabItem">
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Padding" Value="14,9" />
+            <Setter Property="MinHeight" Value="0" />
+            <Setter Property="Foreground" Value="#6B7280" />
+        </Style>
+        <Style Selector="TabItem:selected">
+            <Setter Property="Foreground" Value="#4F46E5" />
+        </Style>
+        <Style Selector="TabItem:selected /template/ Border#PART_SelectedPipe">
+            <Setter Property="Background" Value="#4F46E5" />
         </Style>
 
         <!-- Tab bağla düyməsi -->
         <Style Selector="Button.tabclose">
             <Setter Property="Background" Value="Transparent" />
             <Setter Property="Foreground" Value="#9CA3AF" />
-            <Setter Property="Padding" Value="4,0" />
-            <Setter Property="FontSize" Value="11" />
+            <Setter Property="Padding" Value="5,1" />
+            <Setter Property="FontSize" Value="10" />
+            <Setter Property="CornerRadius" Value="5" />
             <Setter Property="BorderThickness" Value="0" />
         </Style>
         <Style Selector="Button.tabclose:pointerover /template/ ContentPresenter">

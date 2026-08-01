@@ -11,16 +11,14 @@ using ERP.Shared.Contracts.Settings;
 namespace ERP.Desktop.ViewModels;
 
 /// <summary>
-/// Əsas pəncərə ViewModel-i — sol tree-menyu (qruplaşdırılmış) + sağ tab iş sahəsi.
-/// Bölmə klik olunanda tab açılır (varsa seçilir). Bütün alt-ekranlar eyni
-/// autentifikasiya olunmuş ErpApiClient-i bölüşür (TDD §31 — API-first).
+/// Əsas pəncərə ViewModel-i — sol tree-menyu (ikonlu, qruplaşdırılmış) + sağ tab iş sahəsi.
+/// Bölmə klik olunanda tab açılır (varsa seçilir) və menyuda vurğulanır.
 /// </summary>
 public partial class MainViewModel : ViewModelBase
 {
     private readonly Action _onLogout;
-
-    // Bölmə açarı → (başlıq, VM). Tab açılanda buradan tapılır.
-    private readonly Dictionary<string, (string title, ViewModelBase vm)> _sections;
+    private readonly Dictionary<string, (string icon, string title, ViewModelBase vm)> _sections;
+    private readonly List<NavItem> _allItems = [];
 
     public ObservableCollection<NavGroup> Menu { get; } = [];
     public ObservableCollection<WorkspaceTab> Tabs { get; } = [];
@@ -28,6 +26,7 @@ public partial class MainViewModel : ViewModelBase
 
     public string Title => "ERP";
     public string CurrentUser { get; }
+    public string UserInitial { get; }
     public bool CanManageUsers { get; }
     public bool CanViewAudit { get; }
 
@@ -36,6 +35,7 @@ public partial class MainViewModel : ViewModelBase
     {
         _onLogout = onLogout;
         CurrentUser = $"{auth.FullName} ({auth.Role})";
+        UserInitial = string.IsNullOrWhiteSpace(auth.FullName) ? "?" : auth.FullName.Trim()[..1].ToUpperInvariant();
         CanManageUsers = auth.Permissions.Contains("users.manage");
         CanViewAudit = auth.Permissions.Contains("audit.view");
 
@@ -45,7 +45,6 @@ public partial class MainViewModel : ViewModelBase
             return rule is null ? auth.Role is "Admin" or "Menecer" : rule.AllowedRoles.Contains(auth.Role);
         }
 
-        // Alt-ekran VM-ləri (bir dəfə yaradılır, tab-larda təkrar istifadə olunur).
         var dashboard = new DashboardViewModel(api);
         var customers = new CustomersViewModel(api);
         var products = new ProductsViewModel(api, canViewCost: CanViewField("product.cost"));
@@ -68,30 +67,37 @@ public partial class MainViewModel : ViewModelBase
         var roles = new RolesViewModel(api);
         var audit = new AuditViewModel(api);
 
+        // açar → (ikon, başlıq, VM)
         _sections = new()
         {
-            ["İdarə Paneli"] = ("İdarə Paneli", dashboard),
-            ["Müştərilər"] = ("Müştərilər", customers),
-            ["Məhsullar"] = ("Məhsullar", products),
-            ["Sifarişlər"] = ("Sifarişlər", orders),
-            ["Fakturalar"] = ("Fakturalar", invoices),
-            ["Təchizatçılar"] = ("Təchizatçılar", suppliers),
-            ["Alışlar"] = ("Alışlar", purchases),
-            ["Maliyyə"] = ("Maliyyə", finance),
-            ["İşçilər"] = ("Təmsilçilər", employees),
-            ["Davamiyyət"] = ("Davamiyyət", attendance),
-            ["Əməkhaqqı"] = ("Əməkhaqqı", payroll),
-            ["Anbarlar"] = ("Anbarlar", warehouses),
-            ["Stok"] = ("Anbar stokları", stock),
-            ["Hesabatlar"] = ("Hesabatlar", reports),
-            ["İcarə Təqvimi"] = ("İcarə Təqvimi", rentalCalendar),
-            ["İstifadəçilər"] = ("İstifadəçilər", users),
-            ["Sahə İcazələri"] = ("Sahə İcazələri", fieldPermissions_),
-            ["Rollar"] = ("Rollar", roles),
-            ["Audit Jurnalı"] = ("Audit Jurnalı", audit),
+            ["İdarə Paneli"] = ("\U0001F4CA", "İdarə Paneli", dashboard),
+            ["Müştərilər"] = ("\U0001F465", "Müştərilər", customers),
+            ["Məhsullar"] = ("\U0001F4E6", "Məhsullar", products),
+            ["Sifarişlər"] = ("\U0001F9FE", "Sifarişlər", orders),
+            ["Fakturalar"] = ("\U0001F9FE", "Fakturalar", invoices),
+            ["Təchizatçılar"] = ("\U0001F69A", "Təchizatçılar", suppliers),
+            ["Alışlar"] = ("\U0001F6D2", "Alışlar", purchases),
+            ["Maliyyə"] = ("\U0001F4B5", "Maliyyə", finance),
+            ["İşçilər"] = ("\U0001F464", "Təmsilçilər", employees),
+            ["Davamiyyət"] = ("\U0001F552", "Davamiyyət", attendance),
+            ["Əməkhaqqı"] = ("\U0001F4B3", "Əməkhaqqı", payroll),
+            ["Anbarlar"] = ("\U0001F3ED", "Anbarlar", warehouses),
+            ["Stok"] = ("\U0001F4CB", "Anbar stokları", stock),
+            ["Hesabatlar"] = ("\U0001F4C8", "Hesabatlar", reports),
+            ["İcarə Təqvimi"] = ("\U0001F4C5", "İcarə Təqvimi", rentalCalendar),
+            ["İstifadəçilər"] = ("\U0001F511", "İstifadəçilər", users),
+            ["Sahə İcazələri"] = ("\U0001F6E1", "Sahə İcazələri", fieldPermissions_),
+            ["Rollar"] = ("\U0001F3AD", "Rollar", roles),
+            ["Audit Jurnalı"] = ("\U0001F4DC", "Audit Jurnalı", audit),
         };
 
-        NavItem Item(string key, string label) => new(label, new RelayCommand(() => OpenSection(key)));
+        NavItem Item(string key, string label, bool visible = true)
+        {
+            var icon = _sections.TryGetValue(key, out var s) ? s.icon : "•";
+            var item = new NavItem(key, icon, label, new RelayCommand(() => OpenSection(key)), visible);
+            _allItems.Add(item);
+            return item;
+        }
 
         Menu.Add(new NavGroup("İDARƏ PANELİ", [Item("İdarə Paneli", "Ümumi baxış")], isExpanded: true));
         Menu.Add(new NavGroup("KARTLAR", [Item("Müştərilər", "Müştərilər")], isExpanded: true));
@@ -99,7 +105,7 @@ public partial class MainViewModel : ViewModelBase
             Item("İşçilər", "Təmsilçilər"),
             Item("Davamiyyət", "Davamiyyət"),
             Item("Əməkhaqqı", "Əməkhaqqı"),
-        ]));
+        ], isExpanded: true));
         Menu.Add(new NavGroup("SATIŞ", [
             Item("Sifarişlər", "Sifarişlər / İcarə"),
             Item("Fakturalar", "Fakturalar"),
@@ -111,23 +117,21 @@ public partial class MainViewModel : ViewModelBase
             Item("Anbarlar", "Anbarlar"),
             Item("Alışlar", "Alışlar"),
             Item("Təchizatçılar", "Təchizatçılar"),
-        ]));
+        ], isExpanded: true));
         Menu.Add(new NavGroup("MALİYYƏ", [
             Item("Maliyyə", "Maliyyə / Kassa"),
             Item("Hesabatlar", "Hesabatlar"),
-        ]));
+        ], isExpanded: true));
         Menu.Add(new NavGroup("SİSTEM", [
-            new NavItem("İstifadəçilər", new RelayCommand(() => OpenSection("İstifadəçilər")), CanManageUsers),
-            new NavItem("Rollar", new RelayCommand(() => OpenSection("Rollar")), CanManageUsers),
-            new NavItem("Sahə İcazələri", new RelayCommand(() => OpenSection("Sahə İcazələri")), CanManageUsers),
-            new NavItem("Audit Jurnalı", new RelayCommand(() => OpenSection("Audit Jurnalı")), CanViewAudit),
+            Item("İstifadəçilər", "İstifadəçilər", CanManageUsers),
+            Item("Rollar", "Rollar", CanManageUsers),
+            Item("Sahə İcazələri", "Sahə İcazələri", CanManageUsers),
+            Item("Audit Jurnalı", "Audit Jurnalı", CanViewAudit),
         ]));
 
-        // Açılışda idarə panelini aç.
         OpenSection("İdarə Paneli");
     }
 
-    /// <summary>Bölməni tab kimi açır (açıqdırsa seçir) və məzmununu yükləyir.</summary>
     public void OpenSection(string key)
     {
         if (!_sections.TryGetValue(key, out var s)) return;
@@ -135,11 +139,17 @@ public partial class MainViewModel : ViewModelBase
         var existing = Tabs.FirstOrDefault(t => t.Key == key);
         if (existing is null)
         {
-            existing = new WorkspaceTab(key, s.title, s.vm, new RelayCommand<WorkspaceTab>(CloseTab));
+            existing = new WorkspaceTab(key, s.icon, s.title, s.vm, new RelayCommand<WorkspaceTab>(CloseTab));
             Tabs.Add(existing);
             LoadContent(s.vm);
         }
         SelectedTab = existing;
+    }
+
+    partial void OnSelectedTabChanged(WorkspaceTab? value)
+    {
+        foreach (var it in _allItems)
+            it.IsActive = value is not null && it.Key == value.Key;
     }
 
     private void CloseTab(WorkspaceTab? tab)

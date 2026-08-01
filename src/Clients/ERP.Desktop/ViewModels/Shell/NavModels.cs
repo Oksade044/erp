@@ -6,15 +6,22 @@ using CommunityToolkit.Mvvm.Input;
 
 namespace ERP.Desktop.ViewModels;
 
-/// <summary>Sol tree-menyuda bir bölmə (klik → sağ iş sahəsində tab açır).</summary>
-public sealed class NavItem
+/// <summary>Sol tree-menyuda bir bölmə (ikon + ad). Klik → sağ iş sahəsində tab açır.</summary>
+public sealed partial class NavItem : ObservableObject
 {
+    public string Key { get; }
+    public string Icon { get; }
     public string Label { get; }
     public IRelayCommand Command { get; }
     public bool IsVisible { get; }
 
-    public NavItem(string label, IRelayCommand command, bool isVisible = true)
+    /// <summary>Hazırda açıq/seçili bölmədirsə — vurğulanır.</summary>
+    [ObservableProperty] private bool _isActive;
+
+    public NavItem(string key, string icon, string label, IRelayCommand command, bool isVisible = true)
     {
+        Key = key;
+        Icon = icon;
         Label = label;
         Command = command;
         IsVisible = isVisible;
@@ -35,21 +42,22 @@ public sealed partial class NavGroup : ObservableObject
         _isExpanded = isExpanded;
     }
 
-    /// <summary>Ən azı bir görünən alt bölmə varmı (boş qruplar gizlədilir).</summary>
     public bool HasVisible => Items.Any(i => i.IsVisible);
 }
 
-/// <summary>Sağ iş sahəsində açıq tab (başlıq + məzmun VM-i + bağla).</summary>
+/// <summary>Sağ iş sahəsində açıq tab (ikon + başlıq + məzmun VM-i + bağla).</summary>
 public sealed class WorkspaceTab
 {
     public string Key { get; }
+    public string Icon { get; }
     public string Title { get; }
     public ViewModelBase Content { get; }
     public IRelayCommand CloseCommand { get; }
 
-    public WorkspaceTab(string key, string title, ViewModelBase content, IRelayCommand closeCommand)
+    public WorkspaceTab(string key, string icon, string title, ViewModelBase content, IRelayCommand closeCommand)
     {
         Key = key;
+        Icon = icon;
         Title = title;
         Content = content;
         CloseCommand = closeCommand;
