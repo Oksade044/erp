@@ -25,8 +25,18 @@ public partial class CustomersViewModel(ErpApiClient api) : ViewModelBase
     [ObservableProperty] private string? _newPhone;
     [ObservableProperty] private string? _newEmail;
     [ObservableProperty] private string? _newCity;
+    [ObservableProperty] private string? _newAddress;
+    [ObservableProperty] private string? _newNote;
+    // #1 Əlaqələndirmə + Maliyyə
+    [ObservableProperty] private string? _newWhatsApp;
+    [ObservableProperty] private string? _newRepresentative;
+    [ObservableProperty] private decimal _newDebt;
+    [ObservableProperty] private string _newDebtCurrency = "AZN";
 
     public string[] CustomerTypes { get; } = ["Fərdi", "Korporativ"];
+    public string[] Currencies { get; } = ["AZN", "USD", "EUR"];
+    /// <summary>Təmsilçi seçim siyahısı (#1 — Mərkəz + təmsilçilər).</summary>
+    public ObservableCollection<string> RepresentativeNames { get; } = ["Mərkəz"];
 
     [RelayCommand]
     private async Task LoadAsync()
@@ -40,6 +50,18 @@ public partial class CustomersViewModel(ErpApiClient api) : ViewModelBase
             if (result is not null)
                 foreach (var c in result.Items) Customers.Add(c);
             Status = $"{Customers.Count} müştəri";
+
+            // Təmsilçi siyahısını doldur (#1 Əlaqələndirmə): Mərkəz + işçilər.
+            if (RepresentativeNames.Count <= 1)
+            {
+                try
+                {
+                    var emps = await api.GetEmployeesAsync(null);
+                    if (emps is not null)
+                        foreach (var e in emps.Items) if (!RepresentativeNames.Contains(e.FullName)) RepresentativeNames.Add(e.FullName);
+                }
+                catch { /* siyahı boş qala bilər */ }
+            }
         }
         catch (System.Exception ex)
         {
@@ -62,12 +84,15 @@ public partial class CustomersViewModel(ErpApiClient api) : ViewModelBase
         {
             var (ok, error) = await api.CreateCustomerAsync(new CreateCustomerRequest(
                 Type: NewType, Name: NewName!, Phone: NewPhone!,
-                Email: NewEmail, City: NewCity));
+                Email: NewEmail, City: NewCity, AddressLine: NewAddress, Notes: NewNote,
+                WhatsApp: NewWhatsApp, RepresentativeName: NewRepresentative,
+                Debt: NewDebt, DebtCurrency: NewDebtCurrency));
 
             if (ok)
             {
                 Status = "Müştəri əlavə olundu.";
-                NewName = NewPhone = NewEmail = NewCity = null;
+                NewName = NewPhone = NewEmail = NewCity = NewAddress = NewNote = NewWhatsApp = NewRepresentative = null;
+                NewDebt = 0;
                 await LoadAsync();
             }
             else Status = error ?? "Əlavə edilmədi.";

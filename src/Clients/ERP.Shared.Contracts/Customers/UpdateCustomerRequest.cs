@@ -8,4 +8,9 @@ public sealed record UpdateCustomerRequest(
     string? City = null,
     string? AddressLine = null,
     string? Notes = null,
-    bool IsActive = true);
+    bool IsActive = true,
+    // #1 — əlaqələndirmə + maliyyə
+    string? WhatsApp = null,
+    string? RepresentativeName = null,
+    decimal Debt = 0,
+    string DebtCurrency = "AZN");

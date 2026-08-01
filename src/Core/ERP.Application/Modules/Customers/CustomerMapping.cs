@@ -21,7 +21,11 @@ public static class CustomerMapping
         TaxId: c.TaxId,
         Notes: c.Notes,
         IsActive: c.IsActive,
-        CreatedAt: c.CreatedAt);
+        CreatedAt: c.CreatedAt,
+        WhatsApp: c.WhatsApp,
+        RepresentativeName: c.RepresentativeName,
+        Debt: c.Debt?.Amount ?? 0m,
+        DebtCurrency: c.Debt?.Currency ?? "AZN");
 
     public static CustomerType ParseType(string? type)
     {

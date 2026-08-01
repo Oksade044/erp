@@ -23,6 +23,6 @@ public sealed class CustomerRepository(AppDbContext context)
         var all = await Set.AsNoTracking().ToListAsync(ct);
         return RankedSearch.Page(all, search, page, pageSize,
             primary: c => c.Name,
-            secondary: c => [c.Phone.Value]);
+            secondary: c => [c.Phone.Value, c.Address?.City ?? "", c.RepresentativeName ?? ""]);
     }
 }

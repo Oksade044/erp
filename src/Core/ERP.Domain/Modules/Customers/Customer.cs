@@ -1,5 +1,6 @@
 using ERP.Domain.Common;
 using ERP.Domain.Exceptions;
+using ERP.Domain.ValueObjects;
 
 namespace ERP.Domain.Modules.Customers;
 
@@ -18,6 +19,15 @@ public class Customer : BaseEntity, IAggregateRoot
 
     /// <summary>Korporativ müştəri üçün VÖEN (opsional).</summary>
     public string? TaxId { get; private set; }
+
+    /// <summary>WhatsApp nömrəsi (#1).</summary>
+    public string? WhatsApp { get; private set; }
+
+    /// <summary>Müştərinin aid olduğu təmsilçi/nümayəndə (#1 Əlaqələndirmə). Sonradan dəyişdirilə bilər.</summary>
+    public string? RepresentativeName { get; private set; }
+
+    /// <summary>Müştərinin bizə olan borcu (#1 Maliyyə). Valyuta Money-də saxlanılır.</summary>
+    public Money? Debt { get; private set; }
 
     public string? Notes { get; private set; }
     public bool IsActive { get; private set; } = true;
@@ -39,7 +49,10 @@ public class Customer : BaseEntity, IAggregateRoot
         Email? email = null,
         Address? address = null,
         string? taxId = null,
-        string? notes = null)
+        string? notes = null,
+        string? whatsApp = null,
+        string? representativeName = null,
+        Money? debt = null)
     {
         if (string.IsNullOrWhiteSpace(name))
             throw new DomainException("Müştəri adı tələb olunur.");
@@ -49,10 +62,21 @@ public class Customer : BaseEntity, IAggregateRoot
             Email = email,
             Address = address,
             TaxId = NormalizeTaxId(type, taxId),
-            Notes = notes?.Trim()
+            Notes = notes?.Trim(),
+            WhatsApp = string.IsNullOrWhiteSpace(whatsApp) ? null : whatsApp.Trim(),
+            RepresentativeName = string.IsNullOrWhiteSpace(representativeName) ? null : representativeName.Trim(),
+            Debt = debt
         };
 
         return customer;
+    }
+
+    /// <summary>Biznes sahələrini yeniləyir (#1): WhatsApp, təmsilçi, borc.</summary>
+    public void UpdateBusiness(string? whatsApp, string? representativeName, Money? debt)
+    {
+        WhatsApp = string.IsNullOrWhiteSpace(whatsApp) ? null : whatsApp.Trim();
+        RepresentativeName = string.IsNullOrWhiteSpace(representativeName) ? null : representativeName.Trim();
+        Debt = debt;
     }
 
     public void UpdateContact(PhoneNumber phone, Email? email)

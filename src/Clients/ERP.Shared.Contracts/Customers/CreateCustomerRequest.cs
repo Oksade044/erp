@@ -9,4 +9,9 @@ public sealed record CreateCustomerRequest(
     string? City = null,
     string? AddressLine = null,
     string? TaxId = null,
-    string? Notes = null);
+    string? Notes = null,
+    // #1 — əlaqələndirmə + maliyyə
+    string? WhatsApp = null,
+    string? RepresentativeName = null,
+    decimal Debt = 0,
+    string DebtCurrency = "AZN");

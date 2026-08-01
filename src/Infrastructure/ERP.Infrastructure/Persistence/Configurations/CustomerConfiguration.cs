@@ -45,6 +45,16 @@ public sealed class CustomerConfiguration : IEntityTypeConfiguration<Customer>
             addr.Property(a => a.Line).HasColumnName("AddressLine").HasMaxLength(500);
         });
 
+        // #1 — WhatsApp + təmsilçi + borc
+        builder.Property(c => c.WhatsApp).HasMaxLength(40);
+        builder.Property(c => c.RepresentativeName).HasMaxLength(200);
+        builder.OwnsOne(c => c.Debt, d =>
+        {
+            d.Property(m => m.Amount).HasColumnName("Debt").HasPrecision(18, 2);
+            d.Property(m => m.Currency).HasColumnName("DebtCurrency").HasMaxLength(3);
+        });
+        builder.Navigation(c => c.Debt).IsRequired(false);
+
         // Soft delete — silinmişlər avtomatik sorğulardan çıxarılır (TDD §13).
         builder.HasQueryFilter(c => !c.IsDeleted);
 

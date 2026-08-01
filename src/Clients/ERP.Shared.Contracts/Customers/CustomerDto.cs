@@ -15,4 +15,8 @@ public sealed record CustomerDto(
     string? TaxId,
     string? Notes,
     bool IsActive,
-    DateTimeOffset CreatedAt);
+    DateTimeOffset CreatedAt,
+    string? WhatsApp = null,
+    string? RepresentativeName = null,
+    decimal Debt = 0,
+    string DebtCurrency = "AZN");

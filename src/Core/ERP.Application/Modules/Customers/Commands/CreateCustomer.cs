@@ -40,7 +40,9 @@ public sealed class CreateCustomerHandler(
         var email = string.IsNullOrWhiteSpace(dto.Email) ? null : Email.Create(dto.Email);
         var address = CustomerMapping.ToAddress(dto.City, dto.AddressLine);
 
-        var customer = Customer.Create(type, dto.Name, phone, email, address, dto.TaxId, dto.Notes);
+        var debt = dto.Debt > 0 ? ERP.Domain.ValueObjects.Money.Create(dto.Debt, dto.DebtCurrency) : null;
+        var customer = Customer.Create(type, dto.Name, phone, email, address, dto.TaxId, dto.Notes,
+            dto.WhatsApp, dto.RepresentativeName, debt);
 
         await customers.AddAsync(customer, ct);
         await unitOfWork.SaveChangesAsync(ct);

@@ -45,6 +45,8 @@ public sealed class UpdateCustomerHandler(
         customer.UpdateContact(phone, email);
         customer.ChangeAddress(CustomerMapping.ToAddress(dto.City, dto.AddressLine));
         customer.SetNotes(dto.Notes);
+        customer.UpdateBusiness(dto.WhatsApp, dto.RepresentativeName,
+            dto.Debt > 0 ? ERP.Domain.ValueObjects.Money.Create(dto.Debt, dto.DebtCurrency) : null);
         if (dto.IsActive) customer.Activate(); else customer.Deactivate();
 
         customers.Update(customer);

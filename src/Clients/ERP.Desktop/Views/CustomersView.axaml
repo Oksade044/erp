@@ -17,11 +17,11 @@
                            Note="Diqqət: müştəri sizdən icarə götürür; təchizatçı isə sizə mal satır — qarışdırmayın." />
         </StackPanel>
 
-        <!-- Axtarış + yeni müştəri forması -->
+        <!-- Axtarış + yeni müştəri forması (tab-lı: Ümumi / Əlaqələndirmə / Maliyyə) -->
         <Border Grid.Row="1" Background="#F5F6FA" CornerRadius="8" Padding="16" Margin="0,0,0,16">
             <StackPanel Spacing="10">
                 <StackPanel Orientation="Horizontal" Spacing="8">
-                    <TextBox Width="240" PlaceholderText="Ad və ya telefon üzrə axtar"
+                    <TextBox Width="280" PlaceholderText="Ad, telefon, şəhər, təmsilçi üzrə axtar"
                              Text="{Binding Search}">
                         <TextBox.KeyBindings>
                             <KeyBinding Gesture="Enter" Command="{Binding LoadCommand}" />
@@ -29,15 +29,44 @@
                     </TextBox>
                     <Button Content="Axtar" Command="{Binding LoadCommand}" />
                 </StackPanel>
-                <StackPanel Orientation="Horizontal" Spacing="8">
-                    <ComboBox ItemsSource="{Binding CustomerTypes}" SelectedItem="{Binding NewType}" Width="120" />
-                    <TextBox Width="180" PlaceholderText="Ad *" Text="{Binding NewName}" />
-                    <TextBox Width="140" PlaceholderText="Telefon *" Text="{Binding NewPhone}" />
-                    <TextBox Width="160" PlaceholderText="E-poçt" Text="{Binding NewEmail}" />
-                    <TextBox Width="120" PlaceholderText="Şəhər" Text="{Binding NewCity}" />
-                    <Button Content="+ Əlavə et" Command="{Binding AddCommand}"
-                            Background="#3B5BDB" Foreground="White" />
-                </StackPanel>
+
+                <TabControl>
+                    <TabItem Header="Ümumi">
+                        <WrapPanel Margin="0,8,0,0">
+                            <ComboBox ItemsSource="{Binding CustomerTypes}" SelectedItem="{Binding NewType}" Width="120" Margin="0,0,8,8" />
+                            <TextBox Width="180" PlaceholderText="Ad Soyad *" Text="{Binding NewName}" Margin="0,0,8,8" />
+                            <TextBox Width="140" PlaceholderText="Telefon *" Text="{Binding NewPhone}" Margin="0,0,8,8" />
+                            <TextBox Width="160" PlaceholderText="E-poçt" Text="{Binding NewEmail}" Margin="0,0,8,8" />
+                            <TextBox Width="120" PlaceholderText="Şəhər" Text="{Binding NewCity}" Margin="0,0,8,8" />
+                            <TextBox Width="200" PlaceholderText="Ünvan" Text="{Binding NewAddress}" Margin="0,0,8,8" />
+                            <TextBox Width="200" PlaceholderText="Qeyd" Text="{Binding NewNote}" Margin="0,0,8,8" />
+                        </WrapPanel>
+                    </TabItem>
+                    <TabItem Header="Əlaqələndirmə">
+                        <WrapPanel Margin="0,8,0,0">
+                            <TextBox Width="180" PlaceholderText="WhatsApp" Text="{Binding NewWhatsApp}" Margin="0,0,8,8" />
+                            <StackPanel Margin="0,0,8,8">
+                                <TextBlock Text="Aid olduğu təmsilçi" FontSize="11" Foreground="#5A6072" />
+                                <ComboBox ItemsSource="{Binding RepresentativeNames}" SelectedItem="{Binding NewRepresentative}" Width="200"
+                                          ToolTip.Tip="Müştəri hansı nümayəndəyə (təmsilçiyə) aiddir? Sonradan dəyişdirilə bilər." />
+                            </StackPanel>
+                        </WrapPanel>
+                    </TabItem>
+                    <TabItem Header="Maliyyə">
+                        <WrapPanel Margin="0,8,0,0">
+                            <StackPanel Margin="0,0,8,8">
+                                <TextBlock Text="Bizə olan borcu" FontSize="11" Foreground="#5A6072" />
+                                <TextBox Width="140" PlaceholderText="0.00" Text="{Binding NewDebt}" />
+                            </StackPanel>
+                            <StackPanel Margin="0,0,8,8">
+                                <TextBlock Text="Valyuta" FontSize="11" Foreground="#5A6072" />
+                                <ComboBox ItemsSource="{Binding Currencies}" SelectedItem="{Binding NewDebtCurrency}" Width="90" />
+                            </StackPanel>
+                        </WrapPanel>
+                    </TabItem>
+                </TabControl>
+                <Button Content="+ Müştəri əlavə et" Command="{Binding AddCommand}" HorizontalAlignment="Left"
+                        Background="#3B5BDB" Foreground="White" />
             </StackPanel>
         </Border>
 
@@ -48,8 +77,10 @@
                 <DataGridTextColumn Header="Ad" Binding="{Binding Name}" Width="2*" />
                 <DataGridTextColumn Header="Növ" Binding="{Binding Type}" Width="Auto" />
                 <DataGridTextColumn Header="Telefon" Binding="{Binding Phone}" Width="*" />
-                <DataGridTextColumn Header="E-poçt" Binding="{Binding Email}" Width="*" />
                 <DataGridTextColumn Header="Şəhər" Binding="{Binding City}" Width="Auto" />
+                <DataGridTextColumn Header="Təmsilçi" Binding="{Binding RepresentativeName}" Width="*" />
+                <DataGridTextColumn Header="Borc" Binding="{Binding Debt, StringFormat='{}{0:0.00}'}" Width="Auto" />
+                <DataGridTextColumn Header="Val." Binding="{Binding DebtCurrency}" Width="Auto" />
                 <DataGridCheckBoxColumn Header="Aktiv" Binding="{Binding IsActive}" Width="Auto" />
             </DataGrid.Columns>
         </DataGrid>
