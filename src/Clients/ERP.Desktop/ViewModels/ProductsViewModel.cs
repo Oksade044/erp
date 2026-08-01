@@ -22,10 +22,15 @@ public partial class ProductsViewModel : ViewModelBase
     /// <summary>Alış/satış (həssas) qiymətləri görmək icazəsi — yalnız Admin/Menecer (products.viewcost).</summary>
     public bool CanViewCost { get; }
 
-    public ProductsViewModel(ErpApiClient api, bool canViewCost = false)
+    /// <summary>#5 — bu ekran yalnız məhsul yaratma üçündür (siyahı ayrı bölmədədir).</summary>
+    public bool CreateMode { get; }
+    public bool ListMode => !CreateMode;
+
+    public ProductsViewModel(ErpApiClient api, bool canViewCost = false, bool createMode = false)
     {
         _api = api;
         CanViewCost = canViewCost;
+        CreateMode = createMode;
     }
 
     public ObservableCollection<ProductDto> Products { get; } = [];

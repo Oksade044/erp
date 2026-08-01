@@ -51,11 +51,21 @@ public partial class OrdersViewModel : ViewModelBase
     /// <summary>"Yaradan" sütununun görünürlüyü — sahə icazəsindən (order.creator).</summary>
     public bool CanViewCreator { get; }
 
-    public OrdersViewModel(ErpApiClient api, bool canChooseCreator = false, bool canViewCreator = true)
+    /// <summary>#3 — bu ekran yalnız sifariş yaratma üçündür (siyahı ayrı bölmədədir).</summary>
+    public bool CreateMode { get; }
+    public bool ListMode => !CreateMode;
+
+    public OrdersViewModel(ErpApiClient api, bool canChooseCreator = false, bool canViewCreator = true, bool createMode = false)
     {
         this.api = api;
         CanChooseCreator = canChooseCreator;
         CanViewCreator = canViewCreator;
+        CreateMode = createMode;
+        if (createMode)
+        {
+            ShowNewOrder = true;
+            _ = EnsureFormDataAsync();
+        }
     }
 
     public ObservableCollection<OrderDto> Orders { get; } = [];
@@ -149,6 +159,7 @@ public partial class OrdersViewModel : ViewModelBase
     // --- #34/#35 Status dəyişəndə ödəniş pəncərəsi ---
     public string[] PaymentMethods { get; } = ["Nağd", "Köçürmə", "Kart"];
     [ObservableProperty] private bool _showPaymentPrompt;
+    partial void OnShowPaymentPromptChanged(bool value) => OnPropertyChanged(nameof(ShowDepositPanel));
     [ObservableProperty] private string? _paymentPromptTitle;
     [ObservableProperty] private decimal _paymentAmount;
     [ObservableProperty] private string _paymentMethod = "Nağd";
@@ -216,18 +227,26 @@ public partial class OrdersViewModel : ViewModelBase
 
     public decimal DraftTotal => DraftLines.Sum(l => l.LineTotal);
 
+    /// <summary>Depozit paneli yalnız siyahı rejimində və ödəniş pəncərəsi açıq deyilkən görünür.</summary>
+    public bool ShowDepositPanel => ListMode && !ShowPaymentPrompt;
+
     [RelayCommand]
     private async Task ToggleNewOrderAsync()
     {
         ShowNewOrder = !ShowNewOrder;
-        if (ShowNewOrder && AllCustomers.Count == 0)
+        if (ShowNewOrder) await EnsureFormDataAsync();
+    }
+
+    /// <summary>Sifariş forması üçün müştəri/məhsul/əməkdaş siyahılarını bir dəfə yükləyir.</summary>
+    private async Task EnsureFormDataAsync()
+    {
+        if (AllCustomers.Count == 0)
         {
             var custs = await api.GetCustomersAsync(null);
             if (custs is not null) foreach (var c in custs.Items) AllCustomers.Add(c);
             var prods = await api.GetProductsAsync(null);
             if (prods is not null) foreach (var p in prods.Items) AllProducts.Add(p);
 
-            // Admin/Menecer üçün məsul əməkdaş siyahısı.
             if (CanChooseCreator && AllEmployees.Count == 0)
             {
                 var emps = await api.GetEmployeesAsync(null);

@@ -38,7 +38,7 @@
             </Button>
         </StackPanel>
 
-        <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="8" Margin="0,0,0,16">
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="8" Margin="0,0,0,16" IsVisible="{Binding ListMode}">
             <TextBox Width="200" PlaceholderText="Sifariş № və ya müştəri (yazdıqca süzülür)" Text="{Binding Search}"
                      ToolTip.Tip="Müştəri adı və ya sifariş nömrəsi üzrə axtar. Yazdıqca süzülür, Enter də işləyir.">
                         <TextBox.KeyBindings>
@@ -50,8 +50,8 @@
             <ComboBox ItemsSource="{Binding TypeFilters}" SelectedItem="{Binding SelectedTypeFilter}" Width="110"
                       ToolTip.Tip="Sifariş növünə görə süzgəc: İcarə, Satış və ya hamısı." />
             <Button Content="➕ Yeni Sifariş" Command="{Binding ToggleNewOrderCommand}"
-                    Background="#3B5BDB" Foreground="White"
-                    ToolTip.Tip="Yeni icarə sifarişi forması açır (müştəri, tarixlər, məhsul sətirləri)" />
+                    Background="#3B5BDB" Foreground="White" IsVisible="False"
+                    ToolTip.Tip="Yeni sifariş 'Yeni Sifariş' bölməsindən yaradılır" />
             <Button Content="📋 Detal" Click="OnOrderDetail"
                     ToolTip.Tip="Seçilmiş sifarişin tam detalı: yaradan/təsdiqləyən, ödənişlər, dəyişiklik tarixçəsi (cədvəldə iki dəfə klik də açır)" />
             <Button Content="✓ Təsdiqlə" Command="{Binding ConfirmCommand}"
@@ -73,7 +73,7 @@
 
         <!-- Yeni sifariş forması -->
         <Border Grid.Row="2" Background="#F5F6FA" CornerRadius="8" Padding="16" Margin="0,0,0,16"
-                IsVisible="{Binding ShowNewOrder}">
+                IsVisible="{Binding CreateMode}">
             <StackPanel Spacing="10">
                 <!-- #33 — sifariş növü -->
                 <StackPanel Orientation="Horizontal" Spacing="8">
@@ -217,7 +217,7 @@
 
         <!-- Depozit & qaytarma hesablaşması (seçilmiş sifariş üçün) -->
         <Border Grid.Row="3" Background="#FFF9DB" CornerRadius="8" Padding="12" Margin="0,0,0,12"
-                IsVisible="{Binding !ShowPaymentPrompt}">
+                IsVisible="{Binding ShowDepositPanel}">
             <StackPanel Orientation="Horizontal" Spacing="8">
                 <TextBlock Text="Depozit (AZN):" VerticalAlignment="Center"
                            ToolTip.Tip="Müştəridən alınan girov məbləği. Təhvildən əvvəl təyin edilir." />
@@ -240,7 +240,7 @@
 
         <DataGrid Grid.Row="4" x:Name="OrdersGrid" ItemsSource="{Binding Orders}" SelectedItem="{Binding Selected}"
                   IsReadOnly="True" CanUserResizeColumns="True" local:GridColumnPersistence.Key="orders"
-                  GridLinesVisibility="Horizontal"
+                  GridLinesVisibility="Horizontal" IsVisible="{Binding ListMode}"
                   BorderThickness="1" BorderBrush="#E0E2EA"
                   DoubleTapped="OnOrderDoubleTapped">
             <DataGrid.Columns>

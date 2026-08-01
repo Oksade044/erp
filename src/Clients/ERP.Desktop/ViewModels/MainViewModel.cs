@@ -47,10 +47,12 @@ public partial class MainViewModel : ViewModelBase
 
         var dashboard = new DashboardViewModel(api);
         var customers = new CustomersViewModel(api);
-        var products = new ProductsViewModel(api, canViewCost: CanViewField("product.cost"));
-        var orders = new OrdersViewModel(api,
-            canChooseCreator: auth.Role is "Admin" or "Menecer",
-            canViewCreator: CanViewField("order.creator"));
+        var products = new ProductsViewModel(api, canViewCost: CanViewField("product.cost"), createMode: false);
+        var productsCreate = new ProductsViewModel(api, canViewCost: CanViewField("product.cost"), createMode: true);
+        var canChoose = auth.Role is "Admin" or "Menecer";
+        var canViewCr = CanViewField("order.creator");
+        var orders = new OrdersViewModel(api, canChoose, canViewCr, createMode: false);
+        var ordersCreate = new OrdersViewModel(api, canChoose, canViewCr, createMode: true);
         var invoices = new InvoicesViewModel(api);
         var suppliers = new SuppliersViewModel(api);
         var purchases = new PurchasesViewModel(api);
@@ -75,9 +77,11 @@ public partial class MainViewModel : ViewModelBase
         {
             ["İdarə Paneli"] = ("\U0001F4CA", "İdarə Paneli", dashboard),
             ["Müştərilər"] = ("\U0001F465", "Müştərilər", customers),
-            ["Məhsullar"] = ("\U0001F4E6", "Məhsullar", products),
+            ["Məhsullar"] = ("\U0001F4E6", "Məhsul siyahısı", products),
+            ["Məhsul Yarat"] = ("\U00002795", "Yeni məhsul", productsCreate),
             ["Kateqoriyalar"] = ("\U0001F3F7", "Kateqoriyalar", categories),
-            ["Sifarişlər"] = ("\U0001F9FE", "Sifarişlər", orders),
+            ["Sifarişlər"] = ("\U0001F9FE", "Sifariş siyahısı", orders),
+            ["Yeni Sifariş"] = ("\U00002795", "Yeni sifariş", ordersCreate),
             ["Fakturalar"] = ("\U0001F9FE", "Fakturalar", invoices),
             ["Təchizatçılar"] = ("\U0001F69A", "Təchizatçılar", suppliers),
             ["Alışlar"] = ("\U0001F6D2", "Alışlar", purchases),
@@ -113,13 +117,15 @@ public partial class MainViewModel : ViewModelBase
             Item("Davamiyyət", "Davamiyyət"),
             Item("Əməkhaqqı", "Əməkhaqqı"),
         ], isExpanded: true));
-        Menu.Add(new NavGroup("SATIŞ", [
-            Item("Sifarişlər", "Sifarişlər / İcarə"),
+        Menu.Add(new NavGroup("SATIŞ / İCARƏ", [
+            Item("Yeni Sifariş", "➕ Yeni sifariş yarat"),
+            Item("Sifarişlər", "Sifariş siyahısı"),
             Item("Fakturalar", "Fakturalar"),
             Item("İcarə Təqvimi", "İcarə Təqvimi"),
         ], isExpanded: true));
         Menu.Add(new NavGroup("MALLAR", [
-            Item("Məhsullar", "Məhsullar (siyahı)"),
+            Item("Məhsul Yarat", "➕ Yeni məhsul"),
+            Item("Məhsullar", "Məhsul siyahısı"),
             Item("Kateqoriyalar", "Kateqoriyalar"),
             Item("Stok", "Anbar stokları"),
             Item("Anbarlar", "Anbarlar"),
