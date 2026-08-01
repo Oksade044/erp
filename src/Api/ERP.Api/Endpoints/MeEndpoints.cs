@@ -26,6 +26,13 @@ public static class MeEndpoints
             return result.IsSuccess ? Results.Ok(result.Value) : Results.BadRequest(new { error = result.Error });
         });
 
+        // Mənim borcum (#17) — cari təmsilçi balansı + qeydlər.
+        group.MapGet("/debt", async (ISender sender) =>
+        {
+            var result = await sender.Send(new GetMyDebtQuery());
+            return result.IsSuccess ? Results.Ok(result.Value) : Results.BadRequest(new { error = result.Error });
+        });
+
         // filter: all | today-delivery | today-return | active | pending
         group.MapGet("/orders", async (ISender sender, string? filter) =>
         {

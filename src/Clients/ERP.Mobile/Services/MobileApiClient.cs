@@ -58,6 +58,10 @@ public sealed class MobileApiClient(AppState state)
     public async Task<List<OrderDto>> GetMyOrdersAsync(string filter = "all", CancellationToken ct = default) =>
         await GetAsync<List<OrderDto>>($"/api/v1/me/orders?filter={filter}", ct) ?? [];
 
+    // Mənim borcum (#17)
+    public Task<ERP.Shared.Contracts.Representatives.RepresentativeLedgerDto?> GetMyDebtAsync(CancellationToken ct = default) =>
+        GetAsync<ERP.Shared.Contracts.Representatives.RepresentativeLedgerDto>("/api/v1/me/debt", ct);
+
     // --- Sifariş detalı + status ---
     public Task<OrderDto?> GetOrderAsync(Guid id, CancellationToken ct = default) =>
         GetAsync<OrderDto>($"/api/v1/orders/{id}", ct);

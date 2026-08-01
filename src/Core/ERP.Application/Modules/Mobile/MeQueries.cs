@@ -2,6 +2,7 @@ using ERP.Application.Common.Interfaces;
 using ERP.Application.Common.Messaging;
 using ERP.Application.Common.Models;
 using ERP.Application.Modules.Orders;
+using ERP.Application.Modules.Representatives;
 using ERP.Shared.Contracts.Mobile;
 using ERP.Shared.Contracts.Orders;
 
@@ -39,6 +40,28 @@ public sealed class GetMyFinanceHandler(IReportService reports, ICurrentUser cur
         if (string.IsNullOrWhiteSpace(name))
             return Result.Failure<EmployeeFinanceDto>("İstifadəçi müəyyən edilmədi.");
         return Result.Success(await reports.GetEmployeeFinanceAsync(name, ct));
+    }
+}
+
+// --- Mənim borcum (#17) — cari təmsilçi balansı ---
+public sealed record GetMyDebtQuery : IRequest<Result<ERP.Shared.Contracts.Representatives.RepresentativeLedgerDto>>;
+
+public sealed class GetMyDebtHandler(
+    ERP.Application.Common.Interfaces.IRepresentativeRepository repo, ICurrentUser currentUser)
+    : IRequestHandler<GetMyDebtQuery, Result<ERP.Shared.Contracts.Representatives.RepresentativeLedgerDto>>
+{
+    public async Task<Result<ERP.Shared.Contracts.Representatives.RepresentativeLedgerDto>> Handle(GetMyDebtQuery request, CancellationToken ct)
+    {
+        var name = currentUser.FullName ?? currentUser.UserName;
+        if (string.IsNullOrWhiteSpace(name))
+            return Result.Failure<ERP.Shared.Contracts.Representatives.RepresentativeLedgerDto>("İstifadəçi müəyyən edilmədi.");
+
+        var entries = await repo.GetByRepresentativeAsync(name, ct);
+        var totalDebt = entries.Where(e => e.Type is Domain.Modules.Representatives.RepEntryType.Borc or Domain.Modules.Representatives.RepEntryType.SifarişLəğvi).Sum(e => e.Amount.Amount);
+        var totalOrders = entries.Where(e => e.Type is Domain.Modules.Representatives.RepEntryType.Sifariş or Domain.Modules.Representatives.RepEntryType.Ödəniş).Sum(e => e.Amount.Amount);
+        return Result.Success(new ERP.Shared.Contracts.Representatives.RepresentativeLedgerDto(
+            name, entries.Sum(e => e.SignedAmount), totalDebt, totalOrders, "AZN",
+            entries.Select(e => e.ToDto()).ToList()));
     }
 }
 

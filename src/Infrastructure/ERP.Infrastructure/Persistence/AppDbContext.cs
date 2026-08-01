@@ -30,6 +30,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
     public DbSet<Invoice> Invoices => Set<Invoice>();
     public DbSet<Supplier> Suppliers => Set<Supplier>();
     public DbSet<SupplierLedgerEntry> SupplierLedgerEntries => Set<SupplierLedgerEntry>();
+    public DbSet<ERP.Domain.Modules.Representatives.RepresentativeEntry> RepresentativeEntries => Set<ERP.Domain.Modules.Representatives.RepresentativeEntry>();
     public DbSet<PurchaseOrder> Purchases => Set<PurchaseOrder>();
     public DbSet<FinancialTransaction> FinancialTransactions => Set<FinancialTransaction>();
     public DbSet<Employee> Employees => Set<Employee>();

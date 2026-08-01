@@ -400,6 +400,19 @@ public sealed class ErpApiClient(HttpClient http)
         return http.GetFromJsonAsync<List<EmployeePerformanceRowDto>>($"/api/v1/reports/employee-performance{q}", JsonOpts, ct);
     }
 
+    // --- Təmsilçi-borc sistemi (#16-18) ---
+    public Task<List<ERP.Shared.Contracts.Representatives.RepresentativeBalanceDto>?> GetRepresentativeBalancesAsync(CancellationToken ct = default) =>
+        http.GetFromJsonAsync<List<ERP.Shared.Contracts.Representatives.RepresentativeBalanceDto>>("/api/v1/representatives", JsonOpts, ct);
+
+    public Task<ERP.Shared.Contracts.Representatives.RepresentativeLedgerDto?> GetRepresentativeLedgerAsync(string name, CancellationToken ct = default) =>
+        http.GetFromJsonAsync<ERP.Shared.Contracts.Representatives.RepresentativeLedgerDto>($"/api/v1/representatives/{Uri.EscapeDataString(name)}/ledger", JsonOpts, ct);
+
+    public async Task<(bool ok, string? error)> AssignDebtAsync(ERP.Shared.Contracts.Representatives.AssignDebtRequest request, CancellationToken ct = default)
+    {
+        var resp = await http.PostAsJsonAsync("/api/v1/representatives/debt", request, JsonOpts, ct);
+        return await ReadResultAsync(resp, ct);
+    }
+
     public Task<List<RentalCalendarEntryDto>?> GetRentalCalendarAsync(DateOnly? from = null, DateOnly? to = null, CancellationToken ct = default)
     {
         var q = from is not null && to is not null ? $"?from={from:yyyy-MM-dd}&to={to:yyyy-MM-dd}" : "";

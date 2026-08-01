@@ -29,6 +29,7 @@ public static class MauiProgram
 		builder.Services.AddTransient<OrderDetailViewModel>();
 		builder.Services.AddTransient<NewOrderViewModel>();
 		builder.Services.AddTransient<FinanceViewModel>();
+		builder.Services.AddTransient<DebtViewModel>();
 		builder.Services.AddTransient<ProfileViewModel>();
 
 		// Naviqasiya qabığı
@@ -41,6 +42,7 @@ public static class MauiProgram
 		builder.Services.AddTransient<OrderDetailPage>();
 		builder.Services.AddTransient<NewOrderPage>();
 		builder.Services.AddTransient<FinancePage>();
+		builder.Services.AddTransient<DebtPage>();
 		builder.Services.AddTransient<ProfilePage>();
 
 #if DEBUG

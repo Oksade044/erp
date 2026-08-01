@@ -10,7 +10,7 @@
         <ShellContent Title="Əsas" ContentTemplate="{DataTemplate views:DashboardPage}" Route="dashboard" />
         <ShellContent Title="Sifarişlərim" ContentTemplate="{DataTemplate views:MyOrdersPage}" Route="myorders" />
         <ShellContent Title="Yeni" ContentTemplate="{DataTemplate views:NewOrderPage}" Route="neworder" />
-        <ShellContent Title="Maliyyəm" ContentTemplate="{DataTemplate views:FinancePage}" Route="finance" />
+        <ShellContent Title="Borcum" ContentTemplate="{DataTemplate views:DebtPage}" Route="debt" />
         <ShellContent Title="Profil" ContentTemplate="{DataTemplate views:ProfilePage}" Route="profile" />
     </TabBar>
 

@@ -56,6 +56,7 @@ public partial class MainViewModel : ViewModelBase
         var purchases = new PurchasesViewModel(api);
         var finance = new FinanceViewModel(api);
         var employees = new EmployeesViewModel(api, canViewSalary: CanViewField("employee.salary"));
+        var representatives = new RepresentativesViewModel(api);
         var attendance = new AttendanceViewModel(api);
         var payroll = new PayrollViewModel(api);
         var warehouses = new WarehousesViewModel(api);
@@ -79,6 +80,7 @@ public partial class MainViewModel : ViewModelBase
             ["Alışlar"] = ("\U0001F6D2", "Alışlar", purchases),
             ["Maliyyə"] = ("\U0001F4B5", "Maliyyə", finance),
             ["İşçilər"] = ("\U0001F464", "Təmsilçilər", employees),
+            ["Təmsilçi Borcları"] = ("\U0001F4B0", "Təmsilçi borcları", representatives),
             ["Davamiyyət"] = ("\U0001F552", "Davamiyyət", attendance),
             ["Əməkhaqqı"] = ("\U0001F4B3", "Əməkhaqqı", payroll),
             ["Anbarlar"] = ("\U0001F3ED", "Anbarlar", warehouses),
@@ -103,6 +105,7 @@ public partial class MainViewModel : ViewModelBase
         Menu.Add(new NavGroup("KARTLAR", [Item("Müştərilər", "Müştərilər")], isExpanded: true));
         Menu.Add(new NavGroup("TƏMSİLÇİLƏR", [
             Item("İşçilər", "Təmsilçilər"),
+            Item("Təmsilçi Borcları", "Borclar / Hesab"),
             Item("Davamiyyət", "Davamiyyət"),
             Item("Əməkhaqqı", "Əməkhaqqı"),
         ], isExpanded: true));
@@ -174,6 +177,7 @@ public partial class MainViewModel : ViewModelBase
             case PurchasesViewModel v: v.LoadCommand.Execute(null); break;
             case FinanceViewModel v: v.LoadCommand.Execute(null); break;
             case EmployeesViewModel v: v.LoadCommand.Execute(null); break;
+            case RepresentativesViewModel v: v.LoadCommand.Execute(null); break;
             case AttendanceViewModel v: v.LoadCommand.Execute(null); break;
             case PayrollViewModel v: v.LoadCommand.Execute(null); break;
             case WarehousesViewModel v: v.LoadCommand.Execute(null); break;

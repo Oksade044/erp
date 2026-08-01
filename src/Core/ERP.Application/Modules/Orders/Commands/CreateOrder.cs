@@ -33,6 +33,7 @@ public sealed class CreateOrderHandler(
     ICustomerRepository customers,
     IProductRepository products,
     IWarehouseRepository warehouses,
+    ERP.Application.Common.Interfaces.IRepresentativeRepository representatives,
     ICurrentUser currentUser,
     IAuditLogWriter audit,
     IUnitOfWork unitOfWork)
@@ -99,6 +100,17 @@ public sealed class CreateOrderHandler(
         }
 
         await orders.AddAsync(order, ct);
+
+        // #18 — sifariş yaradan təmsilçinin borcunu bağla: sifariş məbləği kredit kimi yazılır.
+        if (!string.IsNullOrWhiteSpace(createdByName) && order.Total.Amount > 0)
+        {
+            var credit = ERP.Domain.Modules.Representatives.RepresentativeEntry.Create(
+                createdByName!, DateOnly.FromDateTime(DateTime.UtcNow),
+                ERP.Domain.Modules.Representatives.RepEntryType.Sifariş,
+                order.Total, $"Sifariş {orderNumber}", orderNumber);
+            await representatives.AddAsync(credit, ct);
+        }
+
         await unitOfWork.SaveChangesAsync(ct);
 
         return Result.Success(order.Id);
