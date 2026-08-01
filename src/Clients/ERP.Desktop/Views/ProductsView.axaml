@@ -108,6 +108,11 @@
                                         ToolTip.Tip="Yazılan kateqoriyanı indi yarat (məhsulsuz)" />
                             </StackPanel>
                         </StackPanel>
+                        <StackPanel Width="130" Margin="0,0,12,10">
+                            <TextBlock Text="Ölçü vahidi" FontSize="12" Foreground="#5A6072" />
+                            <ComboBox ItemsSource="{Binding Units}" SelectedItem="{Binding NewUnit}" HorizontalAlignment="Stretch"
+                                      ToolTip.Tip="Məhsulun ölçü vahidi: Ədəd, Kg, Litr, Dəst və s." />
+                        </StackPanel>
                         <StackPanel Width="220" Margin="0,0,12,10">
                             <TextBlock Text="Şəkil (opsional)" FontSize="12" Foreground="#5A6072" />
                             <StackPanel Orientation="Horizontal" Spacing="6">
@@ -200,6 +205,10 @@
                                              FilterMode="ContainsOrdinal" MinimumPrefixLength="0"
                                              PlaceholderText="Məs: Mebel" />
                         </StackPanel>
+                        <StackPanel Width="130" Margin="0,0,12,10">
+                            <TextBlock Text="Ölçü vahidi" FontSize="12" Foreground="#5A6072" />
+                            <ComboBox ItemsSource="{Binding Units}" SelectedItem="{Binding EditUnit}" HorizontalAlignment="Stretch" />
+                        </StackPanel>
                         <StackPanel Width="140" Margin="0,0,12,10">
                             <TextBlock Text="Aktivdir?" FontSize="12" Foreground="#5A6072" />
                             <CheckBox Content="Satışda / istifadədə" IsChecked="{Binding EditIsActive}" />
@@ -278,6 +287,7 @@
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="SKU (kod)" Binding="{Binding Sku}" Width="Auto" />
                     <DataGridTextColumn Header="Ad" Binding="{Binding Name}" Width="2*" />
+                    <DataGridTextColumn Header="Vahid" Binding="{Binding Unit}" Width="Auto" />
                     <DataGridTextColumn Header="Kateqoriya" Binding="{Binding Category}" Width="*" />
                     <DataGridTextColumn Header="İcarə qiyməti" Binding="{Binding RentalPrice}" Width="Auto" />
                     <DataGridTextColumn Header="İdarəetmə növü"

@@ -100,6 +100,10 @@ public partial class ProductsViewModel : ViewModelBase
     [ObservableProperty] private int _newStock;
     [ObservableProperty] private int _newMinStock;
     [ObservableProperty] private string? _newCategory;
+    [ObservableProperty] private string _newUnit = "Ədəd";
+
+    /// <summary>#12 — ölçü vahidləri (məhsul əlavə/redaktə formasında seçilir).</summary>
+    public string[] Units { get; } = ["Ədəd", "Kg", "Qram", "Litr", "Metr", "Sm", "Mm", "Paket", "Dəst", "Qutu", "Cüt", "Rulon"];
 
     /// <summary>Anbar siyahısı (yeni məhsulun anbar-stoklarını seçmək üçün).</summary>
     public ObservableCollection<WarehouseDto> Warehouses { get; } = [];
@@ -147,6 +151,7 @@ public partial class ProductsViewModel : ViewModelBase
     [ObservableProperty] private int _editStock;
     [ObservableProperty] private int _editMinStock;
     [ObservableProperty] private string? _editCategory;
+    [ObservableProperty] private string _editUnit = "Ədəd";
     [ObservableProperty] private bool _editIsActive = true;
 
     // ---- #17: redaktədə anbarlar üzrə stok ----
@@ -281,7 +286,8 @@ public partial class ProductsViewModel : ViewModelBase
                 SalePrice: CanViewCost ? NewSalePrice : null,
                 MinStockQuantity: NewMinStock,
                 Category: NewCategory,
-                InitialStocks: initialStocks));
+                InitialStocks: initialStocks,
+                Unit: NewUnit));
 
             if (ok)
             {
@@ -338,6 +344,7 @@ public partial class ProductsViewModel : ViewModelBase
         EditStock = Selected.StockQuantity;
         EditMinStock = Selected.MinStockQuantity;
         EditCategory = Selected.Category;
+        EditUnit = string.IsNullOrWhiteSpace(Selected.Unit) ? "Ədəd" : Selected.Unit;
         EditIsActive = Selected.IsActive;
         _editProductId = Selected.Id;
         IsEditing = true;
@@ -370,7 +377,8 @@ public partial class ProductsViewModel : ViewModelBase
                 StockQuantity: EditStock,
                 MinStockQuantity: EditMinStock,
                 Category: EditCategory,
-                IsActive: EditIsActive));
+                IsActive: EditIsActive,
+                Unit: EditUnit));
 
             if (ok)
             {

@@ -49,6 +49,7 @@ public sealed class UpdateProductHandler(
         product.SetMinStock(dto.MinStockQuantity);
         product.ChangeCategory(dto.Category);
         product.ChangeDescription(dto.Description);
+        product.ChangeUnit(dto.Unit);
         if (dto.IsActive) product.Activate(); else product.Deactivate();
 
         // Yeni kateqoriya adı yazılıbsa lüğətə əlavə et.

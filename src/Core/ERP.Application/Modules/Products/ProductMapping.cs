@@ -23,7 +23,8 @@ public static class ProductMapping
         IsLowStock: p.IsLowStock,
         IsActive: p.IsActive,
         HasImage: !string.IsNullOrWhiteSpace(p.ImagePath),
-        CreatedAt: p.CreatedAt);
+        CreatedAt: p.CreatedAt,
+        Unit: p.Unit);
 
     public static ProductTrackingMode ParseTrackingMode(string? mode)
     {

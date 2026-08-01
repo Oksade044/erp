@@ -19,7 +19,9 @@ public sealed record CreateProductRequest(
     // Köhnə: tək anbar (geriyə uyğunluq üçün saxlanılır).
     Guid? WarehouseId = null,
     // Yeni: məhsul bir neçə anbarda müxtəlif sayda ola bilər — hər anbar üçün ilkin stok.
-    IReadOnlyList<InitialStockRequest>? InitialStocks = null);
+    IReadOnlyList<InitialStockRequest>? InitialStocks = null,
+    // #12 — ölçü vahidi.
+    string Unit = "Ədəd");
 
 /// <summary>Yeni məhsulun bir anbardakı ilkin stoku.</summary>
 public sealed record InitialStockRequest(

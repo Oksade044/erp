@@ -26,4 +26,6 @@ public sealed record ProductDto(
     int ReservedStock = 0,
     int RentedStock = 0,
     int InRepairStock = 0,
-    int DamagedStock = 0);
+    int DamagedStock = 0,
+    // #12 — ölçü vahidi (Ədəd, Kg, Litr, Metr, Dəst ...).
+    string Unit = "Ədəd");

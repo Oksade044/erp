@@ -12,4 +12,5 @@ public sealed record UpdateProductRequest(
     int MinStockQuantity = 0,
     string? Category = null,
     string? Description = null,
-    bool IsActive = true);
+    bool IsActive = true,
+    string Unit = "Ədəd");

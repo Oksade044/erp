@@ -18,6 +18,7 @@ public sealed class ProductConfiguration : IEntityTypeConfiguration<Product>
         builder.Property(p => p.Name).HasMaxLength(200).IsRequired();
         builder.Property(p => p.Category).HasMaxLength(100);
         builder.Property(p => p.Description).HasMaxLength(2000);
+        builder.Property(p => p.Unit).HasMaxLength(20).HasDefaultValue("Ədəd").IsRequired();
         builder.Property(p => p.StockQuantity).IsRequired();
         builder.Property(p => p.MinStockQuantity).IsRequired();
         builder.Property(p => p.IsActive).IsRequired();

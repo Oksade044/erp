@@ -70,7 +70,7 @@ public sealed class CreateProductHandler(
         var sale = dto.SalePrice.HasValue ? Money.Create(dto.SalePrice.Value, dto.Currency) : null;
 
         var product = Product.Create(sku, dto.Name, price, mode, dto.StockQuantity,
-            dto.Category, dto.Description, purchase, sale, dto.MinStockQuantity);
+            dto.Category, dto.Description, purchase, sale, dto.MinStockQuantity, dto.Unit);
 
         await products.AddAsync(product, ct);
 

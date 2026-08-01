@@ -41,6 +41,9 @@ public class Product : BaseEntity, IAggregateRoot
     /// <summary>Məhsul şəklinin saxlama açarı/yolu (fayl storage-də; DB-də yalnız yol — TDD §24).</summary>
     public string? ImagePath { get; private set; }
 
+    /// <summary>Ölçü vahidi (#12) — Ədəd, Kg, Litr, Metr, Dəst və s. Default: Ədəd.</summary>
+    public string Unit { get; private set; } = "Ədəd";
+
     // EF Core üçün.
     private Product() { }
 
@@ -62,7 +65,8 @@ public class Product : BaseEntity, IAggregateRoot
         string? description = null,
         Money? purchasePrice = null,
         Money? salePrice = null,
-        int minStockQuantity = 0)
+        int minStockQuantity = 0,
+        string? unit = null)
     {
         if (string.IsNullOrWhiteSpace(name))
             throw new DomainException("Məhsul adı tələb olunur.");
@@ -78,9 +82,12 @@ public class Product : BaseEntity, IAggregateRoot
             Description = description?.Trim(),
             PurchasePrice = purchasePrice,
             SalePrice = salePrice,
-            MinStockQuantity = minStockQuantity
+            MinStockQuantity = minStockQuantity,
+            Unit = string.IsNullOrWhiteSpace(unit) ? "Ədəd" : unit.Trim()
         };
     }
+
+    public void ChangeUnit(string? unit) => Unit = string.IsNullOrWhiteSpace(unit) ? "Ədəd" : unit.Trim();
 
     public void Rename(string name)
     {
