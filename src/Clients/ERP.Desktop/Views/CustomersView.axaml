@@ -30,9 +30,13 @@
                     </TextBox>
                     <Button Content="Axtar" Command="{Binding LoadCommand}" />
                     <Button Content="⟳ Yenilə" Command="{Binding LoadCommand}" />
+                    <Button Content="✎ Redaktə et" Command="{Binding EditSelectedCommand}"
+                            ToolTip.Tip="Seçilmiş müştərini redaktə et (ad, borc, təmsilçi və s.)" />
+                    <Button Content="🗑 Sil" Command="{Binding DeleteSelectedCommand}" Background="#E03131" Foreground="White"
+                            ToolTip.Tip="Seçilmiş müştərini sil (bərpa oluna bilər)" />
                 </StackPanel>
 
-                <TabControl IsVisible="{Binding CreateMode}">
+                <TabControl IsVisible="{Binding FormVisible}">
                     <TabItem Header="Ümumi">
                         <WrapPanel Margin="0,8,0,0">
                             <ComboBox ItemsSource="{Binding CustomerTypes}" SelectedItem="{Binding NewType}" Width="120" Margin="0,0,8,8" />
@@ -67,13 +71,13 @@
                         </WrapPanel>
                     </TabItem>
                 </TabControl>
-                <Button Content="+ Müştəri əlavə et" Command="{Binding AddCommand}" HorizontalAlignment="Left"
-                        Background="#3B5BDB" Foreground="White" IsVisible="{Binding CreateMode}" />
+                <Button Content="+ Yadda saxla" Command="{Binding AddCommand}" HorizontalAlignment="Left"
+                        Background="#3B5BDB" Foreground="White" IsVisible="{Binding FormVisible}" />
             </StackPanel>
         </Border>
 
         <!-- Siyahı -->
-        <DataGrid Grid.Row="2" ItemsSource="{Binding Customers}" IsReadOnly="True" IsVisible="{Binding ListMode}"
+        <DataGrid Grid.Row="2" ItemsSource="{Binding Customers}" SelectedItem="{Binding Selected}" IsReadOnly="True" IsVisible="{Binding ListMode}"
                   CanUserResizeColumns="True" local:GridColumnPersistence.Key="customers"
                   GridLinesVisibility="Horizontal" BorderThickness="1" BorderBrush="#E0E2EA">
             <DataGrid.Columns>

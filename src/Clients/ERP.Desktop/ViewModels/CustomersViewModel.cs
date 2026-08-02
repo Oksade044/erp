@@ -14,7 +14,40 @@ public partial class CustomersViewModel(ErpApiClient api, bool createMode = fals
     public bool CreateMode { get; } = createMode;
     public bool ListMode => !createMode;
 
+    /// <summary>Redaktə rejimi — siyahı bölməsində forma göstərilir.</summary>
+    [ObservableProperty] private bool _isEditing;
+    public bool FormVisible => CreateMode || IsEditing;
+    partial void OnIsEditingChanged(bool value) => OnPropertyChanged(nameof(FormVisible));
+
     public ObservableCollection<CustomerDto> Customers { get; } = [];
+    [ObservableProperty] private CustomerDto? _selected;
+
+    /// <summary>Seçilmiş müştərini silir (soft delete).</summary>
+    [RelayCommand]
+    private async Task DeleteSelectedAsync()
+    {
+        if (Selected is null) { ERP.Desktop.AppNotify.Show("Silmək üçün müştəri seçin."); return; }
+        var name = Selected.Name;
+        var (ok, err) = await api.DeleteCustomerAsync(Selected.Id);
+        ERP.Desktop.AppNotify.Show(ok ? $"Müştəri silindi: {name}" : err ?? "Silinmədi.");
+        if (ok) await LoadAsync();
+    }
+
+    /// <summary>Seçilmiş müştərini redaktə formasına doldurur (adı və s. dəyişmək üçün).</summary>
+    [RelayCommand]
+    private void EditSelected()
+    {
+        if (Selected is null) { ERP.Desktop.AppNotify.Show("Redaktə üçün müştəri seçin."); return; }
+        NewType = Selected.Type; NewName = Selected.Name; NewPhone = Selected.Phone;
+        NewEmail = Selected.Email; NewCity = Selected.City; NewAddress = Selected.AddressLine; NewNote = Selected.Notes;
+        NewWhatsApp = Selected.WhatsApp; NewRepresentative = Selected.RepresentativeName;
+        NewDebt = Selected.Debt; NewDebtCurrency = Selected.DebtCurrency;
+        _editId = Selected.Id;
+        IsEditing = true;
+        AppNotify.Show("Redaktə rejimi: dəyişiklikləri edib 'Yadda saxla' basın.");
+    }
+
+    private System.Guid? _editId;
 
     [ObservableProperty] private string? _search;
 
@@ -83,20 +116,33 @@ public partial class CustomersViewModel(ErpApiClient api, bool createMode = fals
         IsBusy = true;
         try
         {
-            var (ok, error) = await api.CreateCustomerAsync(new CreateCustomerRequest(
-                Type: NewType, Name: NewName!, Phone: NewPhone!,
-                Email: NewEmail, City: NewCity, AddressLine: NewAddress, Notes: NewNote,
-                WhatsApp: NewWhatsApp, RepresentativeName: NewRepresentative,
-                Debt: NewDebt, DebtCurrency: NewDebtCurrency));
+            bool ok; string? error;
+            if (_editId is { } id)
+            {
+                (ok, error) = await api.UpdateCustomerAsync(id, new UpdateCustomerRequest(
+                    Name: NewName!, Phone: NewPhone!, Email: NewEmail, City: NewCity,
+                    AddressLine: NewAddress, Notes: NewNote, IsActive: true,
+                    WhatsApp: NewWhatsApp, RepresentativeName: NewRepresentative,
+                    Debt: NewDebt, DebtCurrency: NewDebtCurrency));
+            }
+            else
+            {
+                (ok, error) = await api.CreateCustomerAsync(new CreateCustomerRequest(
+                    Type: NewType, Name: NewName!, Phone: NewPhone!,
+                    Email: NewEmail, City: NewCity, AddressLine: NewAddress, Notes: NewNote,
+                    WhatsApp: NewWhatsApp, RepresentativeName: NewRepresentative,
+                    Debt: NewDebt, DebtCurrency: NewDebtCurrency));
+            }
 
             if (ok)
             {
-                Status = "Müştəri əlavə olundu.";
+                AppNotify.Show(_editId is null ? $"Müştəri əlavə olundu: {NewName}" : $"Müştəri yeniləndi: {NewName}");
+                _editId = null; IsEditing = false;
                 NewName = NewPhone = NewEmail = NewCity = NewAddress = NewNote = NewWhatsApp = NewRepresentative = null;
                 NewDebt = 0;
                 await LoadAsync();
             }
-            else Status = error ?? "Əlavə edilmədi.";
+            else AppNotify.Show(error ?? "Əməliyyat alınmadı.");
         }
         finally { IsBusy = false; }
     }

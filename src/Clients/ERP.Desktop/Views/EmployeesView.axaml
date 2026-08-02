@@ -29,6 +29,8 @@
                     </TextBox>
                     <Button Content="Axtar" Command="{Binding LoadCommand}" />
                     <Button Content="⟳ Yenilə" Command="{Binding LoadCommand}" />
+                    <Button Content="🗑 Sil" Command="{Binding DeleteSelectedCommand}" Background="#E03131" Foreground="White"
+                            ToolTip.Tip="Seçilmiş təmsilçini sil (bərpa oluna bilər)" />
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding CreateMode}">
                     <TextBox Width="170" PlaceholderText="Ad Soyad *" Text="{Binding NewFullName}" />
@@ -49,7 +51,7 @@
         </Border>
 
         <!-- Siyahı -->
-        <DataGrid Grid.Row="2" x:Name="EmployeesGrid" ItemsSource="{Binding Employees}" IsReadOnly="True" IsVisible="{Binding ListMode}"
+        <DataGrid Grid.Row="2" x:Name="EmployeesGrid" ItemsSource="{Binding Employees}" SelectedItem="{Binding Selected}" IsReadOnly="True" IsVisible="{Binding ListMode}"
                   GridLinesVisibility="Horizontal" BorderThickness="1" BorderBrush="#E0E2EA">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="№" Binding="{Binding EmployeeNumber}" Width="Auto" />

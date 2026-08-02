@@ -29,6 +29,18 @@ public static class ProductEndpoints
         })
         .RequireAuthorization(ERP.Domain.Modules.Users.Permissions.ProductsEdit);
 
+        categories.MapPut("/{id:guid}", async (Guid id, CreateCategoryRequest request, ISender sender) =>
+        {
+            var result = await sender.Send(new UpdateCategoryCommand(id, request.Name));
+            return result.IsSuccess ? Results.NoContent() : Results.BadRequest(new { error = result.Error });
+        }).RequireAuthorization(ERP.Domain.Modules.Users.Permissions.ProductsEdit);
+
+        categories.MapDelete("/{id:guid}", async (Guid id, ISender sender) =>
+        {
+            var result = await sender.Send(new DeleteCategoryCommand(id));
+            return result.IsSuccess ? Results.NoContent() : Results.BadRequest(new { error = result.Error });
+        }).RequireAuthorization(ERP.Domain.Modules.Users.Permissions.ProductsEdit);
+
         group.MapGet("/", async (string? search, ISender sender, int page = 1, int pageSize = 20) =>
         {
             var result = await sender.Send(new GetProductsQuery(search, page, pageSize));
@@ -66,6 +78,12 @@ public static class ProductEndpoints
             var result = await sender.Send(new UpdateProductCommand(id, request));
             return result.IsSuccess ? Results.NoContent() : Results.BadRequest(new { error = result.Error });
         });
+
+        group.MapDelete("/{id:guid}", async (Guid id, ISender sender) =>
+        {
+            var result = await sender.Send(new DeleteProductCommand(id));
+            return result.IsSuccess ? Results.NoContent() : Results.BadRequest(new { error = result.Error });
+        }).RequireAuthorization(ERP.Domain.Modules.Users.Permissions.ProductsEdit);
 
         // QR kod (TDD §27) — məhsulun SKU-su PNG QR kimi (anbar skanlaması üçün).
         group.MapGet("/{id:guid}/qr", async (Guid id, ISender sender) =>

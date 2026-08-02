@@ -70,6 +70,12 @@ public sealed class ErpApiClient(HttpClient http)
         return await ReadResultAsync(resp, ct);
     }
 
+    public async Task<(bool ok, string? error)> UpdateCustomerAsync(Guid id, UpdateCustomerRequest request, CancellationToken ct = default)
+    {
+        var resp = await http.PutAsJsonAsync($"/api/v1/customers/{id}", request, JsonOpts, ct);
+        return await ReadResultAsync(resp, ct);
+    }
+
     // --- Təchizatçılar ---
     public Task<PagedResult<SupplierDto>?> GetSuppliersAsync(string? search, CancellationToken ct = default) =>
         http.GetFromJsonAsync<PagedResult<SupplierDto>>(
@@ -122,6 +128,18 @@ public sealed class ErpApiClient(HttpClient http)
         return await ReadResultAsync(resp, ct);
     }
 
+    // --- Silmə əməliyyatları (soft delete) ---
+    public async Task<(bool ok, string? error)> DeleteProductAsync(Guid id, CancellationToken ct = default) =>
+        await ReadResultAsync(await http.DeleteAsync($"/api/v1/products/{id}", ct), ct);
+    public async Task<(bool ok, string? error)> DeleteCustomerAsync(Guid id, CancellationToken ct = default) =>
+        await ReadResultAsync(await http.DeleteAsync($"/api/v1/customers/{id}", ct), ct);
+    public async Task<(bool ok, string? error)> DeleteEmployeeAsync(Guid id, CancellationToken ct = default) =>
+        await ReadResultAsync(await http.DeleteAsync($"/api/v1/employees/{id}", ct), ct);
+    public async Task<(bool ok, string? error)> DeleteWarehouseAsync(Guid id, CancellationToken ct = default) =>
+        await ReadResultAsync(await http.DeleteAsync($"/api/v1/warehouses/{id}", ct), ct);
+    public async Task<(bool ok, string? error)> DeleteCategoryAsync(Guid id, CancellationToken ct = default) =>
+        await ReadResultAsync(await http.DeleteAsync($"/api/v1/categories/{id}", ct), ct);
+
     // --- Kateqoriyalar ---
     public Task<List<CategoryDto>?> GetCategoriesAsync(CancellationToken ct = default) =>
         http.GetFromJsonAsync<List<CategoryDto>>("/api/v1/categories", JsonOpts, ct);
@@ -129,6 +147,12 @@ public sealed class ErpApiClient(HttpClient http)
     public async Task<(bool ok, string? error)> CreateCategoryAsync(string name, CancellationToken ct = default)
     {
         var resp = await http.PostAsJsonAsync("/api/v1/categories", new CreateCategoryRequest(name), JsonOpts, ct);
+        return await ReadResultAsync(resp, ct);
+    }
+
+    public async Task<(bool ok, string? error)> UpdateCategoryAsync(Guid id, string name, CancellationToken ct = default)
+    {
+        var resp = await http.PutAsJsonAsync($"/api/v1/categories/{id}", new CreateCategoryRequest(name), JsonOpts, ct);
         return await ReadResultAsync(resp, ct);
     }
 

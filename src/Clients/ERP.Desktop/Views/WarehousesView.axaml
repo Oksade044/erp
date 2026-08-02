@@ -26,6 +26,9 @@
                         </TextBox.KeyBindings>
                     </TextBox>
                     <Button Content="Axtar" Command="{Binding LoadCommand}" />
+                    <Button Content="⟳ Yenilə" Command="{Binding LoadCommand}" />
+                    <Button Content="🗑 Sil" Command="{Binding DeleteSelectedCommand}" Background="#E03131" Foreground="White"
+                            ToolTip.Tip="Seçilmiş anbarı sil (bərpa oluna bilər)" />
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" Spacing="8">
                     <TextBox Width="200" PlaceholderText="Ad *" Text="{Binding NewName}" />
@@ -38,7 +41,7 @@
             </StackPanel>
         </Border>
 
-        <DataGrid Grid.Row="2" ItemsSource="{Binding Warehouses}" IsReadOnly="True"
+        <DataGrid Grid.Row="2" ItemsSource="{Binding Warehouses}" SelectedItem="{Binding Selected}" IsReadOnly="True"
                   GridLinesVisibility="Horizontal" BorderThickness="1" BorderBrush="#E0E2EA">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Ad" Binding="{Binding Name}" Width="2*" />

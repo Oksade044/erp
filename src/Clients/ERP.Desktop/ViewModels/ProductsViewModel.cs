@@ -362,6 +362,17 @@ public partial class ProductsViewModel : ViewModelBase
     [RelayCommand]
     private void CancelEdit() => IsEditing = false;
 
+    /// <summary>Seçilmiş məhsulu silir (soft delete — bərpa oluna bilər).</summary>
+    [RelayCommand]
+    private async Task DeleteSelectedAsync()
+    {
+        if (Selected is null) { ERP.Desktop.AppNotify.Show("Silmək üçün məhsul seçin."); return; }
+        var name = Selected.Name;
+        var (ok, err) = await _api.DeleteProductAsync(Selected.Id);
+        ERP.Desktop.AppNotify.Show(ok ? $"Məhsul silindi: {name}" : err ?? "Silinmədi.");
+        if (ok) await LoadAsync();
+    }
+
     [RelayCommand]
     private async Task SaveEditAsync()
     {

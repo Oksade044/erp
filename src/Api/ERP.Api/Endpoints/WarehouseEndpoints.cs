@@ -42,6 +42,12 @@ public static class WarehouseEndpoints
             return result.IsSuccess ? Results.NoContent() : Results.BadRequest(new { error = result.Error });
         }).RequireAuthorization(Permissions.WarehousesEdit);
 
+        group.MapDelete("/{id:guid}", async (Guid id, ISender sender) =>
+        {
+            var result = await sender.Send(new ERP.Application.Modules.Warehouses.Commands.DeleteWarehouseCommand(id));
+            return result.IsSuccess ? Results.NoContent() : Results.BadRequest(new { error = result.Error });
+        }).RequireAuthorization(Permissions.WarehousesEdit);
+
         return app;
     }
 }

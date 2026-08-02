@@ -11,6 +11,18 @@ namespace ERP.Desktop.ViewModels;
 public partial class WarehousesViewModel(ErpApiClient api) : ViewModelBase
 {
     public ObservableCollection<WarehouseDto> Warehouses { get; } = [];
+    [ObservableProperty] private WarehouseDto? _selected;
+
+    /// <summary>Seçilmiş anbarı silir (soft delete).</summary>
+    [RelayCommand]
+    private async Task DeleteSelectedAsync()
+    {
+        if (Selected is null) { ERP.Desktop.AppNotify.Show("Silmək üçün anbar seçin."); return; }
+        var name = Selected.Name;
+        var (ok, err) = await api.DeleteWarehouseAsync(Selected.Id);
+        ERP.Desktop.AppNotify.Show(ok ? $"Anbar silindi: {name}" : err ?? "Silinmədi.");
+        if (ok) await LoadAsync();
+    }
 
     [ObservableProperty] private string? _search;
 

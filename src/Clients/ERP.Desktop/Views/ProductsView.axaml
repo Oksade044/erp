@@ -49,6 +49,9 @@
                 <Button Content="✏ Redaktə et" Command="{Binding BeginEditCommand}"
                         Background="#3B5BDB" Foreground="White"
                         ToolTip.Tip="Seçilmiş məhsulun məlumatlarını dəyişmək üçün açır" />
+                <Button Content="🗑 Sil" Command="{Binding DeleteSelectedCommand}"
+                        Background="#E03131" Foreground="White"
+                        ToolTip.Tip="Seçilmiş məhsulu sil (bərpa oluna bilər)" />
                 <Button Content="📊 Excel ixrac" Command="{Binding ExportExcelCommand}"
                         Background="#2F9E44" Foreground="White"
                         ToolTip.Tip="Bütün məhsulları Excel (.xlsx) faylı kimi yükləyir" />
@@ -91,11 +94,9 @@
                             <TextBox PlaceholderText="Məs: 60.00" Text="{Binding NewSalePrice}"
                                      ToolTip.Tip="Avadanlıq satılarsa qiyməti. Boş buraxıla bilər." />
                         </StackPanel>
-                        <StackPanel Width="200" Margin="0,0,12,10">
-                            <TextBlock Text="İdarəetmə növü" FontSize="12" Foreground="#5A6072" />
-                            <ComboBox ItemsSource="{Binding TrackingModes}" SelectedItem="{Binding NewTrackingMode}"
-                                      HorizontalAlignment="Stretch"
-                                      ToolTip.Tip="Say ilə: eyni əşyadan çox (200 stul). Fərdi: hər nüsxə ayrıca izlənir." />
+                        <!-- #1 — idarəetmə növü gizlədildi (default Toplu) -->
+                        <StackPanel Width="200" Margin="0,0,12,10" IsVisible="False">
+                            <ComboBox ItemsSource="{Binding TrackingModes}" SelectedItem="{Binding NewTrackingMode}" />
                         </StackPanel>
                         <StackPanel Width="220" Margin="0,0,12,10">
                             <TextBlock Text="Kateqoriya (siyahıdan seç)" FontSize="12" Foreground="#5A6072" />

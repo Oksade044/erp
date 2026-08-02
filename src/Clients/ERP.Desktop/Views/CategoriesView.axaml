@@ -18,12 +18,14 @@
                         <KeyBinding Gesture="Enter" Command="{Binding AddCommand}" />
                     </TextBox.KeyBindings>
                 </TextBox>
-                <Button Content="+ Yarat" Command="{Binding AddCommand}" Background="#3B5BDB" Foreground="White" />
+                <Button Content="+ Yadda saxla" Command="{Binding AddCommand}" Background="#3B5BDB" Foreground="White" />
+                <Button Content="✎ Adı dəyiş" Command="{Binding EditSelectedCommand}" />
+                <Button Content="🗑 Sil" Command="{Binding DeleteSelectedCommand}" Background="#E03131" Foreground="White" />
                 <Button Content="⟳ Yenilə" Command="{Binding LoadCommand}" />
             </StackPanel>
         </Border>
 
-        <DataGrid Grid.Row="2" ItemsSource="{Binding Categories}" IsReadOnly="True"
+        <DataGrid Grid.Row="2" ItemsSource="{Binding Categories}" SelectedItem="{Binding Selected}" IsReadOnly="True"
                   CanUserResizeColumns="True" GridLinesVisibility="Horizontal" BorderThickness="1" BorderBrush="#E0E2EA">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Ad" Binding="{Binding Name}" Width="2*" />

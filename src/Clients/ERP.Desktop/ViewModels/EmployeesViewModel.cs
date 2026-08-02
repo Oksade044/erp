@@ -16,9 +16,21 @@ public partial class EmployeesViewModel(ErpApiClient api, bool canViewSalary = t
     public bool ListMode => !createMode;
 
     public ObservableCollection<EmployeeDto> Employees { get; } = [];
+    [ObservableProperty] private EmployeeDto? _selected;
 
     /// <summary>Maaş sütunu/sahəsinin görünürlüyü — sahə icazəsindən (employee.salary).</summary>
     public bool CanViewSalary { get; } = canViewSalary;
+
+    /// <summary>Seçilmiş təmsilçini silir (soft delete).</summary>
+    [RelayCommand]
+    private async Task DeleteSelectedAsync()
+    {
+        if (Selected is null) { ERP.Desktop.AppNotify.Show("Silmək üçün təmsilçi seçin."); return; }
+        var name = Selected.FullName;
+        var (ok, err) = await api.DeleteEmployeeAsync(Selected.Id);
+        ERP.Desktop.AppNotify.Show(ok ? $"Təmsilçi silindi: {name}" : err ?? "Silinmədi.");
+        if (ok) await LoadAsync();
+    }
 
     [ObservableProperty] private string? _search;
 

@@ -122,7 +122,6 @@ public partial class MainViewModel : ViewModelBase
             Item("Təmsilçi Yarat", "➕ Yeni təmsilçi"),
             Item("İşçilər", "Təmsilçi siyahısı"),
             Item("Təmsilçi Borcları", "Borclar / Hesab"),
-            Item("Davamiyyət", "Davamiyyət"),
             Item("Əməkhaqqı", "Əməkhaqqı"),
         ], isExpanded: true));
         Menu.Add(new NavGroup("SATIŞ / İCARƏ", [

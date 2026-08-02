@@ -42,6 +42,12 @@ public static class EmployeeEndpoints
             return result.IsSuccess ? Results.NoContent() : Results.BadRequest(new { error = result.Error });
         }).RequireAuthorization(Permissions.HrEdit);
 
+        group.MapDelete("/{id:guid}", async (Guid id, ISender sender) =>
+        {
+            var result = await sender.Send(new ERP.Application.Modules.Hr.Commands.DeleteEmployeeCommand(id));
+            return result.IsSuccess ? Results.NoContent() : Results.BadRequest(new { error = result.Error });
+        }).RequireAuthorization(Permissions.HrEdit);
+
         return app;
     }
 }
