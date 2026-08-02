@@ -34,20 +34,24 @@
                     <Button Content="🗑 Sil" Command="{Binding DeleteSelectedCommand}" Background="#E03131" Foreground="White"
                             ToolTip.Tip="Seçilmiş təmsilçini sil (bərpa oluna bilər)" />
                 </StackPanel>
-                <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding CreateMode}">
+                <TextBlock Text="✎ Təmsilçi redaktə olunur" FontWeight="SemiBold" Foreground="#3B5BDB"
+                           IsVisible="{Binding IsEditing}" />
+                <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding FormVisible}">
                     <TextBox Width="170" PlaceholderText="Ad Soyad *" Text="{Binding NewFullName}" />
                     <TextBox Width="130" PlaceholderText="Vəzifə *" Text="{Binding NewPosition}" />
                     <TextBox Width="110" PlaceholderText="Şöbə" Text="{Binding NewDepartment}" />
                     <TextBox Width="130" PlaceholderText="Telefon *" Text="{Binding NewPhone}" />
                 </StackPanel>
-                <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding CreateMode}">
+                <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding FormVisible}">
                     <TextBox Width="160" PlaceholderText="E-poçt" Text="{Binding NewEmail}" />
                     <TextBlock Text="İşə qəbul:" VerticalAlignment="Center" />
                     <DatePicker SelectedDate="{Binding NewHireDate}" />
                     <TextBox Width="120" PlaceholderText="Əməkhaqqı" Text="{Binding NewSalary}"
                              IsVisible="{Binding CanViewSalary}" />
-                    <Button Content="+ Əlavə et" Command="{Binding AddCommand}"
+                    <Button Content="{Binding SaveButtonText}" Command="{Binding AddCommand}"
                             Background="#3B5BDB" Foreground="White" />
+                    <Button Content="✕ Ləğv" Command="{Binding CancelEditCommand}"
+                            IsVisible="{Binding IsEditing}" Background="#E03131" Foreground="White" />
                 </StackPanel>
             </StackPanel>
         </Border>

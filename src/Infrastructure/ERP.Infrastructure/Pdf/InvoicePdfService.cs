@@ -57,8 +57,7 @@ public sealed class InvoicePdfService : IInvoicePdfService
                             table.ColumnsDefinition(c =>
                             {
                                 c.ConstantColumn(52);   // şəkil
-                                c.RelativeColumn(3);    // ad
-                                c.RelativeColumn(2);    // sku
+                                c.RelativeColumn(4);    // ad
                                 c.RelativeColumn(1);    // say
                                 c.RelativeColumn(2);    // qiymət
                                 c.RelativeColumn(2);    // məbləğ
@@ -66,7 +65,7 @@ public sealed class InvoicePdfService : IInvoicePdfService
 
                             table.Header(header =>
                             {
-                                foreach (var h in new[] { "Şəkil", "Ad", "SKU", "Say", "Qiymət", "Məbləğ" })
+                                foreach (var h in new[] { "Şəkil", "Ad", "Say", "Qiymət", "Məbləğ" })
                                     header.Cell().Background(Colors.Grey.Lighten3).Padding(5).Text(h).SemiBold();
                             });
 
@@ -78,7 +77,6 @@ public sealed class InvoicePdfService : IInvoicePdfService
                                     table.Cell().Padding(5).AlignMiddle().AlignCenter().Text("—").FontColor(Colors.Grey.Medium);
 
                                 table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Padding(5).AlignMiddle().Text(l.ProductName);
-                                table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Padding(5).AlignMiddle().Text(l.Sku);
                                 table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Padding(5).AlignMiddle().Text(l.Quantity.ToString());
                                 table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Padding(5).AlignMiddle().Text($"{l.UnitPrice:0.00} {l.Currency}");
                                 table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Padding(5).AlignMiddle().Text($"{l.LineTotal:0.00} {l.Currency}");

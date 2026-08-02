@@ -15,10 +15,29 @@ public partial class EmployeesViewModel(ErpApiClient api, bool canViewSalary = t
     public bool CreateMode { get; } = createMode;
     public bool ListMode => !createMode;
 
+    /// <summary>Redaktə rejimi — siyahı bölməsində forma sahələrini göstərir.</summary>
+    [ObservableProperty] private bool _isEditing;
+    partial void OnIsEditingChanged(bool value)
+    {
+        OnPropertyChanged(nameof(FormVisible));
+        OnPropertyChanged(nameof(SaveButtonText));
+    }
+    /// <summary>Forma sahələrinin görünürlüyü: yaratma bölməsi VƏ YA redaktə.</summary>
+    public bool FormVisible => CreateMode || IsEditing;
+    public string SaveButtonText => IsEditing ? "✓ Yadda saxla" : "+ Əlavə et";
+
     public ObservableCollection<EmployeeDto> Employees { get; } = [];
     [ObservableProperty] private EmployeeDto? _selected;
     private Guid? _editId;
     private string _editStatus = "İşləyir";
+
+    /// <summary>Redaktədən çıx (dəyişiklikləri saxlamadan).</summary>
+    [RelayCommand]
+    private void CancelEdit()
+    {
+        _editId = null; IsEditing = false;
+        NewFullName = NewPosition = NewDepartment = NewPhone = NewEmail = null; NewSalary = 0;
+    }
 
     /// <summary>Maaş sütunu/sahəsinin görünürlüyü — sahə icazəsindən (employee.salary).</summary>
     public bool CanViewSalary { get; } = canViewSalary;
@@ -43,6 +62,7 @@ public partial class EmployeesViewModel(ErpApiClient api, bool canViewSalary = t
         NewFullName = Selected.FullName; NewPosition = Selected.Position; NewDepartment = Selected.Department;
         NewPhone = Selected.Phone; NewEmail = Selected.Email; NewSalary = Selected.Salary;
         NewHireDate = new DateTimeOffset(Selected.HireDate.ToDateTime(TimeOnly.MinValue));
+        IsEditing = true;
         ERP.Desktop.AppNotify.Show("Məlumatı dəyişib 'Yadda saxla' basın.");
     }
 
@@ -115,6 +135,7 @@ public partial class EmployeesViewModel(ErpApiClient api, bool canViewSalary = t
                 Status = _editId is null ? "İşçi əlavə olundu." : "İşçi yeniləndi.";
                 ERP.Desktop.AppNotify.Show(Status);
                 _editId = null;
+                IsEditing = false;
                 NewFullName = NewPosition = NewDepartment = NewPhone = NewEmail = null;
                 NewSalary = 0;
                 await LoadAsync();

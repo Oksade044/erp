@@ -68,6 +68,7 @@ public partial class MainViewModel : ViewModelBase
         var employees = new EmployeesViewModel(api, canViewSalary: CanViewField("employee.salary"), createMode: false);
         var employeesCreate = new EmployeesViewModel(api, canViewSalary: CanViewField("employee.salary"), createMode: true);
         var representatives = new RepresentativesViewModel(api);
+        var customerDebts = new CustomerDebtsViewModel(api);
         var attendance = new AttendanceViewModel(api);
         var payroll = new PayrollViewModel(api);
         var warehouses = new WarehousesViewModel(api);
@@ -101,7 +102,8 @@ public partial class MainViewModel : ViewModelBase
             ["Kassa"] = ("\U0001F4B0", "Kassa", kassa),
             ["İşçilər"] = ("\U0001F464", "Təmsilçi siyahısı", employees),
             ["Təmsilçi Yarat"] = ("\U00002795", "Yeni təmsilçi", employeesCreate),
-            ["Təmsilçi Borcları"] = ("\U0001F4B0", "Təmsilçi borcları", representatives),
+            ["Hesablar"] = ("\U0001F4B0", "Hesablar — təmsilçilər", representatives),
+            ["Borclar"] = ("\U0001F4B8", "Borclar — müştərilər", customerDebts),
             ["Davamiyyət"] = ("\U0001F552", "Davamiyyət", attendance),
             ["Əməkhaqqı"] = ("\U0001F4B3", "Əməkhaqqı", payroll),
             ["Anbarlar"] = ("\U0001F3ED", "Anbarlar", warehouses),
@@ -153,7 +155,8 @@ public partial class MainViewModel : ViewModelBase
             Item("Kassa", "Kassa"),
             Item("Maliyyə", "Maliyyə hesabatlar"),
             Item("Hesabatlar", "Hesabatlar"),
-            Item("Təmsilçi Borcları", "Borclar / Hesab"),
+            Item("Borclar", "Borclar (müştərilər)"),
+            Item("Hesablar", "Hesablar (təmsilçilər)"),
             Item("Əməkhaqqı", "Əməkhaqqı"),
         ], isExpanded: true));
         Menu.Add(new NavGroup("⚙ SİSTEM", [
@@ -212,6 +215,7 @@ public partial class MainViewModel : ViewModelBase
             case CategoriesViewModel v: v.LoadCommand.Execute(null); break;
             case EmployeesViewModel v: v.LoadCommand.Execute(null); break;
             case RepresentativesViewModel v: v.LoadCommand.Execute(null); break;
+            case CustomerDebtsViewModel v: v.LoadCommand.Execute(null); break;
             case AttendanceViewModel v: v.LoadCommand.Execute(null); break;
             case PayrollViewModel v: v.LoadCommand.Execute(null); break;
             case WarehousesViewModel v: v.LoadCommand.Execute(null); break;
