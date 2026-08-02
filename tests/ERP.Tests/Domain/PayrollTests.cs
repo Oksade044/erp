@@ -50,4 +50,61 @@ public class PayrollTests
         p.MarkPaid(new DateOnly(2026, 7, 31));
         Assert.Throws<DomainException>(() => p.MarkPaid(new DateOnly(2026, 8, 1)));
     }
+
+    [Fact]
+    public void Installment_updates_paid_and_remaining_and_partial_status()
+    {
+        var p = Make(3000m, 0m, 0m);
+        p.AddPayment(Money.Create(1500m), new DateOnly(2026, 7, 15), "Nağd", "1-ci hissə");
+
+        Assert.Equal(1500m, p.PaidAmount.Amount);
+        Assert.Equal(1500m, p.Remaining.Amount);
+        Assert.Equal(PayrollStatus.QismənÖdənilmiş, p.Status);
+    }
+
+    [Fact]
+    public void Installments_summing_to_net_complete_the_payroll()
+    {
+        var p = Make(3000m, 0m, 0m);
+        p.AddPayment(Money.Create(1500m), new DateOnly(2026, 7, 15), "Nağd", null);
+        p.AddPayment(Money.Create(1500m), new DateOnly(2026, 7, 31), "Nağd", null);
+
+        Assert.Equal(0m, p.Remaining.Amount);
+        Assert.Equal(PayrollStatus.Ödənilmiş, p.Status);
+        Assert.Equal(new DateOnly(2026, 7, 31), p.PaidDate);
+    }
+
+    [Fact]
+    public void Payment_over_remaining_throws()
+    {
+        var p = Make(3000m, 0m, 0m);
+        p.AddPayment(Money.Create(1500m), new DateOnly(2026, 7, 15), "Nağd", null);
+        Assert.Throws<DomainException>(() =>
+            p.AddPayment(Money.Create(1600m), new DateOnly(2026, 7, 20), "Nağd", null));
+    }
+
+    [Fact]
+    public void Bonus_increases_net_and_remaining_but_not_paid()
+    {
+        var p = Make(3000m, 0m, 0m);
+        p.AddPayment(Money.Create(1500m), new DateOnly(2026, 7, 15), "Nağd", null);
+        p.AddBonus(Money.Create(200m), new DateOnly(2026, 7, 16), "Nağd", "mükafat");
+
+        Assert.Equal(3200m, p.NetSalary.Amount);
+        Assert.Equal(1500m, p.PaidAmount.Amount);   // bonus ödənilmişə sayılmır
+        Assert.Equal(1700m, p.Remaining.Amount);
+        Assert.Equal(PayrollStatus.QismənÖdənilmiş, p.Status);
+    }
+
+    [Fact]
+    public void MarkPaid_after_installment_pays_only_remaining()
+    {
+        var p = Make(3000m, 0m, 0m);
+        p.AddPayment(Money.Create(1000m), new DateOnly(2026, 7, 15), "Nağd", null);
+        var final = p.MarkPaid(new DateOnly(2026, 7, 31));
+
+        Assert.Equal(2000m, final.Amount.Amount);   // yalnız qalıq borc
+        Assert.Equal(0m, p.Remaining.Amount);
+        Assert.Equal(PayrollStatus.Ödənilmiş, p.Status);
+    }
 }
