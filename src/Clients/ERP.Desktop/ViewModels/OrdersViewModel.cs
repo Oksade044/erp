@@ -149,8 +149,34 @@ public partial class OrdersViewModel : ViewModelBase
 
     /// <summary>#18 — qaralama düzənləmə rejimi (siyahı bölməsində formanı göstərir).</summary>
     [ObservableProperty] private bool _isEditingOrder;
-    partial void OnIsEditingOrderChanged(bool value) => OnPropertyChanged(nameof(FormVisible));
+    partial void OnIsEditingOrderChanged(bool value)
+    {
+        OnPropertyChanged(nameof(FormVisible));
+        OnPropertyChanged(nameof(SaveButtonText));
+    }
     private Guid? _editingOrderId;
+    // Düzənləmə zamanı sifarişin əvvəlki "məsul əməkdaş"ı qorunur (sıfırlanmasın).
+    private string? _editCreatedByName;
+    private string? _editCreatedByRole;
+
+    /// <summary>Yadda saxla düyməsinin mətni — yaratma və ya düzənləmə.</summary>
+    public string SaveButtonText => IsEditingOrder ? "✓ Yadda saxla" : "Sifarişi yarat";
+
+    /// <summary>#18 — düzənləmədən çıx (dəyişiklikləri saxlamadan).</summary>
+    [RelayCommand]
+    private void CancelEdit()
+    {
+        _editingOrderId = null;
+        _editCreatedByName = null;
+        _editCreatedByRole = null;
+        IsEditingOrder = false;
+        ShowNewOrder = false;
+        DraftLines.Clear();
+        NewCustomer = null;
+        NewDeposit = 0;
+        OnPropertyChanged(nameof(DraftTotal));
+        ERP.Desktop.AppNotify.Show("Düzənləmədən çıxıldı.");
+    }
 
     /// <summary>Yeni sifariş forması görünürlüyü: yaratma bölməsi VƏ YA düzənləmə.</summary>
     public bool FormVisible => CreateMode || IsEditingOrder;
@@ -446,6 +472,11 @@ public partial class OrdersViewModel : ViewModelBase
     {
         await EnsureFormDataAsync();
         _editingOrderId = dto.Id;
+        // Məsul əməkdaşı qoru — düzənləmədə sıfırlanıb admin olmasın.
+        _editCreatedByName = dto.CreatedByName;
+        _editCreatedByRole = dto.CreatedByRole;
+        if (CanChooseCreator && dto.CreatedByName is { } cn)
+            SelectedCreator = AllEmployees.FirstOrDefault(e => e.FullName == cn);
         IsEditingOrder = true;
         ShowNewOrder = true;
         NewOrderType = dto.OrderType;
@@ -473,9 +504,9 @@ public partial class OrdersViewModel : ViewModelBase
             StartDate: DateOnly.FromDateTime(NewStartDate.DateTime),
             EndDate: DateOnly.FromDateTime(NewEndDate.DateTime),
             Lines: DraftLines.Select(l => new CreateOrderLineRequest(l.ProductId, l.Quantity, l.UnitPrice, l.WarehouseId)).ToList(),
-            // Admin/Menecer məsul əməkdaş seçibsə, sifariş onun adına yazılır (yoxsa özünün).
-            CreatedByName: CanChooseCreator ? SelectedCreator?.FullName : null,
-            CreatedByRole: CanChooseCreator ? SelectedCreator?.Position : null,
+            // Düzənləmədə əvvəlki məsul əməkdaş qorunur; yeni sifarişdə Admin/Menecer seçimi.
+            CreatedByName: _editingOrderId is not null ? _editCreatedByName : (CanChooseCreator ? SelectedCreator?.FullName : null),
+            CreatedByRole: _editingOrderId is not null ? _editCreatedByRole : (CanChooseCreator ? SelectedCreator?.Position : null),
             OrderType: NewOrderType);
 
         var (ok, error, newId) = await api.CreateOrderReturningIdAsync(request);
@@ -492,6 +523,8 @@ public partial class OrdersViewModel : ViewModelBase
             Status = _editingOrderId is not null ? "Sifariş yeniləndi (Qaralama)." : "Sifariş yaradıldı (Qaralama).";
             ERP.Desktop.AppNotify.Show(_editingOrderId is not null ? "✓ Sifariş yeniləndi." : "✓ Sifariş yaradıldı (Qaralama).");
             _editingOrderId = null;
+            _editCreatedByName = null;
+            _editCreatedByRole = null;
             IsEditingOrder = false;
             DraftLines.Clear();
             NewCustomer = null;

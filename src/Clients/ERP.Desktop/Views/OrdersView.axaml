@@ -182,8 +182,11 @@
                         <Run Text="{Binding DraftTotal, StringFormat={}{0:0.00}}" />
                         <Run Text="{Binding DraftCurrency}" />
                     </TextBlock>
-                    <Button Content="Sifarişi yarat" Command="{Binding CreateOrderCommand}"
+                    <Button Content="{Binding SaveButtonText}" Command="{Binding CreateOrderCommand}"
                             Background="#2F9E44" Foreground="White" />
+                    <Button Content="✕ Düzəltmədən çıx" Command="{Binding CancelEditCommand}"
+                            IsVisible="{Binding IsEditingOrder}" Background="#E03131" Foreground="White"
+                            ToolTip.Tip="Dəyişiklikləri saxlamadan düzənləmədən çıx" />
                 </StackPanel>
             </StackPanel>
         </Border>
@@ -212,10 +215,10 @@
                                 <Button Content="✎ Düzənlə" IsVisible="{Binding CanEdit}" FontSize="11" Padding="8,4"
                                         Command="{Binding $parent[DataGrid].DataContext.EditDraftCommand}" CommandParameter="{Binding}" />
                                 <Button Content="🚚 Təhvil ver" IsVisible="{Binding CanDeliver}" FontSize="11" Padding="8,4"
-                                        Background="#1971C2" Foreground="White"
+                                        Background="#2F9E44" Foreground="White"
                                         Command="{Binding $parent[DataGrid].DataContext.DeliverRowCommand}" CommandParameter="{Binding}" />
                                 <Button Content="↩ Qaytarıldı" IsVisible="{Binding CanReturn}" FontSize="11" Padding="8,4"
-                                        Background="#7048E8" Foreground="White"
+                                        Background="#1971C2" Foreground="White"
                                         Command="{Binding $parent[DataGrid].DataContext.ReturnRowCommand}" CommandParameter="{Binding}" />
                                 <Button Content="✕ Ləğv et" IsVisible="{Binding CanCancel}" FontSize="11" Padding="8,4"
                                         Background="#E03131" Foreground="White"

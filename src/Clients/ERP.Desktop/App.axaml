@@ -12,5 +12,19 @@
     <Application.Styles>
         <FluentTheme />
         <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml" />
+
+        <!-- Kompakt siyahılar — bütün cədvəllərdə sətirlər daha kiçik/sıx (istifadəçi tələbi) -->
+        <Style Selector="DataGridRow">
+            <Setter Property="MinHeight" Value="26" />
+            <Setter Property="FontSize" Value="12" />
+        </Style>
+        <Style Selector="DataGridColumnHeader">
+            <Setter Property="MinHeight" Value="28" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+        <Style Selector="DataGridCell">
+            <Setter Property="Padding" Value="6,1" />
+        </Style>
     </Application.Styles>
 </Application>
