@@ -103,16 +103,24 @@
                             </StackPanel>
                         </Border>
                     </WrapPanel>
-                    <!-- Sifariş statusları — kompakt zolaq -->
-                    <Border Background="#F5F6FA" CornerRadius="8" Padding="14,10">
-                        <WrapPanel>
-                            <TextBlock Text="Sifariş statusları:" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,16,0" />
-                            <TextBlock Text="{Binding Summary.DraftOrders, StringFormat=Qaralama: {0}}" VerticalAlignment="Center" Margin="0,0,20,0" />
-                            <TextBlock Text="{Binding Summary.ConfirmedOrders, StringFormat=Rezervdə: {0}}" VerticalAlignment="Center" Margin="0,0,20,0" />
-                            <TextBlock Text="{Binding Summary.DeliveredOrders, StringFormat=Kirayədə: {0}}" VerticalAlignment="Center" Margin="0,0,20,0" />
-                            <TextBlock Text="{Binding Summary.ReturnedOrders, StringFormat=Qaytarılmış: {0}}" VerticalAlignment="Center" Margin="0,0,20,0" />
-                            <TextBlock Text="{Binding Summary.CancelledOrders, StringFormat=Ləğv: {0}}" VerticalAlignment="Center" />
-                        </WrapPanel>
+                    <!-- Sifariş statusları — zolaq diaqram (#22) -->
+                    <Border Background="#F5F6FA" CornerRadius="8" Padding="16,12">
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="Sifariş statusları (qrafik)" FontWeight="SemiBold" Margin="0,0,0,4" />
+                            <ItemsControl ItemsSource="{Binding StatusBars}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:StatusBar">
+                                        <Grid ColumnDefinitions="110,*,40" Margin="0,3">
+                                            <TextBlock Grid.Column="0" Text="{Binding Label}" VerticalAlignment="Center" FontSize="13" />
+                                            <Border Grid.Column="1" Height="22" CornerRadius="4" HorizontalAlignment="Left"
+                                                    Width="{Binding BarWidth}" Background="{Binding Color}" MinWidth="2" />
+                                            <TextBlock Grid.Column="2" Text="{Binding Value}" VerticalAlignment="Center"
+                                                       HorizontalAlignment="Right" FontWeight="SemiBold" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
                     </Border>
                 </StackPanel>
             </Border>
@@ -173,8 +181,32 @@
                         </StackPanel>
 
                         <StackPanel Grid.Column="2">
-                            <TextBlock Text="Aylıq gəlir / xərc" FontWeight="SemiBold" Margin="0,0,0,8" />
-                            <DataGrid ItemsSource="{Binding MonthlyRevenue}" IsReadOnly="True" Height="200"
+                            <TextBlock Text="Aylıq gəlir / xərc (qrafik)" FontWeight="SemiBold" Margin="0,0,0,8" />
+                            <!-- Şaquli zolaq diaqram: yaşıl=gəlir, qırmızı=xərc (#22) -->
+                            <Border Background="#FBFBFD" CornerRadius="8" Padding="10" BorderBrush="#E9EBF1" BorderThickness="1" Margin="0,0,0,10">
+                                <ItemsControl ItemsSource="{Binding MonthBars}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate><StackPanel Orientation="Horizontal" Spacing="10" /></ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:MonthBar">
+                                            <StackPanel VerticalAlignment="Bottom">
+                                                <StackPanel Orientation="Horizontal" Spacing="3" VerticalAlignment="Bottom" Height="140">
+                                                    <Border Width="14" Background="#2F9E44" CornerRadius="3,3,0,0"
+                                                            Height="{Binding IncomeHeight}" VerticalAlignment="Bottom"
+                                                            ToolTip.Tip="{Binding Income, StringFormat=Gəlir: {0:0.00}}" />
+                                                    <Border Width="14" Background="#E03131" CornerRadius="3,3,0,0"
+                                                            Height="{Binding ExpenseHeight}" VerticalAlignment="Bottom"
+                                                            ToolTip.Tip="{Binding Expense, StringFormat=Xərc: {0:0.00}}" />
+                                                </StackPanel>
+                                                <TextBlock Text="{Binding Month}" FontSize="10" HorizontalAlignment="Center"
+                                                           Margin="0,4,0,0" MaxWidth="40" TextTrimming="CharacterEllipsis" />
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </Border>
+                            <DataGrid ItemsSource="{Binding MonthlyRevenue}" IsReadOnly="True" Height="160"
                                       GridLinesVisibility="Horizontal" BorderThickness="1" BorderBrush="#E0E2EA">
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="Ay" Binding="{Binding Month}" Width="Auto" />
@@ -199,8 +231,24 @@
 
                     <Grid ColumnDefinitions="*,16,*">
                         <StackPanel Grid.Column="0">
-                            <TextBlock Text="Ən çox icarəyə verilən" FontWeight="SemiBold" Margin="0,0,0,8" />
-                            <DataGrid ItemsSource="{Binding TopProducts}" IsReadOnly="True" Height="220"
+                            <TextBlock Text="Ən çox icarəyə verilən (qrafik)" FontWeight="SemiBold" Margin="0,0,0,8" />
+                            <Border Background="#FBFBFD" CornerRadius="8" Padding="10" BorderBrush="#E9EBF1" BorderThickness="1" Margin="0,0,0,10">
+                                <ItemsControl ItemsSource="{Binding TopProductBars}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:StatusBar">
+                                            <Grid ColumnDefinitions="130,*,34" Margin="0,2">
+                                                <TextBlock Grid.Column="0" Text="{Binding Label}" VerticalAlignment="Center" FontSize="11"
+                                                           MaxWidth="125" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Label}" />
+                                                <Border Grid.Column="1" Height="18" CornerRadius="4" HorizontalAlignment="Left"
+                                                        Width="{Binding BarWidth}" Background="{Binding Color}" MinWidth="2" />
+                                                <TextBlock Grid.Column="2" Text="{Binding Value}" VerticalAlignment="Center"
+                                                           HorizontalAlignment="Right" FontSize="11" FontWeight="SemiBold" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </Border>
+                            <DataGrid ItemsSource="{Binding TopProducts}" IsReadOnly="True" Height="180"
                                       GridLinesVisibility="Horizontal" BorderThickness="1" BorderBrush="#E0E2EA">
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="Məhsul" Binding="{Binding ProductName}" Width="2*" />
