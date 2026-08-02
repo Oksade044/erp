@@ -287,21 +287,14 @@
                       GridLinesVisibility="Horizontal" BorderThickness="1" BorderBrush="#E0E2EA"
                       DoubleTapped="OnProductDoubleTapped">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="SKU (kod)" Binding="{Binding Sku}" Width="Auto" />
-                    <DataGridTextColumn Header="Ad" Binding="{Binding Name}" Width="260" MinWidth="120" />
-                    <DataGridTextColumn Header="Vahid" Binding="{Binding Unit}" Width="Auto" />
+                    <!-- Minimal siyahı — detallı stok bölgüsü 'Stok' bölməsindədir (istifadəçi tələbi) -->
+                    <DataGridTextColumn Header="SKU" Binding="{Binding Sku}" Width="Auto" />
+                    <DataGridTextColumn Header="Ad" Binding="{Binding Name}" Width="2*" MinWidth="120" />
                     <DataGridTextColumn Header="Kateqoriya" Binding="{Binding Category}" Width="*" />
-                    <DataGridTextColumn Header="İcarə qiyməti" Binding="{Binding RentalPrice}" Width="Auto" />
-                    <DataGridTextColumn Header="İdarəetmə növü"
-                                        Binding="{Binding TrackingMode, Converter={StaticResource TrackingMode}}" Width="Auto" />
-                    <DataGridTextColumn Header="Ümumi stok" Binding="{Binding TotalStock}" Width="Auto" />
+                    <DataGridTextColumn Header="Qiymət" Binding="{Binding RentalPrice}" Width="Auto" />
+                    <DataGridTextColumn Header="Ümumi" Binding="{Binding TotalStock}" Width="Auto" />
                     <DataGridTextColumn Header="Boş" Binding="{Binding FreeStock}" Width="Auto" />
-                    <DataGridTextColumn Header="Rezervdə" Binding="{Binding ReservedStock}" Width="Auto" />
-                    <DataGridTextColumn Header="Kirayədə" Binding="{Binding RentedStock}" Width="Auto" />
-                    <DataGridTextColumn Header="Təmirdə" Binding="{Binding InRepairStock}" Width="Auto" />
-                    <DataGridTextColumn Header="Zədəli" Binding="{Binding DamagedStock}" Width="Auto" />
-                    <DataGridTextColumn Header="Anbar(lar) üzrə" Binding="{Binding WarehouseSummary}" Width="*" />
-                    <DataGridTemplateColumn Header="Stok vəziyyəti" Width="Auto">
+                    <DataGridTemplateColumn Header="Vəziyyət" Width="Auto">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock Text="⚠ Az qalıb" Foreground="#E03131" FontWeight="SemiBold"
@@ -310,7 +303,6 @@
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
-                    <DataGridCheckBoxColumn Header="Şəkil var" Binding="{Binding HasImage}" Width="Auto" />
                 </DataGrid.Columns>
             </DataGrid>
 

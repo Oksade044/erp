@@ -212,18 +212,18 @@
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate x:CompileBindings="False">
                             <StackPanel Orientation="Horizontal" Spacing="4" Margin="6,3" VerticalAlignment="Center">
-                                <Button Content="✎ Düzənlə" IsVisible="{Binding CanEdit}" FontSize="11" Padding="8,4"
+                                <Button Content="✎ Düzənlə" IsVisible="{Binding CanEdit}" FontSize="10" Padding="6,2"
                                         Command="{Binding $parent[DataGrid].DataContext.EditDraftCommand}" CommandParameter="{Binding}" />
-                                <Button Content="🚚 Təhvil ver" IsVisible="{Binding CanDeliver}" FontSize="11" Padding="8,4"
+                                <Button Content="🚚 Təhvil ver" IsVisible="{Binding CanDeliver}" FontSize="10" Padding="6,2"
                                         Background="#2F9E44" Foreground="White"
                                         Command="{Binding $parent[DataGrid].DataContext.DeliverRowCommand}" CommandParameter="{Binding}" />
-                                <Button Content="↩ Qaytarıldı" IsVisible="{Binding CanReturn}" FontSize="11" Padding="8,4"
+                                <Button Content="↩ Qaytarıldı" IsVisible="{Binding CanReturn}" FontSize="10" Padding="6,2"
                                         Background="#1971C2" Foreground="White"
                                         Command="{Binding $parent[DataGrid].DataContext.ReturnRowCommand}" CommandParameter="{Binding}" />
-                                <Button Content="✕ Ləğv et" IsVisible="{Binding CanCancel}" FontSize="11" Padding="8,4"
+                                <Button Content="✕ Ləğv et" IsVisible="{Binding CanCancel}" FontSize="10" Padding="6,2"
                                         Background="#E03131" Foreground="White"
                                         Command="{Binding $parent[DataGrid].DataContext.CancelRowCommand}" CommandParameter="{Binding}" />
-                                <Button Content="💰 Fakturaya bax" IsVisible="{Binding HasInvoice}" FontSize="11" Padding="8,4"
+                                <Button Content="💰 Fakturaya bax" IsVisible="{Binding HasInvoice}" FontSize="10" Padding="6,2"
                                         Background="#F08C00" Foreground="White"
                                         Command="{Binding $parent[DataGrid].DataContext.ViewInvoiceRowCommand}" CommandParameter="{Binding}" />
                             </StackPanel>
@@ -255,19 +255,19 @@
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
                 <!-- #41 — Maliyyə: məbləğ + depozit + tutulma + qaytarma bir yerdə -->
-                <DataGridTemplateColumn Header="Maliyyə" Width="200" MinWidth="180">
+                <DataGridTemplateColumn Header="Maliyyə" Width="Auto" MinWidth="150">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <StackPanel Margin="10,4" VerticalAlignment="Center">
-                                <TextBlock FontWeight="Bold" FontSize="13">
-                                    <Run Text="Məbləğ:" />
+                            <StackPanel Margin="8,1" VerticalAlignment="Center">
+                                <TextBlock FontWeight="Bold" FontSize="12">
                                     <Run Text="{Binding Total, StringFormat={}{0:0.00}}" />
                                     <Run Text="{Binding Currency}" />
                                 </TextBlock>
-                                <TextBlock Text="{Binding Deposit, StringFormat='Depozit: {0:0.00}'}" FontSize="12" Foreground="#5A6072" />
-                                <TextBlock Text="{Binding DepositStatus, StringFormat='Depozit statusu: {0}'}" FontSize="12" Foreground="#1971C2" FontWeight="SemiBold" />
-                                <TextBlock Text="{Binding TotalCharges, StringFormat='Tutulma: {0:0.00}'}" FontSize="12" Foreground="#E8590C" />
-                                <TextBlock Text="{Binding DepositRefund, StringFormat='Qaytarılan: {0:0.00}'}" FontSize="12" Foreground="#2B8A3E" />
+                                <TextBlock FontSize="10" Foreground="#5A6072"
+                                           ToolTip.Tip="{Binding DepositStatus, StringFormat='Depozit statusu: {0}'}">
+                                    <Run Text="Dep:" /><Run Text="{Binding Deposit, StringFormat={}{0:0.} }" />
+                                    <Run Text="· Qayt:" /><Run Text="{Binding DepositRefund, StringFormat={}{0:0.}}" />
+                                </TextBlock>
                             </StackPanel>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>

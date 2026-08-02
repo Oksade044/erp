@@ -504,9 +504,9 @@ public partial class OrdersViewModel : ViewModelBase
             StartDate: DateOnly.FromDateTime(NewStartDate.DateTime),
             EndDate: DateOnly.FromDateTime(NewEndDate.DateTime),
             Lines: DraftLines.Select(l => new CreateOrderLineRequest(l.ProductId, l.Quantity, l.UnitPrice, l.WarehouseId)).ToList(),
-            // Düzənləmədə əvvəlki məsul əməkdaş qorunur; yeni sifarişdə Admin/Menecer seçimi.
-            CreatedByName: _editingOrderId is not null ? _editCreatedByName : (CanChooseCreator ? SelectedCreator?.FullName : null),
-            CreatedByRole: _editingOrderId is not null ? _editCreatedByRole : (CanChooseCreator ? SelectedCreator?.Position : null),
+            // Məsul əməkdaş: dropdown dəyişilibsə yeni dəyər, yoxsa (düzənlədə) əvvəlki qorunur.
+            CreatedByName: CanChooseCreator ? (SelectedCreator?.FullName ?? _editCreatedByName) : _editCreatedByName,
+            CreatedByRole: CanChooseCreator ? (SelectedCreator?.Position ?? _editCreatedByRole) : _editCreatedByRole,
             OrderType: NewOrderType);
 
         var (ok, error, newId) = await api.CreateOrderReturningIdAsync(request);
