@@ -44,8 +44,30 @@ public partial class StockViewModel(ErpApiClient api) : ViewModelBase
     [ObservableProperty] private bool _showTransfer;
     partial void OnLowOnlyChanged(bool value) => _ = LoadAsync();
 
+    /// <summary>#16 — stok redaktə paneli yalnız düymə ilə açılır.</summary>
+    [ObservableProperty] private bool _showAdjust;
+
     [RelayCommand]
-    private void ToggleTransfer() => ShowTransfer = !ShowTransfer;
+    private void ToggleTransfer() { ShowTransfer = !ShowTransfer; if (ShowTransfer) ShowAdjust = false; }
+
+    /// <summary>Seçilmiş sətri redaktə panelinə yükləyib açır (#16 — düymə ilə).</summary>
+    [RelayCommand]
+    private void EditSelected()
+    {
+        if (SelectedLevel is null) { ERP.Desktop.AppNotify.Show("Redaktə üçün cədvəldən stok seçin."); return; }
+        FillAdjustFromSelected();
+        ShowTransfer = false;
+        ShowAdjust = true;
+    }
+
+    /// <summary>Boş redaktə paneli — yeni məhsul-anbar stoku təyin etmək üçün.</summary>
+    [RelayCommand]
+    private void NewAdjust()
+    {
+        AdjProduct = null; AdjWarehouse = WarehouseFilter; AdjQuantity = 0; AdjMinQuantity = 0; AdjInRepair = 0; AdjDamaged = 0;
+        ShowTransfer = false;
+        ShowAdjust = true;
+    }
 
     /// <summary>#3 — cədvəldə sətrə 2 klik: adjust formasını doldur (yerindəcə redaktə).</summary>
     public void FillAdjustFromSelected()
@@ -61,6 +83,12 @@ public partial class StockViewModel(ErpApiClient api) : ViewModelBase
     }
     [ObservableProperty] private bool _isBusy;
     [ObservableProperty] private string? _status;
+    /// <summary>Dropdown siyahılarını yenidən yükləmək lazımdırmı (yalnız açılışda/Yenilə-də).</summary>
+    private bool _reloadLists = true;
+
+    /// <summary>Anbar/məhsul siyahılarını + səviyyələri tam təzələyir (Yenilə düyməsi).</summary>
+    [RelayCommand]
+    private async Task RefreshAsync() { _reloadLists = true; await LoadAsync(); }
 
     // Stok təyini (adjust) forması
     [ObservableProperty] private ProductDto? _adjProduct;
@@ -116,13 +144,21 @@ public partial class StockViewModel(ErpApiClient api) : ViewModelBase
         Status = "Yüklənir...";
         try
         {
-            // Anbar/məhsul siyahılarını təzələ (#4 — yeni əlavələr dərhal görünsün).
-            var prods = await api.GetProductsAsync(null);
-            AllProducts.Clear();
-            if (prods is not null) foreach (var p in prods.Items) AllProducts.Add(p);
-            var whs = await api.GetWarehousesAsync(null);
-            AllWarehouses.Clear();
-            if (whs is not null) foreach (var w in whs.Items) AllWarehouses.Add(w);
+            // Anbar/məhsul dropdown-larını yüklə. Filtr dəyişəndə təkrar TƏMİZLƏMİRİK ki,
+            // yuxarıdakı anbar seçimi sıfırlanmasın (#16 — "anbar siyahısı gəlmir" bug).
+            if (AllProducts.Count == 0 || _reloadLists)
+            {
+                var prods = await api.GetProductsAsync(null);
+                AllProducts.Clear();
+                if (prods is not null) foreach (var p in prods.Items) AllProducts.Add(p);
+            }
+            if (AllWarehouses.Count == 0 || _reloadLists)
+            {
+                var whs = await api.GetWarehousesAsync(null);
+                AllWarehouses.Clear();
+                if (whs is not null) foreach (var w in whs.Items) AllWarehouses.Add(w);
+            }
+            _reloadLists = false;
 
             var result = await api.GetStockLevelsAsync(Search, LowOnly);
             Levels.Clear();
@@ -150,7 +186,8 @@ public partial class StockViewModel(ErpApiClient api) : ViewModelBase
             Quantity: AdjQuantity, MinQuantity: AdjMinQuantity,
             InRepair: AdjInRepair, Damaged: AdjDamaged));
         Status = ok ? "Stok təyin edildi." : error ?? "Alınmadı.";
-        if (ok) await LoadAsync();
+        ERP.Desktop.AppNotify.Show(ok ? "✓ Stok təyin edildi." : "⚠ " + (error ?? "Alınmadı."));
+        if (ok) { ShowAdjust = false; await LoadAsync(); }
     }
 
     [RelayCommand]
@@ -162,6 +199,7 @@ public partial class StockViewModel(ErpApiClient api) : ViewModelBase
         var (ok, error) = await api.TransferStockAsync(new TransferStockRequest(
             ProductId: TrProduct.Id, FromWarehouseId: TrFrom.Id, ToWarehouseId: TrTo.Id, Quantity: TrQuantity));
         Status = ok ? "Transfer tamamlandı." : error ?? "Transfer alınmadı.";
-        if (ok) await LoadAsync();
+        ERP.Desktop.AppNotify.Show(ok ? "✓ Transfer tamamlandı." : "⚠ " + (error ?? "Transfer alınmadı."));
+        if (ok) { ShowTransfer = false; TrQuantity = 0; await LoadAsync(); }
     }
 }
