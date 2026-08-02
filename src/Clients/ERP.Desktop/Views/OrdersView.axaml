@@ -192,8 +192,11 @@
                 </DataGrid>
 
                 <StackPanel Orientation="Horizontal" Spacing="12">
-                    <TextBlock Text="{Binding DraftTotal, StringFormat=Cəmi: {0:0.00} AZN}"
-                               FontWeight="SemiBold" VerticalAlignment="Center" />
+                    <TextBlock FontWeight="SemiBold" VerticalAlignment="Center">
+                        <Run Text="Cəmi:" />
+                        <Run Text="{Binding DraftTotal, StringFormat={}{0:0.00}}" />
+                        <Run Text="{Binding DraftCurrency}" />
+                    </TextBlock>
                     <Button Content="Sifarişi yarat" Command="{Binding CreateOrderCommand}"
                             Background="#2F9E44" Foreground="White" />
                 </StackPanel>
@@ -286,7 +289,11 @@
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <StackPanel Margin="10,4" VerticalAlignment="Center">
-                                <TextBlock Text="{Binding Total, StringFormat='Məbləğ: {0:0.00} AZN'}" FontWeight="Bold" FontSize="13" />
+                                <TextBlock FontWeight="Bold" FontSize="13">
+                                    <Run Text="Məbləğ:" />
+                                    <Run Text="{Binding Total, StringFormat={}{0:0.00}}" />
+                                    <Run Text="{Binding Currency}" />
+                                </TextBlock>
                                 <TextBlock Text="{Binding Deposit, StringFormat='Depozit: {0:0.00}'}" FontSize="12" Foreground="#5A6072" />
                                 <TextBlock Text="{Binding DepositStatus, StringFormat='Depozit statusu: {0}'}" FontSize="12" Foreground="#1971C2" FontWeight="SemiBold" />
                                 <TextBlock Text="{Binding TotalCharges, StringFormat='Tutulma: {0:0.00}'}" FontSize="12" Foreground="#E8590C" />

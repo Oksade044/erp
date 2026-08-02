@@ -24,11 +24,14 @@ public sealed partial class DraftLine : ObservableObject
     /// <summary>#3 — bu anbarda mövcud boş say (say redaktə olunanda xəbərdarlıq üçün). 0 = naməlum.</summary>
     public int MaxAvailable { get; }
 
+    /// <summary>#7 — sətrin valyutası (məhsuldan gəlir). Bir sifarişdə hamısı eyni olmalıdır.</summary>
+    public string Currency { get; }
+
     [ObservableProperty] private int _quantity;
     [ObservableProperty] private decimal _unitPrice;
 
     public DraftLine(Guid productId, string productName, int quantity, decimal unitPrice,
-        Guid? warehouseId = null, string? warehouseName = null, int maxAvailable = 0)
+        Guid? warehouseId = null, string? warehouseName = null, int maxAvailable = 0, string currency = "AZN")
     {
         ProductId = productId;
         ProductName = productName;
@@ -37,6 +40,7 @@ public sealed partial class DraftLine : ObservableObject
         WarehouseId = warehouseId;
         WarehouseName = warehouseName;
         MaxAvailable = maxAvailable;
+        Currency = currency;
     }
 
     /// <summary>#3 — say anbardakı boş saydan çoxdursa cədvəldə görünən xəbərdarlıq.</summary>
@@ -250,6 +254,9 @@ public partial class OrdersViewModel : ViewModelBase
 
     public decimal DraftTotal => DraftLines.Sum(l => l.LineTotal);
 
+    /// <summary>#7 — sifarişin valyutası (məhsullardan gəlir; qarışıq ola bilməz).</summary>
+    public string DraftCurrency => DraftLines.FirstOrDefault()?.Currency ?? "AZN";
+
     /// <summary>Depozit paneli yalnız siyahı rejimində və ödəniş pəncərəsi açıq deyilkən görünür.</summary>
     public bool ShowDepositPanel => ListMode && !ShowPaymentPrompt;
 
@@ -308,15 +315,24 @@ public partial class OrdersViewModel : ViewModelBase
     /// <summary>Seçim pəncərəsindən gələn məhsulları sifariş sətirlərinə əlavə edir (say 1).</summary>
     public void AddPickedProducts(System.Collections.Generic.IEnumerable<ERP.Shared.Contracts.Products.ProductDto> picked)
     {
-        int added = 0;
+        int added = 0, skippedCurrency = 0;
         foreach (var p in picked)
         {
             if (DraftLines.Any(l => l.ProductId == p.Id)) continue;
-            DraftLines.Add(Track(new DraftLine(p.Id, p.Name, 1, p.RentalPrice)));
+            // #7 — bir sifarişdə valyuta qarışdırıla bilməz.
+            if (DraftLines.Count > 0 && !string.Equals(p.Currency, DraftCurrency, StringComparison.OrdinalIgnoreCase))
+            {
+                skippedCurrency++;
+                continue;
+            }
+            DraftLines.Add(Track(new DraftLine(p.Id, p.Name, 1, p.RentalPrice, currency: p.Currency)));
             added++;
         }
         OnPropertyChanged(nameof(DraftTotal));
+        OnPropertyChanged(nameof(DraftCurrency));
         Status = added > 0 ? $"{added} məhsul əlavə olundu." : "Yeni məhsul seçilmədi.";
+        if (skippedCurrency > 0)
+            ERP.Desktop.AppNotify.Show($"⚠ {skippedCurrency} məhsul fərqli valyutada olduğu üçün əlavə olunmadı (sifariş valyutası: {DraftCurrency}).");
     }
 
     /// <summary>Sətir say/qiymət dəyişdikdə ümumi cəmi yeniləyir (#6).</summary>
@@ -333,6 +349,14 @@ public partial class OrdersViewModel : ViewModelBase
         if (LineUnitPrice < 0) { Status = "Qiymət mənfi ola bilməz."; return; }
         if (DraftLines.Any(l => l.ProductId == LineProduct.Id)) { Status = "Bu məhsul artıq əlavə olunub."; return; }
 
+        // #7 — bir sifarişdə valyuta qarışdırıla bilməz.
+        if (DraftLines.Count > 0 && !string.Equals(LineProduct.Currency, DraftCurrency, StringComparison.OrdinalIgnoreCase))
+        {
+            var msg = $"⚠ Bu məhsul {LineProduct.Currency} valyutadadır — sifariş {DraftCurrency} valyutadadır. Qarışdırıla bilməz.";
+            Status = msg; ERP.Desktop.AppNotify.Show(msg);
+            return;
+        }
+
         // #18/#19 — seçilmiş anbarda kifayət qədər boş varmı? (ekran ortası xəbərdarlıq)
         if (LineWarehouse is not null && LineQuantity > LineWarehouse.Free)
         {
@@ -344,8 +368,9 @@ public partial class OrdersViewModel : ViewModelBase
 
         // #29/#30 — istifadəçinin daxil etdiyi (dəyişdirilə bilən) vahid qiymət istifadə olunur.
         DraftLines.Add(Track(new DraftLine(LineProduct.Id, LineProduct.Name, LineQuantity, LineUnitPrice,
-            LineWarehouse?.WarehouseId, LineWarehouse?.WarehouseName, LineWarehouse?.Free ?? 0)));
+            LineWarehouse?.WarehouseId, LineWarehouse?.WarehouseName, LineWarehouse?.Free ?? 0, LineProduct.Currency)));
         OnPropertyChanged(nameof(DraftTotal));
+        OnPropertyChanged(nameof(DraftCurrency));
         LineQuantity = 1;
     }
 
@@ -354,6 +379,7 @@ public partial class OrdersViewModel : ViewModelBase
     {
         DraftLines.Remove(line);
         OnPropertyChanged(nameof(DraftTotal));
+        OnPropertyChanged(nameof(DraftCurrency));
     }
 
     [RelayCommand]

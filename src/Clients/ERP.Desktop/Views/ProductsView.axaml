@@ -84,8 +84,13 @@
                             <TextBox PlaceholderText="Məs: 5.00" Text="{Binding NewRentalPrice}"
                                      ToolTip.Tip="Bir icarə üçün baza qiyməti. Sifarişdə dəyişdirilə bilər." />
                         </StackPanel>
+                        <StackPanel Width="110" Margin="0,0,12,10">
+                            <TextBlock Text="Valyuta" FontSize="12" Foreground="#5A6072" />
+                            <ComboBox ItemsSource="{Binding Currencies}" SelectedItem="{Binding NewCurrency}" HorizontalAlignment="Stretch"
+                                      ToolTip.Tip="Məhsul qiymətləri hansı valyutadadır (AZN/USD/EUR)." />
+                        </StackPanel>
                         <StackPanel Width="150" Margin="0,0,12,10" IsVisible="{Binding CanViewCost}">
-                            <TextBlock Text="Alış qiyməti (AZN)" FontSize="12" Foreground="#5A6072" />
+                            <TextBlock Text="Alış qiyməti" FontSize="12" Foreground="#5A6072" />
                             <TextBox PlaceholderText="Məs: 40.00" Text="{Binding NewPurchasePrice}"
                                      ToolTip.Tip="Avadanlığın alış/maya dəyəri. Yalnız Admin/Menecer görür." />
                         </StackPanel>

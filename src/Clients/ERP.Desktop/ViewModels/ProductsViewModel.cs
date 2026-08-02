@@ -107,6 +107,10 @@ public partial class ProductsViewModel : ViewModelBase
     [ObservableProperty] private string? _newCategory;
     [ObservableProperty] private string _newUnit = "Ədəd";
 
+    /// <summary>#7 — valyuta seçimi (məhsulun qiymətləri hansı valyutadadır).</summary>
+    public string[] Currencies { get; } = ["AZN", "USD", "EUR"];
+    [ObservableProperty] private string _newCurrency = "AZN";
+
     /// <summary>#12 — ölçü vahidləri (məhsul əlavə/redaktə formasında seçilir).</summary>
     public string[] Units { get; } = ["Ədəd", "Kg", "Qram", "Litr", "Metr", "Sm", "Mm", "Paket", "Dəst", "Qutu", "Cüt", "Rulon"];
 
@@ -291,6 +295,7 @@ public partial class ProductsViewModel : ViewModelBase
                 Sku: null, // server avtomatik PRD-000001 generasiya edir
                 PurchasePrice: CanViewCost ? NewPurchasePrice : null,
                 SalePrice: CanViewCost ? NewSalePrice : null,
+                Currency: NewCurrency,
                 MinStockQuantity: NewMinStock,
                 Category: NewCategory,
                 InitialStocks: initialStocks,
@@ -309,6 +314,7 @@ public partial class ProductsViewModel : ViewModelBase
                 Status = (initialStocks.Count > 0
                     ? $"Məhsul əlavə olundu — {initialStocks.Count} anbara stok yazıldı."
                     : "Məhsul əlavə olundu (SKU avtomatik təyin edildi).") + imageNote;
+                ERP.Desktop.AppNotify.Show($"✓ Məhsul əlavə olundu: {NewName}");
 
                 NewName = NewCategory = null;
                 NewRentalPrice = 0; NewStock = 0; NewMinStock = 0;
