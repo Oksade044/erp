@@ -33,6 +33,7 @@ public sealed class CreateOrderHandler(
     ICustomerRepository customers,
     IProductRepository products,
     IWarehouseRepository warehouses,
+    IAvailabilityReader availability,
     ERP.Application.Common.Interfaces.IRepresentativeRepository representatives,
     ICurrentUser currentUser,
     IAuditLogWriter audit,
@@ -94,6 +95,23 @@ public sealed class CreateOrderHandler(
                 if (wh is null)
                     return Result.Failure<Guid>($"Anbar tapılmadı: {whId}");
                 warehouseName = wh.Name;
+            }
+
+            // Stok yoxlaması — sifarişin sayı boş stokdan çox ola bilməz (sifariş yaradılmır).
+            var avail = await availability.GetProductAvailabilityAsync(product.Id, ct);
+            if (lineDto.WarehouseId is { } wid)
+            {
+                var free = avail.FirstOrDefault(a => a.WarehouseId == wid)?.Free ?? 0;
+                if (lineDto.Quantity > free)
+                    return Result.Failure<Guid>(
+                        $"'{product.Name}' — '{warehouseName}' anbarında boş yalnız {free} ədəddir (istənilən: {lineDto.Quantity}). Sifariş yaradılmadı.");
+            }
+            else
+            {
+                var totalFree = avail.Sum(a => a.Free);
+                if (lineDto.Quantity > totalFree)
+                    return Result.Failure<Guid>(
+                        $"'{product.Name}' — bütün anbarlarda boş yalnız {totalFree} ədəddir (istənilən: {lineDto.Quantity}). Sifariş yaradılmadı.");
             }
 
             order.AddLine(product.Id, product.Name, lineDto.Quantity, unitPrice, lineDto.WarehouseId, warehouseName);

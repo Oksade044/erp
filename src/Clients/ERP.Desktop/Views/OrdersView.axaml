@@ -14,6 +14,7 @@
         <conv:StatusColorConverter x:Key="StatusColor" />
     </UserControl.Resources>
 
+    <Panel>
     <Grid RowDefinitions="Auto,Auto,Auto,Auto,*,Auto" Margin="24">
 
         <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="8" Margin="0,0,0,16">
@@ -49,34 +50,14 @@
             <TextBlock Text="Növ:" VerticalAlignment="Center" />
             <ComboBox ItemsSource="{Binding TypeFilters}" SelectedItem="{Binding SelectedTypeFilter}" Width="110"
                       ToolTip.Tip="Sifariş növünə görə süzgəc: İcarə, Satış və ya hamısı." />
-            <Button Content="➕ Yeni Sifariş" Command="{Binding ToggleNewOrderCommand}"
-                    Background="#3B5BDB" Foreground="White" IsVisible="False"
-                    ToolTip.Tip="Yeni sifariş 'Yeni Sifariş' bölməsindən yaradılır" />
-            <Button Content="📋 Detal" Click="OnOrderDetail"
-                    ToolTip.Tip="Seçilmiş sifarişin tam detalı: yaradan/təsdiqləyən, ödənişlər, dəyişiklik tarixçəsi (cədvəldə iki dəfə klik də açır)" />
-            <Button Content="✓ Təsdiqlə" Command="{Binding ConfirmCommand}"
-                    Background="#2F9E44" Foreground="White"
-                    ToolTip.Tip="Seçilmiş sifarişi təsdiqləyir: Qaralama → Təsdiqlənmiş. Avadanlığı rezerv edir (ikiqat bron yoxlanılır)." />
-            <Button Content="🚚 Təhvil" Command="{Binding DeliverCommand}"
-                    Background="#1971C2" Foreground="White"
-                    ToolTip.Tip="Avadanlığı müştəriyə təhvil verir: Təsdiqlənmiş → Təhvil verilmiş." />
-            <Button Content="↩ Qaytar" Command="{Binding ReturnCommand}"
-                    Background="#7048E8" Foreground="White"
-                    ToolTip.Tip="Avadanlığı geri qəbul edir: Təhvil verilmiş → Qaytarılmış. Rezerv boşalır." />
-            <Button Content="✕ Ləğv" Command="{Binding CancelCommand}"
-                    Background="#E03131" Foreground="White"
-                    ToolTip.Tip="Sifarişi ləğv edir və rezervi boşaldır. Təhvil verilmiş sifariş ləğv edilə bilməz." />
-            <Button Content="✓✓ Seçilənləri təsdiqlə" Click="OnConfirmSelected"
+            <Button Content="✓✓ Seçilənləri təsdiqlə" Command="{Binding ConfirmSelectedCommand}"
                     Background="#0CA678" Foreground="White"
-                    ToolTip.Tip="Cədvəldə Ctrl/Shift ilə bir neçə qaralama sifariş seçin və hamısını birdəfəyə təsdiqləyin (#7)." />
-            <Button Content="💰 Faktura" Command="{Binding CreateInvoiceCommand}"
-                    Background="#F08C00" Foreground="White"
-                    ToolTip.Tip="Bu sifariş üçün faktura yaradır. Ödəniş və PDF 'Fakturalar' bölməsindədir." />
+                    ToolTip.Tip="Checkbox ilə bir neçə qaralama sifariş seçin və hamısını birdəfəyə təsdiqləyin (#7)." />
         </StackPanel>
 
-        <!-- Yeni sifariş forması -->
+        <!-- Yeni sifariş forması (yaratma və ya qaralama düzənləmə) -->
         <Border Grid.Row="2" Background="#F5F6FA" CornerRadius="8" Padding="16" Margin="0,0,0,16"
-                IsVisible="{Binding CreateMode}">
+                IsVisible="{Binding FormVisible}">
             <StackPanel Spacing="10">
                 <!-- #33 — sifariş növü -->
                 <StackPanel Orientation="Horizontal" Spacing="8">
@@ -98,6 +79,10 @@
                     <DatePicker SelectedDate="{Binding NewStartDate}" IsVisible="{Binding IsRental}" />
                     <TextBlock Text="—" VerticalAlignment="Center" IsVisible="{Binding IsRental}" />
                     <DatePicker SelectedDate="{Binding NewEndDate}" IsVisible="{Binding IsRental}" />
+                    <!-- #17 — depozit yalnız burada (yaratma/qaralama) -->
+                    <TextBlock Text="Depozit:" VerticalAlignment="Center" Margin="12,0,0,0" IsVisible="{Binding IsRental}" />
+                    <TextBox Width="100" PlaceholderText="0" Text="{Binding NewDeposit}" IsVisible="{Binding IsRental}"
+                             ToolTip.Tip="Girov/depozit məbləği — yalnız sifariş yaradılarkən təyin olunur." />
                 </StackPanel>
 
                 <!-- Məsul əməkdaş seçimi — yalnız Admin/Menecer (sifariş kimin adına) -->
@@ -203,56 +188,6 @@
             </StackPanel>
         </Border>
 
-        <!-- #34/#35 — status dəyişəndə ödəniş pəncərəsi -->
-        <Border Grid.Row="3" Background="#E7F5FF" BorderBrush="#1971C2" BorderThickness="1"
-                CornerRadius="8" Padding="12" Margin="0,0,0,12" IsVisible="{Binding ShowPaymentPrompt}">
-            <StackPanel Spacing="8">
-                <TextBlock Text="{Binding PaymentPromptTitle}" FontWeight="SemiBold" Foreground="#1971C2" TextWrapping="Wrap" />
-                <!-- #C — qaytarma zamanı zədə/cərimə (yalnız Qaytarıldı mərhələsində) -->
-                <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding IsReturnPrompt}">
-                    <TextBlock Text="Zədə (AZN):" VerticalAlignment="Center"
-                               ToolTip.Tip="Qaytarılan məhsulda zədə/itki dəyəri — fakturanın yekun borcuna əlavə olunur." />
-                    <TextBox Width="100" PlaceholderText="0" Text="{Binding PromptDamage}" />
-                    <TextBlock Text="Cərimə (AZN):" VerticalAlignment="Center"
-                               ToolTip.Tip="Gecikmə/şərt pozuntusu cəriməsi — fakturaya əlavə olunur." />
-                    <TextBox Width="100" PlaceholderText="0" Text="{Binding PromptPenalty}" />
-                </StackPanel>
-                <StackPanel Orientation="Horizontal" Spacing="8">
-                    <TextBlock Text="Məbləğ:" VerticalAlignment="Center" />
-                    <TextBox Width="110" Text="{Binding PaymentAmount}" />
-                    <TextBlock Text="Üsul:" VerticalAlignment="Center" />
-                    <ComboBox ItemsSource="{Binding PaymentMethods}" SelectedItem="{Binding PaymentMethod}" Width="120" />
-                    <TextBox Width="200" PlaceholderText="Qeyd" Text="{Binding PaymentNote}" />
-                    <Button Content="✓ Ödəniş et" Command="{Binding SubmitPaymentCommand}"
-                            Background="#2F9E44" Foreground="White" />
-                    <Button Content="Ödəniş yoxdur" Command="{Binding SkipPaymentCommand}" />
-                </StackPanel>
-            </StackPanel>
-        </Border>
-
-        <!-- Depozit & qaytarma hesablaşması (seçilmiş sifariş üçün) -->
-        <Border Grid.Row="3" Background="#FFF9DB" CornerRadius="8" Padding="12" Margin="0,0,0,12"
-                IsVisible="{Binding ShowDepositPanel}">
-            <StackPanel Orientation="Horizontal" Spacing="8">
-                <TextBlock Text="Depozit (AZN):" VerticalAlignment="Center"
-                           ToolTip.Tip="Müştəridən alınan girov məbləği. Təhvildən əvvəl təyin edilir." />
-                <TextBox Width="100" PlaceholderText="Məs: 200" Text="{Binding DepositAmount}" />
-                <Button Content="Depoziti təyin et" Command="{Binding SetDepositCommand}"
-                        ToolTip.Tip="Seçilmiş sifarişə depozit məbləğini yazır (qaytarılmadan/ləğv olunmadan əvvəl)" />
-                <Rectangle Width="1" Fill="#D0D0D0" Margin="6,0" />
-                <TextBlock Text="Zədə (AZN):" VerticalAlignment="Center"
-                           ToolTip.Tip="Qaytarılan avadanlıqda zədə üçün tutulan məbləğ" />
-                <TextBox Width="90" PlaceholderText="0" Text="{Binding DamageCharge}" />
-                <TextBlock Text="Cərimə (AZN):" VerticalAlignment="Center"
-                           ToolTip.Tip="Gecikmə və ya digər səbəbdən cərimə məbləği" />
-                <TextBox Width="90" PlaceholderText="0" Text="{Binding PenaltyCharge}" />
-                <TextBox Width="150" PlaceholderText="Hesablaşma qeydi" Text="{Binding SettlementNotes}" />
-                <Button Content="Hesablaş" Command="{Binding SettleCommand}"
-                        Background="#7048E8" Foreground="White"
-                        ToolTip.Tip="Depozitdən zədə+cərimə çıxılır, qalıq müştəriyə qaytarılır. Yalnız qaytarıldıqdan sonra." />
-            </StackPanel>
-        </Border>
-
         <DataGrid Grid.Row="4" x:Name="OrdersGrid" ItemsSource="{Binding Orders}" SelectedItem="{Binding Selected}"
                   IsReadOnly="True" CanUserResizeColumns="True" local:GridColumnPersistence.Key="orders"
                   SelectionMode="Extended"
@@ -260,6 +195,38 @@
                   BorderThickness="1" BorderBrush="#E0E2EA"
                   DoubleTapped="OnOrderDoubleTapped">
             <DataGrid.Columns>
+                <DataGridTemplateColumn Header="☑" Width="Auto">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate x:DataType="vm:OrderRow">
+                            <CheckBox IsChecked="{Binding IsSelected}" Margin="8,0"
+                                      IsVisible="{Binding IsDraft}"
+                                      ToolTip.Tip="Toplu təsdiq üçün qaralama sifarişi seç" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <!-- #17 — statusa görə kontekstual əməliyyat düymələri -->
+                <DataGridTemplateColumn Header="Əməliyyat" Width="Auto">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate x:CompileBindings="False">
+                            <StackPanel Orientation="Horizontal" Spacing="4" Margin="6,3" VerticalAlignment="Center">
+                                <Button Content="✎ Düzənlə" IsVisible="{Binding CanEdit}" FontSize="11" Padding="8,4"
+                                        Command="{Binding $parent[DataGrid].DataContext.EditDraftCommand}" CommandParameter="{Binding}" />
+                                <Button Content="🚚 Təhvil ver" IsVisible="{Binding CanDeliver}" FontSize="11" Padding="8,4"
+                                        Background="#1971C2" Foreground="White"
+                                        Command="{Binding $parent[DataGrid].DataContext.DeliverRowCommand}" CommandParameter="{Binding}" />
+                                <Button Content="↩ Qaytarıldı" IsVisible="{Binding CanReturn}" FontSize="11" Padding="8,4"
+                                        Background="#7048E8" Foreground="White"
+                                        Command="{Binding $parent[DataGrid].DataContext.ReturnRowCommand}" CommandParameter="{Binding}" />
+                                <Button Content="✕ Ləğv et" IsVisible="{Binding CanCancel}" FontSize="11" Padding="8,4"
+                                        Background="#E03131" Foreground="White"
+                                        Command="{Binding $parent[DataGrid].DataContext.CancelRowCommand}" CommandParameter="{Binding}" />
+                                <Button Content="💰 Fakturaya bax" IsVisible="{Binding HasInvoice}" FontSize="11" Padding="8,4"
+                                        Background="#F08C00" Foreground="White"
+                                        Command="{Binding $parent[DataGrid].DataContext.ViewInvoiceRowCommand}" CommandParameter="{Binding}" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
                 <!-- #41 — sıra: Status, Növ, Müştəri, Yaradan, Maliyyə, Tarixlər, № -->
                 <DataGridTemplateColumn Header="Status" Width="Auto">
                     <DataGridTemplateColumn.CellTemplate>
@@ -319,4 +286,36 @@
 
         <TextBlock Grid.Row="5" Text="{Binding Status}" Foreground="#5A6072" Margin="0,10,0,0" />
     </Grid>
+
+    <!-- #17 — ödəniş paneli (ekran ortası, göze girən) -->
+    <Border IsVisible="{Binding ShowPaymentPrompt}"
+            Background="#66000000" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+        <Border Background="White" BorderBrush="#1971C2" BorderThickness="2" CornerRadius="14"
+                Padding="26,22" MinWidth="460" MaxWidth="560"
+                HorizontalAlignment="Center" VerticalAlignment="Center"
+                BoxShadow="0 8 28 0 #40000000">
+            <StackPanel Spacing="12">
+                <TextBlock Text="💰 Ödəniş" FontSize="18" FontWeight="Bold" Foreground="#1971C2" />
+                <TextBlock Text="{Binding PaymentPromptTitle}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding IsReturnPrompt}">
+                    <TextBlock Text="Zədə:" VerticalAlignment="Center" />
+                    <TextBox Width="90" PlaceholderText="0" Text="{Binding PromptDamage}" />
+                    <TextBlock Text="Cərimə:" VerticalAlignment="Center" />
+                    <TextBox Width="90" PlaceholderText="0" Text="{Binding PromptPenalty}" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <TextBlock Text="Nə qədər verildi:" VerticalAlignment="Center" FontWeight="SemiBold" />
+                    <TextBox Width="120" Text="{Binding PaymentAmount}" />
+                    <ComboBox ItemsSource="{Binding PaymentMethods}" SelectedItem="{Binding PaymentMethod}" Width="110" />
+                </StackPanel>
+                <TextBox PlaceholderText="Qeyd (mütləq)" Text="{Binding PaymentNote}" />
+                <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right">
+                    <Button Content="Ödəniş yoxdur" Command="{Binding SkipPaymentCommand}" Padding="14,8" />
+                    <Button Content="✓ Ödənişi qeyd et" Command="{Binding SubmitPaymentCommand}"
+                            Background="#2F9E44" Foreground="White" Padding="16,8" FontWeight="SemiBold" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
+    </Border>
+    </Panel>
 </UserControl>

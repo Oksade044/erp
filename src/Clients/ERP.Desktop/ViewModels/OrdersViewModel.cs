@@ -59,6 +59,47 @@ public sealed partial class DraftLine : ObservableObject
     partial void OnUnitPriceChanged(decimal value) => OnPropertyChanged(nameof(LineTotal));
 }
 
+/// <summary>
+/// Sifariş siyahısı sətri — statusa görə kontekstual düymələr və checkbox seçimi (#17).
+/// </summary>
+public partial class OrderRow : ObservableObject
+{
+    public OrderDto Dto { get; }
+    [ObservableProperty] private bool _isSelected;
+    public OrderRow(OrderDto dto) => Dto = dto;
+
+    public Guid Id => Dto.Id;
+    public string OrderNumber => Dto.OrderNumber;
+    public string CustomerName => Dto.CustomerName;
+    public string Status => Dto.Status;
+    public string OrderType => Dto.OrderType;
+    public string? CreatedByName => Dto.CreatedByName;
+    public string? CreatedByRole => Dto.CreatedByRole;
+    public decimal Total => Dto.Total;
+    public string Currency => Dto.Currency;
+    public decimal Deposit => Dto.Deposit;
+    public string DepositStatus => Dto.DepositStatus;
+    public decimal TotalCharges => Dto.TotalCharges;
+    public decimal DepositRefund => Dto.DepositRefund;
+    public DateOnly StartDate => Dto.StartDate;
+    public DateOnly EndDate => Dto.EndDate;
+
+    // Statusa görə kontekstual düymələrin görünürlüyü.
+    public bool IsDraft => Status == "Qaralama";
+    public bool IsConfirmed => Status == "Təsdiqlənmiş";
+    public bool IsDelivered => Status == "TəhvilVerilmiş";
+    public bool IsReturned => Status == "Qaytarılmış";
+    public bool IsCancelled => Status == "Ləğv";
+
+    /// <summary>Qaralama → düzənlə/təhvil/ləğv.</summary>
+    public bool CanEdit => IsDraft;
+    public bool CanDeliver => IsDraft || IsConfirmed;
+    public bool CanCancel => IsDraft || IsConfirmed;
+    public bool CanReturn => IsDelivered;
+    /// <summary>Faktura təsdiqdən sonra mövcuddur.</summary>
+    public bool HasInvoice => !IsDraft && !IsCancelled;
+}
+
 /// <summary>Sifarişlər ekranı — siyahı, təsdiq/ləğv/təhvil, faktura, və yeni sifariş yaratma.</summary>
 public partial class OrdersViewModel : ViewModelBase
 {
@@ -87,7 +128,7 @@ public partial class OrdersViewModel : ViewModelBase
         }
     }
 
-    public ObservableCollection<OrderDto> Orders { get; } = [];
+    public ObservableCollection<OrderRow> Orders { get; } = [];
 
     [ObservableProperty] private string? _search;
 
@@ -100,10 +141,22 @@ public partial class OrdersViewModel : ViewModelBase
     partial void OnSelectedTypeFilterChanged(string value) => LoadCommand.Execute(null);
     [ObservableProperty] private bool _isBusy;
     [ObservableProperty] private string? _status;
-    [ObservableProperty] private OrderDto? _selected;
+    [ObservableProperty] private OrderRow? _selected;
+    private OrderDto? SelectedDto => Selected?.Dto;
 
     // --- Yeni sifariş forması ---
     [ObservableProperty] private bool _showNewOrder;
+
+    /// <summary>#18 — qaralama düzənləmə rejimi (siyahı bölməsində formanı göstərir).</summary>
+    [ObservableProperty] private bool _isEditingOrder;
+    partial void OnIsEditingOrderChanged(bool value) => OnPropertyChanged(nameof(FormVisible));
+    private Guid? _editingOrderId;
+
+    /// <summary>Yeni sifariş forması görünürlüyü: yaratma bölməsi VƏ YA düzənləmə.</summary>
+    public bool FormVisible => CreateMode || IsEditingOrder;
+
+    /// <summary>#17 — depozit yalnız yaratma/qaralama zamanı (icarə üçün).</summary>
+    [ObservableProperty] private decimal _newDeposit;
     public ObservableCollection<CustomerDto> AllCustomers { get; } = [];
     public ObservableCollection<ProductDto> AllProducts { get; } = [];
     public ObservableCollection<DraftLine> DraftLines { get; } = [];
@@ -293,18 +346,24 @@ public partial class OrdersViewModel : ViewModelBase
 
     /// <summary>Seçilmiş sifariş üçün detal kartı VM-i yaradır (#21) — View kod-arxasından çağırılır.</summary>
     public OrderDetailViewModel? CreateDetail() =>
-        Selected is null ? null : new OrderDetailViewModel(api, Selected);
+        SelectedDto is null ? null : new OrderDetailViewModel(api, SelectedDto);
+
+    /// <summary>Verilmiş sifariş üçün detal kartı (sətir düyməsindən).</summary>
+    public OrderDetailViewModel CreateDetailFor(OrderRow row) => new(api, row.Dto);
 
     /// <summary>Kateqoriya-məhsul seçim pəncərəsi üçün VM (kod-arxasından açılır, #5).</summary>
     public ProductPickerViewModel CreatePicker() => new(api);
 
-    /// <summary>#7 — seçilmiş bir neçə sifarişi eyni anda təsdiqlə (yalnız qaralama olanlar).</summary>
-    public async Task ConfirmManyAsync(System.Collections.Generic.IEnumerable<OrderDto> selected)
+    /// <summary>#7 — checkbox ilə seçilmiş bir neçə qaralama sifarişi eyni anda təsdiqlə.</summary>
+    [RelayCommand]
+    private async Task ConfirmSelectedAsync()
     {
+        var chosen = Orders.Where(r => r.IsSelected && r.IsDraft).ToList();
+        if (chosen.Count == 0) { ERP.Desktop.AppNotify.Show("Təsdiq üçün qaralama sifariş seçin (checkbox)."); return; }
         int done = 0, fail = 0;
-        foreach (var o in selected.Where(o => o.Status == "Qaralama"))
+        foreach (var r in chosen)
         {
-            var (ok, _) = await api.ConfirmOrderAsync(o.Id);
+            var (ok, _) = await api.ConfirmOrderAsync(r.Id);
             if (ok) done++; else fail++;
         }
         Status = $"{done} sifariş təsdiqləndi" + (fail > 0 ? $", {fail} alınmadı" : "") + ".";
@@ -382,6 +441,27 @@ public partial class OrdersViewModel : ViewModelBase
         OnPropertyChanged(nameof(DraftCurrency));
     }
 
+    /// <summary>#18 — qaralama sifarişi forma-panelə yükləyir (düzənləmək üçün).</summary>
+    public async Task BeginEditAsync(OrderDto dto)
+    {
+        await EnsureFormDataAsync();
+        _editingOrderId = dto.Id;
+        IsEditingOrder = true;
+        ShowNewOrder = true;
+        NewOrderType = dto.OrderType;
+        NewCustomer = AllCustomers.FirstOrDefault(c => c.Id == dto.CustomerId);
+        NewStartDate = new DateTimeOffset(dto.StartDate.ToDateTime(TimeOnly.MinValue));
+        NewEndDate = new DateTimeOffset(dto.EndDate.ToDateTime(TimeOnly.MinValue));
+        NewDeposit = dto.Deposit;
+        DraftLines.Clear();
+        foreach (var l in dto.Lines)
+            DraftLines.Add(Track(new DraftLine(l.ProductId, l.ProductName, l.Quantity, l.UnitPrice,
+                warehouseName: l.WarehouseName, currency: l.Currency)));
+        OnPropertyChanged(nameof(DraftTotal));
+        OnPropertyChanged(nameof(DraftCurrency));
+        ERP.Desktop.AppNotify.Show($"Sifariş düzənlənir: {dto.OrderNumber}");
+    }
+
     [RelayCommand]
     private async Task CreateOrderAsync()
     {
@@ -398,21 +478,34 @@ public partial class OrdersViewModel : ViewModelBase
             CreatedByRole: CanChooseCreator ? SelectedCreator?.Position : null,
             OrderType: NewOrderType);
 
-        var (ok, error) = await api.CreateOrderAsync(request);
+        var (ok, error, newId) = await api.CreateOrderReturningIdAsync(request);
         if (ok)
         {
-            Status = SelectedCreator is not null
-                ? $"Sifariş yaradıldı (Qaralama) — məsul: {SelectedCreator.FullName}."
-                : "Sifariş yaradıldı (Qaralama).";
-            ERP.Desktop.AppNotify.Show("✓ Sifariş yaradıldı (Qaralama).");
+            // #17 — depozit yalnız yaratma zamanı təyin olunur.
+            if (NewDeposit > 0 && newId is { } oid)
+                await api.SetOrderDepositAsync(oid, NewDeposit);
+
+            // #18 — düzənləmə idisə, köhnə qaralamanı sil (əvəzləmə semantikası).
+            if (_editingOrderId is { } oldId)
+                await api.DeleteOrderAsync(oldId);
+
+            Status = _editingOrderId is not null ? "Sifariş yeniləndi (Qaralama)." : "Sifariş yaradıldı (Qaralama).";
+            ERP.Desktop.AppNotify.Show(_editingOrderId is not null ? "✓ Sifariş yeniləndi." : "✓ Sifariş yaradıldı (Qaralama).");
+            _editingOrderId = null;
+            IsEditingOrder = false;
             DraftLines.Clear();
             NewCustomer = null;
             SelectedCreator = null;
+            NewDeposit = 0;
             ShowNewOrder = false;
             OnPropertyChanged(nameof(DraftTotal));
             await LoadAsync();
         }
-        else Status = error ?? "Sifariş yaradılmadı.";
+        else
+        {
+            Status = error ?? "Sifariş yaradılmadı.";
+            ERP.Desktop.AppNotify.Show("⚠ " + (error ?? "Sifariş yaradılmadı."));
+        }
     }
 
     [RelayCommand]
@@ -430,7 +523,7 @@ public partial class OrdersViewModel : ViewModelBase
             if (result is not null)
                 foreach (var o in result.Items)
                     if (SelectedTypeFilter == "Hamısı" || o.OrderType == SelectedTypeFilter)
-                        Orders.Add(o);
+                        Orders.Add(new OrderRow(o));
             Status = $"{Orders.Count} sifariş" + (SelectedTypeFilter == "Hamısı" ? "" : $" ({SelectedTypeFilter})");
         }
         catch (System.Exception ex)
@@ -440,75 +533,78 @@ public partial class OrdersViewModel : ViewModelBase
         finally { IsBusy = false; }
     }
 
+    /// <summary>Qaralamanı təhvil ver: əvvəlcə təsdiqlə (rezerv), sonra təhvil ver, ödəniş panelini aç.</summary>
     [RelayCommand]
-    private async Task ConfirmAsync()
+    private async Task DeliverRowAsync(OrderRow? row)
     {
-        if (Selected is null) { Status = "Sifariş seçin."; return; }
-        var num = Selected.OrderNumber; var id = Selected.Id;
-        var (ok, error) = await api.ConfirmOrderAsync(Selected.Id);
-        Status = ok ? "Sifariş təsdiqləndi." : error ?? "Təsdiqlənmədi.";
-        ERP.Desktop.AppNotify.Show(ok ? $"✓ Sifariş təsdiqləndi: {num}" : error ?? "Təsdiqlənmədi.");
-        await LoadAsync();
-        if (ok) await OpenPaymentPromptAsync(id, num, "Təsdiqləndi");
-    }
+        row ??= Selected;
+        if (row is null) return;
+        var num = row.OrderNumber; var id = row.Id;
 
-    [RelayCommand]
-    private async Task CancelAsync()
-    {
-        if (Selected is null) { Status = "Sifariş seçin."; return; }
-        var num = Selected.OrderNumber;
-        var (ok, error) = await api.CancelOrderAsync(Selected.Id);
-        Status = ok ? "Sifariş ləğv edildi." : error ?? "Ləğv edilmədi.";
-        ERP.Desktop.AppNotify.Show(ok ? $"✓ Sifariş ləğv edildi: {num}" : error ?? "Ləğv edilmədi.");
-        await LoadAsync();
-    }
+        if (row.IsDraft)
+        {
+            var (cok, cerr) = await api.ConfirmOrderAsync(id);
+            if (!cok) { ERP.Desktop.AppNotify.Show("⚠ " + (cerr ?? "Təsdiqlənmədi.")); await LoadAsync(); return; }
+        }
 
-    [RelayCommand]
-    private async Task DeliverAsync()
-    {
-        if (Selected is null) { Status = "Sifariş seçin."; return; }
-        var num = Selected.OrderNumber; var id = Selected.Id;
-        var (ok, error) = await api.DeliverOrderAsync(Selected.Id);
+        var (ok, error) = await api.DeliverOrderAsync(id);
         Status = ok ? "Sifariş təhvil verildi." : error ?? "Təhvil verilmədi.";
-        ERP.Desktop.AppNotify.Show(ok ? $"✓ Sifariş təhvil verildi: {num}" : error ?? "Təhvil verilmədi.");
+        ERP.Desktop.AppNotify.Show(ok ? $"✓ Təhvil verildi: {num}" : "⚠ " + (error ?? "Təhvil verilmədi."));
         await LoadAsync();
         if (ok) await OpenPaymentPromptAsync(id, num, "Təhvil verildi");
     }
 
+    /// <summary>Sifarişi ləğv et (qaralama/təsdiqlənmiş).</summary>
     [RelayCommand]
-    private async Task ReturnAsync()
+    private async Task CancelRowAsync(OrderRow? row)
     {
-        if (Selected is null) { Status = "Sifariş seçin."; return; }
-        var num = Selected.OrderNumber; var id = Selected.Id;
-        var (ok, error) = await api.ReturnOrderAsync(Selected.Id);
+        row ??= Selected;
+        if (row is null) return;
+        var num = row.OrderNumber;
+        var (ok, error) = await api.CancelOrderAsync(row.Id);
+        Status = ok ? "Sifariş ləğv edildi." : error ?? "Ləğv edilmədi.";
+        ERP.Desktop.AppNotify.Show(ok ? $"✓ Ləğv edildi: {num}" : "⚠ " + (error ?? "Ləğv edilmədi."));
+        await LoadAsync();
+    }
+
+    /// <summary>Təhvil verilmiş sifarişi qaytar + ödəniş/hesablaşma panelini aç.</summary>
+    [RelayCommand]
+    private async Task ReturnRowAsync(OrderRow? row)
+    {
+        row ??= Selected;
+        if (row is null) return;
+        var num = row.OrderNumber; var id = row.Id;
+        var (ok, error) = await api.ReturnOrderAsync(id);
         Status = ok ? "Sifariş qaytarıldı." : error ?? "Qaytarılmadı.";
-        ERP.Desktop.AppNotify.Show(ok ? $"✓ Sifariş qaytarıldı: {num}" : error ?? "Qaytarılmadı.");
+        ERP.Desktop.AppNotify.Show(ok ? $"✓ Qaytarıldı: {num}" : "⚠ " + (error ?? "Qaytarılmadı."));
         await LoadAsync();
         if (ok) await OpenPaymentPromptAsync(id, num, "Qaytarıldı", isReturn: true);
     }
 
+    /// <summary>Sifariş üçün fakturanı ödəniş paneli kimi aç (ödənişin nə qədəri göze girsin).</summary>
     [RelayCommand]
-    private async Task CreateInvoiceAsync()
+    private async Task ViewInvoiceRowAsync(OrderRow? row)
     {
-        if (Selected is null) { Status = "Sifariş seçin."; return; }
-        var (ok, error) = await api.CreateInvoiceAsync(Selected.Id);
-        Status = ok ? "Faktura yaradıldı (Fakturalar bölməsinə baxın)." : error ?? "Faktura yaradılmadı.";
+        row ??= Selected;
+        if (row is null) return;
+        await OpenPaymentPromptAsync(row.Id, row.OrderNumber, "Faktura / ödəniş");
     }
 
+    /// <summary>#18 — qaralama sifarişi düzənlə: tərkibini forma-panelə yüklə.</summary>
     [RelayCommand]
-    private async Task SetDepositAsync()
+    private async Task EditDraftAsync(OrderRow? row)
     {
-        if (Selected is null) { Status = "Sifariş seçin."; return; }
-        var (ok, error) = await api.SetOrderDepositAsync(Selected.Id, DepositAmount);
-        Status = ok ? $"Depozit təyin edildi: {DepositAmount:0.00} AZN." : error ?? "Depozit təyin edilmədi.";
-        await LoadAsync();
+        row ??= Selected;
+        if (row is null) return;
+        if (!row.IsDraft) { ERP.Desktop.AppNotify.Show("Yalnız qaralama sifarişi düzənlənə bilər."); return; }
+        await BeginEditAsync(row.Dto);
     }
 
     [RelayCommand]
     private async Task SettleAsync()
     {
-        if (Selected is null) { Status = "Sifariş seçin."; return; }
-        var (ok, error) = await api.SettleOrderAsync(Selected.Id, DamageCharge, PenaltyCharge, SettlementNotes);
+        if (SelectedDto is null) { Status = "Sifariş seçin."; return; }
+        var (ok, error) = await api.SettleOrderAsync(SelectedDto.Id, DamageCharge, PenaltyCharge, SettlementNotes);
         Status = ok ? "Hesablaşma qeyd edildi — depozit qaytarması hesablandı." : error ?? "Hesablaşma alınmadı.";
         if (ok) { DamageCharge = PenaltyCharge = 0; SettlementNotes = null; }
         await LoadAsync();

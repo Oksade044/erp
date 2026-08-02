@@ -48,6 +48,13 @@ public static class OrderEndpoints
             return result.IsSuccess ? Results.NoContent() : Results.BadRequest(new { error = result.Error });
         });
 
+        // Qaralama sifarişi sil (düzənləmə üçün: köhnəni sil, yenisini yarat).
+        group.MapDelete("/{id:guid}", async (Guid id, ISender sender) =>
+        {
+            var result = await sender.Send(new DeleteOrderCommand(id));
+            return result.IsSuccess ? Results.NoContent() : Results.BadRequest(new { error = result.Error });
+        });
+
         group.MapPost("/{id:guid}/deliver", async (Guid id, ISender sender) =>
         {
             var result = await sender.Send(new DeliverOrderCommand(id));

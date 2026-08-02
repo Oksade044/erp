@@ -201,6 +201,25 @@ public sealed class ErpApiClient(HttpClient http)
         return await ReadResultAsync(resp, ct);
     }
 
+    /// <summary>Sifariş yaradır və yeni sifarişin id-sini qaytarır (depozit təyini üçün).</summary>
+    public async Task<(bool ok, string? error, Guid? id)> CreateOrderReturningIdAsync(CreateOrderRequest request, CancellationToken ct = default)
+    {
+        var resp = await http.PostAsJsonAsync("/api/v1/orders", request, JsonOpts, ct);
+        if (resp.IsSuccessStatusCode)
+        {
+            try
+            {
+                var doc = await resp.Content.ReadFromJsonAsync<JsonElement>(ct);
+                if (doc.TryGetProperty("id", out var idEl) && idEl.TryGetGuid(out var id))
+                    return (true, null, id);
+            }
+            catch { /* struktursuz cavab — yenə uğur */ }
+            return (true, null, null);
+        }
+        var (_, error) = await ReadResultAsync(resp, ct);
+        return (false, error, null);
+    }
+
     public async Task<(bool ok, string? error)> ConfirmOrderAsync(Guid id, CancellationToken ct = default)
     {
         var resp = await http.PostAsync($"/api/v1/orders/{id}/confirm", null, ct);
@@ -212,6 +231,9 @@ public sealed class ErpApiClient(HttpClient http)
         var resp = await http.PostAsync($"/api/v1/orders/{id}/cancel", null, ct);
         return await ReadResultAsync(resp, ct);
     }
+
+    public async Task<(bool ok, string? error)> DeleteOrderAsync(Guid id, CancellationToken ct = default) =>
+        await ReadResultAsync(await http.DeleteAsync($"/api/v1/orders/{id}", ct), ct);
 
     public async Task<(bool ok, string? error)> DeliverOrderAsync(Guid id, CancellationToken ct = default)
     {
