@@ -25,10 +25,23 @@ public sealed record InvoicePdfSettlement(
     string Currency);
 
 /// <summary>
+/// Faktura üzərində əlavə məlumat — təmsilçi + icarə/status tarixləri (bron/apar/qaytar).
+/// PDF başlığında ayrıca blok kimi göstərilir.
+/// </summary>
+public sealed record InvoicePdfMeta(
+    string? RepresentativeName,
+    DateOnly StartDate,
+    DateOnly EndDate,
+    DateTimeOffset? BookedAt,
+    DateTimeOffset? DeliveredAt,
+    DateTimeOffset? ReturnedAt);
+
+/// <summary>
 /// Faktura PDF generasiyası (TDD §25 — QuestPDF). İnterfeys Application-da, implementasiya
 /// Infrastructure-da → Application PDF kitabxanasını tanımır. Sətirlərdə məhsul şəkli də verilir.
 /// </summary>
 public interface IInvoicePdfService
 {
-    byte[] Generate(InvoiceDto invoice, IReadOnlyList<InvoicePdfLine> lines, InvoicePdfSettlement? settlement = null);
+    byte[] Generate(InvoiceDto invoice, IReadOnlyList<InvoicePdfLine> lines,
+        InvoicePdfSettlement? settlement = null, InvoicePdfMeta? meta = null);
 }

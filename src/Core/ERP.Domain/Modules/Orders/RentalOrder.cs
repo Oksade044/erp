@@ -23,6 +23,14 @@ public class RentalOrder : BaseEntity, IAggregateRoot
     public DateOnly EndDate { get; private set; }
     public OrderStatus Status { get; private set; } = OrderStatus.Qaralama;
 
+    // #E — status keçidlərinin zaman möhürləri (fakturada: nə zaman bron/apar/qaytar).
+    /// <summary>Bron (rezerv) edildiyi vaxt — Təsdiqlə.</summary>
+    public DateTimeOffset? BookedAt { get; private set; }
+    /// <summary>Aparıldığı (təhvil verildiyi) vaxt.</summary>
+    public DateTimeOffset? DeliveredAt { get; private set; }
+    /// <summary>Qaytarıldığı vaxt.</summary>
+    public DateTimeOffset? ReturnedAt { get; private set; }
+
     /// <summary>Sifariş növü — İcarə (default) və ya Satış (#33).</summary>
     public OrderType OrderType { get; private set; } = OrderType.İcarə;
     public string? Notes { get; private set; }
@@ -172,6 +180,7 @@ public class RentalOrder : BaseEntity, IAggregateRoot
             throw new DomainException("Boş sifariş təsdiqlənə bilməz.");
         Status = OrderStatus.Təsdiqlənmiş;
         ConfirmedByName = string.IsNullOrWhiteSpace(confirmedByName) ? null : confirmedByName.Trim();
+        BookedAt = DateTimeOffset.UtcNow;
     }
 
     public void Deliver()
@@ -179,6 +188,7 @@ public class RentalOrder : BaseEntity, IAggregateRoot
         if (Status != OrderStatus.Təsdiqlənmiş)
             throw new DomainException("Yalnız təsdiqlənmiş sifariş təhvil verilə bilər.");
         Status = OrderStatus.TəhvilVerilmiş;
+        DeliveredAt = DateTimeOffset.UtcNow;
     }
 
     public void Return()
@@ -186,6 +196,7 @@ public class RentalOrder : BaseEntity, IAggregateRoot
         if (Status != OrderStatus.TəhvilVerilmiş)
             throw new DomainException("Yalnız təhvil verilmiş sifariş qaytarıla bilər.");
         Status = OrderStatus.Qaytarılmış;
+        ReturnedAt = DateTimeOffset.UtcNow;
     }
 
     public void Cancel()

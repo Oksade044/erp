@@ -125,7 +125,7 @@ public sealed class CreateOrderHandler(
             var credit = ERP.Domain.Modules.Representatives.RepresentativeEntry.Create(
                 createdByName!, DateOnly.FromDateTime(DateTime.UtcNow),
                 ERP.Domain.Modules.Representatives.RepEntryType.Sifariş,
-                order.Total, $"Sifariş {orderNumber}", orderNumber);
+                order.Total, $"Sifariş {orderNumber} — müştəri: {customer.Name}", orderNumber);
             await representatives.AddAsync(credit, ct);
         }
 

@@ -24,7 +24,10 @@ public sealed record OrderDto(
     string? CreatedByName,
     string? CreatedByRole,
     string? ConfirmedByName,
-    IReadOnlyList<OrderLineDto> Lines);
+    IReadOnlyList<OrderLineDto> Lines,
+    DateTimeOffset? BookedAt = null,
+    DateTimeOffset? DeliveredAt = null,
+    DateTimeOffset? ReturnedAt = null);
 
 public sealed record OrderLineDto(
     Guid ProductId,

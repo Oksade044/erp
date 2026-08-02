@@ -138,7 +138,8 @@ public partial class OrdersViewModel : ViewModelBase
     {
         null => true,
         "Qaralama" => status == "Qaralama",
-        "Təhvil" => status is "Təsdiqlənmiş" or "TəhvilVerilmiş",
+        "Bron" => status == "Təsdiqlənmiş",         // rezerv edilib, hələ aparılmayıb
+        "Aparıldı" => status == "TəhvilVerilmiş",    // müştəri aparıb (əvvəlki "təhvildə")
         "Qaytarılanlar" => status == "Qaytarılmış",
         "Ləğv" => status == "Ləğv",
         _ => true
@@ -199,6 +200,10 @@ public partial class OrdersViewModel : ViewModelBase
 
     /// <summary>#17 — depozit yalnız yaratma/qaralama zamanı (icarə üçün).</summary>
     [ObservableProperty] private decimal _newDeposit;
+
+    /// <summary>#B — yaratma rejimi: "Qaralama" (layihə) və ya "Bron et" (rezerv).</summary>
+    public string[] CreateModes { get; } = ["Qaralama", "Bron et"];
+    [ObservableProperty] private string _selectedCreateMode = "Qaralama";
     public ObservableCollection<CustomerDto> AllCustomers { get; } = [];
     public ObservableCollection<ProductDto> AllProducts { get; } = [];
     public ObservableCollection<DraftLine> DraftLines { get; } = [];
@@ -536,8 +541,16 @@ public partial class OrdersViewModel : ViewModelBase
             if (_editingOrderId is { } oldId)
                 await api.DeleteOrderAsync(oldId);
 
-            Status = _editingOrderId is not null ? "Sifariş yeniləndi (Qaralama)." : "Sifariş yaradıldı (Qaralama).";
-            ERP.Desktop.AppNotify.Show(_editingOrderId is not null ? "✓ Sifariş yeniləndi." : "✓ Sifariş yaradıldı (Qaralama).");
+            // #B — "Bron et" seçilibsə, sifariş dərhal təsdiqlənir (rezerv edilir).
+            var booked = false;
+            if (SelectedCreateMode == "Bron et" && newId is { } bid)
+            {
+                var (bok, _) = await api.ConfirmOrderAsync(bid);
+                booked = bok;
+            }
+
+            Status = booked ? "Sifariş bron edildi (rezerv)." : (_editingOrderId is not null ? "Sifariş yeniləndi (Qaralama)." : "Sifariş yaradıldı (Qaralama).");
+            ERP.Desktop.AppNotify.Show(booked ? "✓ Sifariş BRON edildi (rezerv)." : (_editingOrderId is not null ? "✓ Sifariş yeniləndi." : "✓ Sifariş yaradıldı (Qaralama)."));
             _editingOrderId = null;
             _editCreatedByName = null;
             _editCreatedByRole = null;

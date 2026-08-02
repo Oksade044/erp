@@ -36,5 +36,8 @@ public static class OrderMapping
             UnitPrice: l.UnitPrice.Amount,
             LineTotal: l.LineTotal.Amount,
             Currency: l.UnitPrice.Currency,
-            WarehouseName: l.WarehouseName)).ToList());
+            WarehouseName: l.WarehouseName)).ToList(),
+        BookedAt: o.BookedAt,
+        DeliveredAt: o.DeliveredAt,
+        ReturnedAt: o.ReturnedAt);
 }

@@ -56,7 +56,8 @@ public partial class MainViewModel : ViewModelBase
         var ordersCreate = new OrdersViewModel(api, canChoose, canViewCr, createMode: true);
         // #B — statusa görə ayrıca sifariş siyahıları (sol menyuda qruplar).
         var ordersDraft = new OrdersViewModel(api, canChoose, canViewCr, statusGroup: "Qaralama");
-        var ordersDelivery = new OrdersViewModel(api, canChoose, canViewCr, statusGroup: "Təhvil");
+        var ordersBooked = new OrdersViewModel(api, canChoose, canViewCr, statusGroup: "Bron");
+        var ordersDelivery = new OrdersViewModel(api, canChoose, canViewCr, statusGroup: "Aparıldı");
         var ordersReturned = new OrdersViewModel(api, canChoose, canViewCr, statusGroup: "Qaytarılanlar");
         var ordersCancelled = new OrdersViewModel(api, canChoose, canViewCr, statusGroup: "Ləğv");
         var invoices = new InvoicesViewModel(api);
@@ -92,7 +93,8 @@ public partial class MainViewModel : ViewModelBase
             ["Sifarişlər"] = ("\U0001F9FE", "Bütün sifarişlər", orders),
             ["Yeni Sifariş"] = ("\U00002795", "İcarə / Satış yarat", ordersCreate),
             ["Sifariş: Qaralama"] = ("\U0001F4DD", "Qaralama sifarişlər", ordersDraft),
-            ["Sifariş: Təhvil"] = ("\U0001F69A", "Təhvildə olanlar", ordersDelivery),
+            ["Sifariş: Bron"] = ("\U0001F4C5", "Bron (rezerv) sifarişlər", ordersBooked),
+            ["Sifariş: Aparıldı"] = ("\U0001F69A", "Aparılanlar", ordersDelivery),
             ["Sifariş: Qaytarılanlar"] = ("\U000021A9", "Qaytarılanlar", ordersReturned),
             ["Sifariş: Ləğv"] = ("\U0000274C", "Ləğv edilənlər", ordersCancelled),
             ["Fakturalar"] = ("\U0001F9FE", "Fakturalar", invoices),
@@ -136,7 +138,8 @@ public partial class MainViewModel : ViewModelBase
             Item("Yeni Sifariş", "➕ İcarə / Satış yarat"),
             Item("Sifarişlər", "Bütün sifarişlər"),
             Item("Sifariş: Qaralama", "• Qaralamalar"),
-            Item("Sifariş: Təhvil", "• Təhvildə olanlar"),
+            Item("Sifariş: Bron", "• Bron (rezerv)"),
+            Item("Sifariş: Aparıldı", "• Aparılanlar"),
             Item("Sifariş: Qaytarılanlar", "• Qaytarılanlar"),
             Item("Sifariş: Ləğv", "• Ləğv edilənlər"),
             Item("Fakturalar", "Fakturalar"),

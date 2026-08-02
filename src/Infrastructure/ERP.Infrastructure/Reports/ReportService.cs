@@ -82,18 +82,21 @@ public sealed class ReportService(AppDbContext context) : IReportService
             .Select(i => new
             {
                 Invoice = i,
-                Paid = i.Payments.Sum(p => p.Amount.Amount)
+                Paid = i.Payments.Sum(p => p.Amount.Amount),
+                Grand = i.GrandTotal.Amount
             })
-            .Where(x => x.Invoice.TotalAmount.Amount - x.Paid > 0)
-            .OrderByDescending(x => x.Invoice.TotalAmount.Amount - x.Paid)
+            .Where(x => x.Grand - x.Paid > 0)
+            .OrderByDescending(x => x.Grand - x.Paid)
             .Select(x => new OutstandingInvoiceDto(
                 InvoiceNumber: x.Invoice.InvoiceNumber,
                 CustomerName: x.Invoice.CustomerName,
-                Total: x.Invoice.TotalAmount.Amount,
+                Total: x.Grand,
                 Paid: x.Paid,
-                Balance: x.Invoice.TotalAmount.Amount - x.Paid,
+                Balance: x.Grand - x.Paid,
                 Currency: x.Invoice.TotalAmount.Currency,
-                Status: x.Invoice.Status.ToString()))
+                Status: x.Invoice.Status.ToString(),
+                InvoiceId: x.Invoice.Id,
+                OrderNumber: x.Invoice.OrderNumber))
             .ToList();
     }
 

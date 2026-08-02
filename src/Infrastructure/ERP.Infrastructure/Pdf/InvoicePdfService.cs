@@ -11,7 +11,8 @@ namespace ERP.Infrastructure.Pdf;
 /// </summary>
 public sealed class InvoicePdfService : IInvoicePdfService
 {
-    public byte[] Generate(InvoiceDto inv, IReadOnlyList<InvoicePdfLine> lines, InvoicePdfSettlement? settlement = null)
+    public byte[] Generate(InvoiceDto inv, IReadOnlyList<InvoicePdfLine> lines,
+        InvoicePdfSettlement? settlement = null, InvoicePdfMeta? meta = null)
     {
         var document = Document.Create(container =>
         {
@@ -38,13 +39,32 @@ public sealed class InvoicePdfService : IInvoicePdfService
                         {
                             c.Item().Text("Müştəri").SemiBold().FontColor(Colors.Grey.Darken1);
                             c.Item().Text(inv.CustomerName).FontSize(12);
+                            if (!string.IsNullOrWhiteSpace(meta?.RepresentativeName))
+                            {
+                                c.Item().PaddingTop(4).Text("Təmsilçi").SemiBold().FontColor(Colors.Grey.Darken1);
+                                c.Item().Text(meta!.RepresentativeName!).FontSize(12);
+                            }
                         });
                         row.RelativeItem().AlignRight().Column(c =>
                         {
                             c.Item().Text("Sifariş").SemiBold().FontColor(Colors.Grey.Darken1);
                             c.Item().Text(inv.OrderNumber).FontSize(12);
+                            if (meta is not null)
+                                c.Item().PaddingTop(4).Text($"İcarə müddəti: {meta.StartDate:dd.MM.yyyy} — {meta.EndDate:dd.MM.yyyy}")
+                                    .FontSize(10).FontColor(Colors.Grey.Darken1);
                         });
                     });
+
+                    // #E — status tarixləri: nə zaman bron / apar / qaytar edildi.
+                    if (meta is not null && (meta.BookedAt is not null || meta.DeliveredAt is not null || meta.ReturnedAt is not null))
+                    {
+                        col.Item().PaddingTop(6).Row(row =>
+                        {
+                            row.RelativeItem().Text($"Bron edildi: {(meta.BookedAt is { } b ? b.LocalDateTime.ToString("dd.MM.yyyy HH:mm") : "—")}").FontSize(9).FontColor(Colors.Grey.Darken1);
+                            row.RelativeItem().Text($"Aparıldı: {(meta.DeliveredAt is { } d ? d.LocalDateTime.ToString("dd.MM.yyyy HH:mm") : "—")}").FontSize(9).FontColor(Colors.Grey.Darken1);
+                            row.RelativeItem().Text($"Qaytarıldı: {(meta.ReturnedAt is { } r ? r.LocalDateTime.ToString("dd.MM.yyyy HH:mm") : "—")}").FontSize(9).FontColor(Colors.Grey.Darken1);
+                        });
+                    }
 
                     col.Item().PaddingTop(10).LineHorizontal(1).LineColor(Colors.Grey.Lighten2);
 

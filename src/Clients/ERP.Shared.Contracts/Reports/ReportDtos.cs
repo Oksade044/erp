@@ -32,7 +32,9 @@ public sealed record OutstandingInvoiceDto(
     decimal Paid,
     decimal Balance,
     string Currency,
-    string Status);
+    string Status,
+    Guid InvoiceId = default,
+    string OrderNumber = "");
 
 /// <summary>Ən çox icarəyə verilən məhsul.</summary>
 public sealed record TopProductDto(
