@@ -1,10 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<!-- Bu mühitdə yalnız Android workload quraşdırılıb; iOS/MacCatalyst build üçün
-		     Mac maşınında aşağıdakı sətri açın (kod platformadan asılı deyil, dəyişiklik lazım deyil):
-		     <TargetFrameworks>net10.0-android;net10.0-ios;net10.0-maccatalyst</TargetFrameworks> -->
+		<!-- Platformaya görə avtomatik hədəflər (kod/əl dəyişikliyi lazım deyil):
+		     • Windows/Linux (yalnız android workload) → yalnız Android build olur.
+		     • macOS (Xcode + full `maui` workload) → Android + iOS + MacCatalyst avtomatik
+		       daxil olur; Mac-də `dotnet build` heç bir dəyişiklik olmadan iOS-u qurur. -->
 		<TargetFrameworks>net10.0-android</TargetFrameworks>
+		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('OSX'))">net10.0-android;net10.0-ios;net10.0-maccatalyst</TargetFrameworks>
 
 		<!-- Note for MacCatalyst:
 		The default runtime is maccatalyst-x64, except in Release config, in which case the default is maccatalyst-x64;maccatalyst-arm64.

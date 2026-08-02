@@ -20,6 +20,7 @@ Ayrıca baza yoxdur — bütün əməliyyatlar real vaxtda ERP-də əks olunur.
 | Sifariş detalı | `Views/OrderDetailPage` | məhsullar, faktura, status dəyişmə, depozit, ödəniş, PDF |
 | Yeni sifariş | `Views/NewOrderPage` | müştəri axtar/yarat + məhsul axtarışı + anbar seçimi + sətirlər |
 | Maliyyəm | `Views/FinancePage` | yalnız öz dövriyyəm (gün/həftə/ay/il, icarə/satış) |
+| Borcum | `Views/DebtPage` | təmsilçi/işçi kart borcu + hərəkət tarixçəsi (`/api/v1/me/debt`) |
 | Profil | `Views/ProfilePage` | işçi məlumatları + çıxış |
 
 Backend dəstəyi: `/api/v1/me/dashboard`, `/api/v1/me/finance`, `/api/v1/me/orders?filter=…`
@@ -35,19 +36,33 @@ Kodda heç nə dəyişmir — yalnız giriş ekranında ünvanı yazmaq kifayət
 
 ## Build
 
-### Android (bu mühitdə hazırdır)
-```
-dotnet build src/Clients/ERP.Mobile/ERP.Mobile.csproj -f net10.0-android -c Release
-# APK: bin/Release/net10.0-android/*-Signed.apk
-```
+Hədəflər `.csproj`-da platformaya görə **avtomatik** seçilir — heç bir əl dəyişikliyi lazım deyil:
+- **Windows/Linux** (yalnız `maui-android` workload) → yalnız `net10.0-android` qurulur.
+- **macOS** (Xcode + full `maui` workload) → `net10.0-android;net10.0-ios;net10.0-maccatalyst` avtomatik daxil olur.
 
-### iOS (macOS tələb olunur)
-iOS build/imza yalnız **macOS + Xcode + Apple Developer hesabı** ilə mümkündür (Windows-da yox).
-Mac-də `ERP.Mobile.csproj`-da TargetFrameworks sətrini açın:
-```xml
-<TargetFrameworks>net10.0-android;net10.0-ios;net10.0-maccatalyst</TargetFrameworks>
+### Android (bu mühitdə hazır — release APK verilir)
 ```
-Kod platformadan asılı deyil — dəyişiklik lazım deyil.
+dotnet workload install maui-android            # bir dəfəlik
+dotnet build src/Clients/ERP.Mobile/ERP.Mobile.csproj -f net10.0-android -c Release
+# İmzalı APK: bin/Release/net10.0-android/az.erp.employee-Signed.apk
+# Google Play üçün AAB: bin/Release/net10.0-android/az.erp.employee.aab
+```
+> Hazır imzalı APK: `D:\tmp\ERP-Isci.apk` (cihaza köçürüb quraşdırın; "naməlum mənbələr"ə icazə verin).
+
+### iOS (macOS + Xcode + Apple Developer tələb olunur)
+Windows-da mümkün deyil. Mac-də əlavə addım lazım DEYİL (multi-target avtomatikdir):
+```
+sudo dotnet workload install maui                # ios daxil (Mac-də)
+# Simulyatorda işə salma:
+dotnet build src/Clients/ERP.Mobile/ERP.Mobile.csproj -f net10.0-ios -t:Run
+# Cihaz/AppStore üçün imzalı .ipa (Apple Developer hesabı + provisioning profile):
+dotnet publish src/Clients/ERP.Mobile/ERP.Mobile.csproj -f net10.0-ios -c Release \
+  -p:RuntimeIdentifier=ios-arm64 \
+  -p:CodesignKey="Apple Distribution: <Şirkət> (<TeamId>)" \
+  -p:CodesignProvision="<Provisioning Profile adı>"
+# .ipa: bin/Release/net10.0-ios/ios-arm64/publish/*.ipa
+```
+Bundle Id: `az.erp.employee` (App Store Connect-də eyni Id ilə tətbiq yaradın).
 
 ## VPS Deployment (production)
 1. Backend artıq hazırdır: `deploy/docker-compose.yml` (API + PostgreSQL + Redis).

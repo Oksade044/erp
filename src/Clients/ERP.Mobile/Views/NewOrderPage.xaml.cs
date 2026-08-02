@@ -29,7 +29,7 @@ public partial class NewOrderPage : ContentPage
 	{
 		if (e.CurrentSelection.FirstOrDefault() is DraftLine line)
 		{
-			var ok = await DisplayAlert("Silinsin?", line.Display, "Sil", "İmtina");
+			var ok = await DisplayAlertAsync("Silinsin?", line.Display, "Sil", "İmtina");
 			if (ok) _vm.RemoveLine(line);
 		}
 		((CollectionView)sender!).SelectedItem = null;
