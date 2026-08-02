@@ -23,8 +23,18 @@ public static class DbSeeder
         var roles = scope.ServiceProvider.GetRequiredService<IRoleRepository>();
         var hasher = scope.ServiceProvider.GetRequiredService<IPasswordHasher>();
 
-        // Gözləyən migration-ları tətbiq et (lokal-first: proqram açılanda sxem hazır olur).
-        await db.Database.MigrateAsync();
+        // Sxemi hazırla. EF migration-ları provider-xasdır — mövcud migration seti SQLite
+        // tipləri (TEXT/BLOB/INTEGER) ilə yaradılıb və Postgres-ə birbaşa tətbiqi sxemi sındırır
+        // (məs. Guid→uuid ↔ text uyğunsuzluğu). Ona görə:
+        //   • Postgres → sxem modeldən birbaşa (provider-düzgün) yaradılır (EnsureCreated).
+        //   • SQLite/digər → migration tətbiq olunur (lokal-first, tarixçəli).
+        // Qeyd: Postgres-də incremental migration lazım olanda ayrıca Postgres migration seti/
+        // assembly-yə keçilməlidir (EnsureCreated __EFMigrationsHistory yaratmır).
+        var isPostgres = db.Database.ProviderName?.Contains("Npgsql", StringComparison.OrdinalIgnoreCase) == true;
+        if (isPostgres)
+            await db.Database.EnsureCreatedAsync();
+        else
+            await db.Database.MigrateAsync();
 
         // #16 — daxili rolları seed et (icazələr enum xəritəsindən; sonradan Admin dəyişə bilər).
         if (!await roles.AnyAsync())
