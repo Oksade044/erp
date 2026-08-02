@@ -35,8 +35,8 @@ public class Invoice : BaseEntity, IAggregateRoot
     public Money AmountPaid => _payments.Aggregate(
         Money.Zero(TotalAmount.Currency), (sum, p) => sum.Add(p.Amount));
 
-    /// <summary>Qalıq borc (yekun məbləğə görə).</summary>
-    public Money Balance => Money.Create(GrandTotal.Amount - AmountPaid.Amount, TotalAmount.Currency);
+    /// <summary>Qalıq borc (yekun məbləğə görə) — artıq ödənişdə mənfi olmur, 0-a bərabərləşir.</summary>
+    public Money Balance => Money.Create(Math.Max(0m, GrandTotal.Amount - AmountPaid.Amount), TotalAmount.Currency);
 
     public InvoiceStatus Status =>
         AmountPaid.Amount <= 0 ? InvoiceStatus.Ödənilməmiş

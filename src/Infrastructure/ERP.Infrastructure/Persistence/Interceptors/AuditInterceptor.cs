@@ -77,6 +77,9 @@ public sealed class AuditInterceptor(ICurrentUser currentUser) : SaveChangesInte
                     entry.Entity.IsDeleted = true;
                     entry.Entity.DeletedAt = now;
                     entry.Entity.DeletedBy = user;
+                    // Owned value object-lər (Phone, Email, Money) də Deleted qalır → sütunları null
+                    // kimi yazılır (NOT NULL pozuntusu). Onları geri Unchanged edirik ki, saxlanılsın.
+                    RestoreOwnedEntries(entry);
                     logs.Add(BuildLog(entry, now, user, "Silindi", null));
                     break;
             }
@@ -85,6 +88,24 @@ public sealed class AuditInterceptor(ICurrentUser currentUser) : SaveChangesInte
         // Audit qeydlərini əlavə et (BaseEntity deyil → yenidən audit olunmur, rekursiya yoxdur).
         if (logs.Count > 0)
             context.Set<AuditLog>().AddRange(logs);
+    }
+
+    /// <summary>
+    /// Soft-delete zamanı principal Deleted→Modified edilir, lakin onun owned (sahibli) alt-tipləri
+    /// Deleted qalır və EF onların sütunlarını null yazmağa çalışır. Bu, həmin owned entry-ləri
+    /// Unchanged-ə qaytarır ki, dəyərləri qorunsun (Phone/Email/Money kimi NOT NULL sahələr).
+    /// </summary>
+    private static void RestoreOwnedEntries(EntityEntry entry)
+    {
+        foreach (var reference in entry.References)
+        {
+            if (reference.TargetEntry is { } target
+                && target.Metadata.IsOwned()
+                && target.State == EntityState.Deleted)
+            {
+                target.State = EntityState.Unchanged;
+            }
+        }
     }
 
     private static AuditLog BuildLog(EntityEntry<BaseEntity> entry, DateTimeOffset now,
