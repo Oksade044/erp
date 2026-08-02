@@ -73,7 +73,8 @@ public partial class OrderRow : ObservableObject
     public string CustomerName => Dto.CustomerName;
     public string Status => Dto.Status;
     public string OrderType => Dto.OrderType;
-    public string? CreatedByName => Dto.CreatedByName;
+    // Sistem administratoru (mərkəzi ofis) → "Mərkəz" kimi göstərilir.
+    public string? CreatedByName => Dto.CreatedByName is "Sistem Administratoru" or null or "" ? "Mərkəz" : Dto.CreatedByName;
     public string? CreatedByRole => Dto.CreatedByRole;
     public decimal Total => Dto.Total;
     public string Currency => Dto.Currency;

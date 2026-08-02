@@ -32,13 +32,12 @@
                   GridLinesVisibility="Horizontal" BorderThickness="1" BorderBrush="#E0E2EA">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Müştəri" Binding="{Binding CustomerName}" Width="2*" />
-                <DataGridTextColumn Header="Sifariş №" Binding="{Binding OrderNumber}" Width="*" />
-                <DataGridTextColumn Header="Faktura №" Binding="{Binding InvoiceNumber}" Width="*" />
+                <DataGridTextColumn Header="Mənbə" Binding="{Binding Source}" Width="Auto" />
+                <DataGridTextColumn Header="Sifariş / qeyd" Binding="{Binding Reference}" Width="*" />
                 <DataGridTextColumn Header="Ümumi" Binding="{Binding Total, StringFormat={}{0:0.00}}" Width="*" />
                 <DataGridTextColumn Header="Ödənilib" Binding="{Binding Paid, StringFormat={}{0:0.00}}" Width="*" />
                 <DataGridTextColumn Header="Qalıq borc" Binding="{Binding Balance, StringFormat={}{0:0.00}}" Width="*" />
                 <DataGridTextColumn Header="Val." Binding="{Binding Currency}" Width="Auto" />
-                <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="Auto" />
             </DataGrid.Columns>
         </DataGrid>
 

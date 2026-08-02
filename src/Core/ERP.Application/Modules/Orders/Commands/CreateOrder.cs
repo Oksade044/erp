@@ -57,6 +57,10 @@ public sealed class CreateOrderHandler(
         var createdByName = overrideCreator ? dto.CreatedByName : (currentUser.FullName ?? currentUser.UserName);
         var createdByRole = overrideCreator ? dto.CreatedByRole : currentUser.Role;
 
+        // Sistem administratoru (mərkəzi ofis) sifariş yaradanda "Mərkəz" kimi görünsün.
+        if (createdByName is "Sistem Administratoru" or null)
+            createdByName = "Mərkəz";
+
         var orderType = string.Equals(dto.OrderType, "Satış", StringComparison.OrdinalIgnoreCase)
             ? Domain.Modules.Orders.OrderType.Satış
             : Domain.Modules.Orders.OrderType.İcarə;

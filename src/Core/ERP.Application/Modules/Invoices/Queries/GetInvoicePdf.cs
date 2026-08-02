@@ -29,7 +29,9 @@ public sealed class GetInvoicePdfHandler(
         if (order is not null)
         {
             meta = new InvoicePdfMeta(
-                RepresentativeName: order.CreatedByName,
+                // Sistem administratoru → "Mərkəz" (mərkəzi ofis).
+                RepresentativeName: order.CreatedByName is "Sistem Administratoru" or null or ""
+                    ? "Mərkəz" : order.CreatedByName,
                 StartDate: order.StartDate,
                 EndDate: order.EndDate,
                 BookedAt: order.BookedAt,
