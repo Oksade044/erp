@@ -189,8 +189,13 @@ app.MapPost("/api/v1/admin/backup", (IBackgroundJobClient jobs) =>
 }).RequireAuthorization(Permissions.UsersManage).WithTags("Admin");
 
 // Gündəlik avtomatik backup (TDD §29).
-RecurringJob.AddOrUpdate<IBackupService>(
-    "daily-backup", s => s.BackupAsync(CancellationToken.None), Cron.Daily);
+// DI-dən IRecurringJobManager istifadə edirik — statik RecurringJob.AddOrUpdate
+// JobStorage.Current tələb edir və o yalnız Hangfire DI-si ilk dəfə resolve olunanda
+// qurulur. Development-də UseHangfireDashboard onu başladırdı; Production-da dashboard
+// yoxdur → statik API "JobStorage not initialized" ilə çökürdü. Manager resolve etmək
+// storage-ı düzgün başladır (hər mühitdə işləyir).
+app.Services.GetRequiredService<IRecurringJobManager>().AddOrUpdate<IBackupService>(
+    "daily-backup", s => s.BackupAsync(CancellationToken.None), Cron.Daily());
 
 // İlkin data: admin istifadəçisi + gözləyən migration-lar (TDD §6).
 await DbSeeder.SeedAsync(app.Services);
