@@ -14,4 +14,10 @@ public interface ICustomerRepository : IRepository<Customer>
     /// <summary>Server-side axtarış + səhifələmə (TDD §11, §33).</summary>
     Task<PagedResult<Customer>> SearchAsync(
         string? search, int page, int pageSize, CancellationToken ct = default);
+
+    /// <summary>
+    /// Kartında ilkin borcu olan (Debt owned VO non-null) BÜTÜN müştərilər — Borclar bölməsi üçün.
+    /// Səhifələmədən asılı deyil ki, çox müştəri olduqda borclu 20-lik səhifədən kənarda qalmasın.
+    /// </summary>
+    Task<IReadOnlyList<Customer>> GetDebtorsAsync(CancellationToken ct = default);
 }

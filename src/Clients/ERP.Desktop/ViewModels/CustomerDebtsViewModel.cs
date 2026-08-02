@@ -63,9 +63,10 @@ public partial class CustomerDebtsViewModel(ErpApiClient api) : ViewModelBase
                     });
 
             // 2) Müştəri kartındakı ilkin borc (Debt > 0) — faktura ilə bağlı deyil.
-            var custs = await api.GetCustomersAsync(null);
+            //    Ayrıca borclular endpoint-i: çox müştəri olduqda borclu 20-lik səhifədən kənarda qalmır.
+            var custs = await api.GetCustomerDebtsAsync();
             if (custs is not null)
-                foreach (var c in custs.Items.Where(x => x.Debt > 0))
+                foreach (var c in custs.Where(x => x.Debt > 0))
                     Debts.Add(new DebtRow
                     {
                         CustomerName = c.Name, Reference = "İlkin borc (kart)", Source = "Kart",

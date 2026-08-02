@@ -25,4 +25,9 @@ public sealed class CustomerRepository(AppDbContext context)
             primary: c => c.Name,
             secondary: c => [c.Phone.Value, c.Address?.City ?? "", c.RepresentativeName ?? ""]);
     }
+
+    public async Task<IReadOnlyList<Customer>> GetDebtorsAsync(CancellationToken ct = default) =>
+        // Debt owned VO borc 0 olanda NULL saxlanır → null-check provider-safe (SQLite decimal=TEXT
+        // müqayisə problemini yan keçir) və miqyaslanandır (yalnız borclular DB-dən gəlir).
+        await Set.AsNoTracking().Where(c => c.Debt != null).ToListAsync(ct);
 }

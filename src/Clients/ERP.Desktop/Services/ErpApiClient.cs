@@ -64,6 +64,10 @@ public sealed class ErpApiClient(HttpClient http)
         http.GetFromJsonAsync<PagedResult<CustomerDto>>(
             $"/api/v1/customers?search={Uri.EscapeDataString(search ?? "")}", JsonOpts, ct);
 
+    /// <summary>Kartında borcu olan bütün müştərilər (Borclar bölməsi — səhifələmədən asılı deyil).</summary>
+    public Task<List<CustomerDto>?> GetCustomerDebtsAsync(CancellationToken ct = default) =>
+        http.GetFromJsonAsync<List<CustomerDto>>("/api/v1/customers/debts", JsonOpts, ct);
+
     public async Task<(bool ok, string? error)> CreateCustomerAsync(CreateCustomerRequest request, CancellationToken ct = default)
     {
         var resp = await http.PostAsJsonAsync("/api/v1/customers", request, JsonOpts, ct);

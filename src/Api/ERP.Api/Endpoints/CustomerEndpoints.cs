@@ -21,6 +21,10 @@ public static class CustomerEndpoints
             return Results.Ok(result);
         });
 
+        // Borclar bölməsi — kartında ilkin borcu olan bütün müştərilər (səhifələmədən asılı deyil).
+        group.MapGet("/debts", async (ISender sender) =>
+            Results.Ok(await sender.Send(new GetCustomerDebtsQuery())));
+
         group.MapGet("/{id:guid}", async (Guid id, ISender sender) =>
         {
             var result = await sender.Send(new GetCustomerByIdQuery(id));
