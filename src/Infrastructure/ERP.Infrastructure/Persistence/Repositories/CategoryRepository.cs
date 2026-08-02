@@ -10,8 +10,11 @@ public sealed class CategoryRepository(AppDbContext context)
 {
     public async Task<Category?> GetByNameAsync(string name, CancellationToken ct = default)
     {
-        var normalized = name.Trim().ToLower();
-        return await Set.FirstOrDefaultAsync(c => c.Name.ToLower() == normalized, ct);
+        // Müqayisə C#-da (OrdinalIgnoreCase) aparılır — SQLite lower() Azərbaycan hərflərini
+        // (Ç, Ş, İ, Ö, Ü, Ğ) düzgün kiçiltmir və bu, təkrar kateqoriya yaradılmasına səbəb olurdu.
+        var normalized = name.Trim();
+        var all = await Set.ToListAsync(ct);
+        return all.FirstOrDefault(c => string.Equals(c.Name.Trim(), normalized, StringComparison.OrdinalIgnoreCase));
     }
 
     public async Task<IReadOnlyList<Category>> ListOrderedAsync(CancellationToken ct = default) =>
