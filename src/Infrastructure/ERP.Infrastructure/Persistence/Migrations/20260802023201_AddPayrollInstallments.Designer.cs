@@ -3,6 +3,7 @@ using System;
 using ERP.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ERP.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260802023201_AddPayrollInstallments")]
+    partial class AddPayrollInstallments
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.9");
@@ -1789,30 +1792,6 @@ namespace ERP.Infrastructure.Persistence.Migrations
                                 .HasForeignKey("PayrollId");
                         });
 
-                    b.OwnsOne("ERP.Domain.ValueObjects.Money", "PaidAmount", b1 =>
-                        {
-                            b1.Property<Guid>("PayrollId")
-                                .HasColumnType("TEXT");
-
-                            b1.Property<decimal>("Amount")
-                                .HasPrecision(18, 2)
-                                .HasColumnType("TEXT")
-                                .HasColumnName("PaidAmount");
-
-                            b1.Property<string>("Currency")
-                                .IsRequired()
-                                .HasMaxLength(3)
-                                .HasColumnType("TEXT")
-                                .HasColumnName("PaidCurrency");
-
-                            b1.HasKey("PayrollId");
-
-                            b1.ToTable("Payrolls");
-
-                            b1.WithOwner()
-                                .HasForeignKey("PayrollId");
-                        });
-
                     b.Navigation("BaseSalary")
                         .IsRequired();
 
@@ -1820,9 +1799,6 @@ namespace ERP.Infrastructure.Persistence.Migrations
                         .IsRequired();
 
                     b.Navigation("Deduction")
-                        .IsRequired();
-
-                    b.Navigation("PaidAmount")
                         .IsRequired();
                 });
 

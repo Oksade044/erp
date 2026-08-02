@@ -17,9 +17,16 @@ public static class PayrollMapping
         Bonus: p.Bonus.Amount,
         Deduction: p.Deduction.Amount,
         NetSalary: p.NetSalary.Amount,
+        PaidAmount: p.PaidAmount.Amount,
+        Remaining: p.Remaining.Amount,
         Currency: p.BaseSalary.Currency,
         Status: p.Status.ToString(),
         PaidDate: p.PaidDate,
         Notes: p.Notes,
-        CreatedAt: p.CreatedAt);
+        CreatedAt: p.CreatedAt,
+        Payments: p.Payments
+            .OrderByDescending(x => x.Date)
+            .Select(x => new PayrollPaymentDto(
+                x.Id, x.Amount.Amount, x.Amount.Currency, x.Date, x.Method, x.Note, x.IsBonus))
+            .ToList());
 }

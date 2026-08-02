@@ -12,8 +12,21 @@ public sealed record PayrollDto(
     decimal Bonus,
     decimal Deduction,
     decimal NetSalary,
+    decimal PaidAmount,
+    decimal Remaining,
     string Currency,
     string Status,
     DateOnly? PaidDate,
     string? Notes,
-    DateTimeOffset CreatedAt);
+    DateTimeOffset CreatedAt,
+    IReadOnlyList<PayrollPaymentDto> Payments);
+
+/// <summary>Əməkhaqqı üzrə bir ödəniş (installment/bonus).</summary>
+public sealed record PayrollPaymentDto(
+    Guid Id,
+    decimal Amount,
+    string Currency,
+    DateOnly Date,
+    string Method,
+    string? Note,
+    bool IsBonus);

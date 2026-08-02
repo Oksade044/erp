@@ -42,6 +42,20 @@ public static class PayrollEndpoints
             return result.IsSuccess ? Results.NoContent() : Results.BadRequest(new { error = result.Error });
         }).RequireAuthorization(Permissions.HrEdit);
 
+        // Hissə-hissə ödəniş (installment).
+        group.MapPost("/{id:guid}/payments", async (Guid id, AddPayrollPaymentRequest request, ISender sender) =>
+        {
+            var result = await sender.Send(new AddPayrollPaymentCommand(id, request.Amount, request.Date, request.Method, request.Note));
+            return result.IsSuccess ? Results.NoContent() : Results.BadRequest(new { error = result.Error });
+        }).RequireAuthorization(Permissions.HrEdit);
+
+        // Aylıq bonus.
+        group.MapPost("/{id:guid}/bonus", async (Guid id, AddPayrollPaymentRequest request, ISender sender) =>
+        {
+            var result = await sender.Send(new AddPayrollBonusCommand(id, request.Amount, request.Date, request.Method, request.Note));
+            return result.IsSuccess ? Results.NoContent() : Results.BadRequest(new { error = result.Error });
+        }).RequireAuthorization(Permissions.HrEdit);
+
         return app;
     }
 }

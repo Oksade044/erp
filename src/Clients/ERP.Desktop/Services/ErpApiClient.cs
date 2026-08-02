@@ -350,6 +350,14 @@ public sealed class ErpApiClient(HttpClient http)
         return await ReadResultAsync(resp, ct);
     }
 
+    /// <summary>Hissə-hissə ödəniş (installment).</summary>
+    public async Task<(bool ok, string? error)> AddPayrollPaymentAsync(Guid id, AddPayrollPaymentRequest request, CancellationToken ct = default) =>
+        await ReadResultAsync(await http.PostAsJsonAsync($"/api/v1/payrolls/{id}/payments", request, JsonOpts, ct), ct);
+
+    /// <summary>Aylıq bonus əlavəsi.</summary>
+    public async Task<(bool ok, string? error)> AddPayrollBonusAsync(Guid id, AddPayrollPaymentRequest request, CancellationToken ct = default) =>
+        await ReadResultAsync(await http.PostAsJsonAsync($"/api/v1/payrolls/{id}/bonus", request, JsonOpts, ct), ct);
+
     // --- Davamiyyət (Attendance) ---
     public Task<PagedResult<AttendanceDto>?> GetAttendanceAsync(string? search, CancellationToken ct = default) =>
         http.GetFromJsonAsync<PagedResult<AttendanceDto>>(

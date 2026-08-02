@@ -12,10 +12,18 @@ public sealed class PayrollRepository(AppDbContext context)
     public async Task<bool> ExistsForPeriodAsync(Guid employeeId, int year, int month, CancellationToken ct = default) =>
         await Set.AnyAsync(p => p.EmployeeId == employeeId && p.Year == year && p.Month == month, ct);
 
+    /// <summary>Ödənişlərlə birlikdə izlənən şəkildə yükləyir (installment status/qalıq üçün).</summary>
+    public async Task<Payroll?> GetByIdWithPaymentsAsync(Guid id, CancellationToken ct = default) =>
+        await Set.Include(p => p.Payments).FirstOrDefaultAsync(p => p.Id == id, ct);
+
+    /// <summary>Ödəniş qeydini ayrıca DbSet-ə əlavə edir — həmişə "Added" (INSERT).</summary>
+    public void AddPaymentRecord(PayrollPayment payment) =>
+        Context.Set<PayrollPayment>().Add(payment);
+
     public async Task<PagedResult<Payroll>> SearchAsync(
         string? search, Guid? employeeId, int page, int pageSize, CancellationToken ct = default)
     {
-        var query = Set.AsNoTracking().AsQueryable();
+        var query = Set.AsNoTracking().Include(p => p.Payments).AsQueryable();
 
         if (employeeId is { } id)
             query = query.Where(p => p.EmployeeId == id);

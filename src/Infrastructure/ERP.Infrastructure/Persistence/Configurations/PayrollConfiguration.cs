@@ -44,8 +44,22 @@ public sealed class PayrollConfiguration : IEntityTypeConfiguration<Payroll>
             m.Property(x => x.Amount).HasColumnName("Deduction").HasPrecision(18, 2).IsRequired();
             m.Property(x => x.Currency).HasColumnName("DeductionCurrency").HasMaxLength(3).IsRequired();
         });
+        builder.OwnsOne(p => p.PaidAmount, m =>
+        {
+            m.Property(x => x.Amount).HasColumnName("PaidAmount").HasPrecision(18, 2).IsRequired();
+            m.Property(x => x.Currency).HasColumnName("PaidCurrency").HasMaxLength(3).IsRequired();
+        });
 
         builder.Ignore(p => p.NetSalary);
+        builder.Ignore(p => p.Remaining);
+
+        // Hissə-hissə ödənişlər (installment) — backing field ilə oxu-yalnız naviqasiya.
+        builder.HasMany(p => p.Payments)
+            .WithOne()
+            .HasForeignKey(pp => pp.PayrollId)
+            .OnDelete(DeleteBehavior.Cascade);
+        builder.Navigation(p => p.Payments)
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
 
         builder.HasIndex(p => new { p.EmployeeId, p.Year, p.Month }).IsUnique();
 

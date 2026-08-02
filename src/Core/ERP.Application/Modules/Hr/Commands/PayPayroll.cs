@@ -26,19 +26,25 @@ public sealed class PayPayrollHandler(
 
         var today = DateOnly.FromDateTime(DateTime.UtcNow);
 
-        payroll.MarkPaid(today);
-        payrolls.Update(payroll);
+        // Yalnız qalıq borc qədər ödəniş edilir (əvvəl hissə-hissə ödənilibsə nəzərə alınır).
+        var amountPaid = payroll.Remaining;
+        if (amountPaid.Amount <= 0m)
+            return Result.Failure("Bu əməkhaqqı üzrə qalıq borc yoxdur.");
 
-        // Maliyyəyə məxaric (kassadan çıxış) — əməkhaqqı ödənişi.
+        // Payroll izlənir → PaidAmount/Status dəyişikliyi UPDATE; ödəniş qeydi isə ayrıca INSERT.
+        var payment = payroll.MarkPaid(today);
+        payrolls.AddPaymentRecord(payment);
+
+        // Maliyyəyə məxaric (kassadan çıxış) — yalnız indi ödənilən məbləğ qədər.
         var number = $"TRX-{DateTime.UtcNow:yyyyMMdd}-{Guid.NewGuid().ToString("N")[..6].ToUpperInvariant()}";
         var expense = FinancialTransaction.Create(
             number,
             TransactionType.Məxaric,
             "Əməkhaqqı",
-            payroll.NetSalary,
+            amountPaid,
             today,
             PaymentMethod.Köçürmə,
-            $"{payroll.EmployeeName} — {payroll.Year}/{payroll.Month:D2} əməkhaqqı ({payroll.PayrollNumber})");
+            $"{payroll.EmployeeName} — {payroll.Year}/{payroll.Month:D2} əməkhaqqı (tam ödəniş, {payroll.PayrollNumber})");
 
         await transactions.AddAsync(expense, ct);
         await unitOfWork.SaveChangesAsync(ct);

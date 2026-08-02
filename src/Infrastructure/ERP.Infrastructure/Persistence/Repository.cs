@@ -14,7 +14,7 @@ public class Repository<T>(AppDbContext context) : IRepository<T>
     protected readonly AppDbContext Context = context;
     protected DbSet<T> Set => Context.Set<T>();
 
-    public async Task<T?> GetByIdAsync(Guid id, CancellationToken ct = default) =>
+    public virtual async Task<T?> GetByIdAsync(Guid id, CancellationToken ct = default) =>
         await Set.FirstOrDefaultAsync(e => e.Id == id, ct);
 
     public async Task<IReadOnlyList<T>> ListAsync(CancellationToken ct = default) =>

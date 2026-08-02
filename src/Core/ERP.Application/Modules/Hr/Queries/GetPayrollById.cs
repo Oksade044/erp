@@ -13,7 +13,7 @@ public sealed class GetPayrollByIdHandler(IPayrollRepository payrolls)
 {
     public async Task<Result<PayrollDto>> Handle(GetPayrollByIdQuery request, CancellationToken ct)
     {
-        var payroll = await payrolls.GetByIdAsync(request.Id, ct);
+        var payroll = await payrolls.GetByIdWithPaymentsAsync(request.Id, ct);
         return payroll is null
             ? Result.Failure<PayrollDto>($"Əməkhaqqı tapılmadı: {request.Id}")
             : Result.Success(payroll.ToDto());
