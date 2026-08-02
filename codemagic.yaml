@@ -45,9 +45,17 @@ workflows:
           dotnet --version
           dotnet workload install maui
 
-      - name: İmza sertifikatı + provisioning profil gətir və tətbiq et
+      - name: İmza sertifikatı + App ID + provisioning profil yarat/gətir
         script: |
           keychain initialize
+          # 1) iOS Distribution sertifikatı — mövcud varsa götür, YOXDURSA yarat.
+          #    (Yalnız --create/fetch-signing-files bəzən "No matching profiles" verir,
+          #     çünki hesabda distribution sertifikatı olmadan App Store profili yaradıla bilmir.)
+          app-store-connect list-certificates --type IOS_DISTRIBUTION --save \
+            || app-store-connect create-certificate --type IOS_DISTRIBUTION --save
+          # 2) Bundle ID (App ID) qeydiyyatı — idempotent (varsa xəta verməsin).
+          app-store-connect create-bundle-id "$BUNDLE_ID" --name "ERP Isci" --platform IOS || true
+          # 3) App Store provisioning profilini (və sertifikatları) gətir/yarat.
           app-store-connect fetch-signing-files "$BUNDLE_ID" \
             --type IOS_APP_STORE \
             --create
