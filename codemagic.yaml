@@ -30,12 +30,19 @@ workflows:
         bundle_identifier: az.erp.employee
       vars:
         BUNDLE_ID: "az.erp.employee"
-      # .NET 10 (layihə net10.0 hədəflidir). Codemagic dəstəkləmirsə konkret versiya yazın.
-      dotnet: 10.0
 
     scripts:
+      - name: .NET 10 SDK təmin et (yoxdursa quraşdır)
+        script: |
+          if ! dotnet --list-sdks 2>/dev/null | grep -q '^10\.'; then
+            curl -sSL https://dot.net/v1/dotnet-install.sh -o /tmp/dotnet-install.sh
+            bash /tmp/dotnet-install.sh --channel 10.0 --install-dir "$HOME/.dotnet10"
+            echo "DOTNET_ROOT=$HOME/.dotnet10" >> "$CM_ENV"
+            echo "PATH=$HOME/.dotnet10:$PATH" >> "$CM_ENV"
+          fi
       - name: .NET MAUI workload quraşdır (android + ios + maccatalyst)
         script: |
+          dotnet --version
           dotnet workload install maui
 
       - name: İmza sertifikatı + provisioning profil gətir və tətbiq et
