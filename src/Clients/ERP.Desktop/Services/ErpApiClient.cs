@@ -137,6 +137,10 @@ public sealed class ErpApiClient(HttpClient http)
         await ReadResultAsync(await http.DeleteAsync($"/api/v1/employees/{id}", ct), ct);
     public async Task<(bool ok, string? error)> DeleteWarehouseAsync(Guid id, CancellationToken ct = default) =>
         await ReadResultAsync(await http.DeleteAsync($"/api/v1/warehouses/{id}", ct), ct);
+    public async Task<(bool ok, string? error)> UpdateEmployeeAsync(Guid id, ERP.Shared.Contracts.Hr.UpdateEmployeeRequest request, CancellationToken ct = default) =>
+        await ReadResultAsync(await http.PutAsJsonAsync($"/api/v1/employees/{id}", request, JsonOpts, ct), ct);
+    public async Task<(bool ok, string? error)> UpdateWarehouseAsync(Guid id, ERP.Shared.Contracts.Warehouses.UpdateWarehouseRequest request, CancellationToken ct = default) =>
+        await ReadResultAsync(await http.PutAsJsonAsync($"/api/v1/warehouses/{id}", request, JsonOpts, ct), ct);
     public async Task<(bool ok, string? error)> DeleteCategoryAsync(Guid id, CancellationToken ct = default) =>
         await ReadResultAsync(await http.DeleteAsync($"/api/v1/categories/{id}", ct), ct);
 

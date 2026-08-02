@@ -21,11 +21,14 @@ public sealed partial class DraftLine : ObservableObject
     public Guid? WarehouseId { get; }
     public string? WarehouseName { get; }
 
+    /// <summary>#3 — bu anbarda mövcud boş say (say redaktə olunanda xəbərdarlıq üçün). 0 = naməlum.</summary>
+    public int MaxAvailable { get; }
+
     [ObservableProperty] private int _quantity;
     [ObservableProperty] private decimal _unitPrice;
 
     public DraftLine(Guid productId, string productName, int quantity, decimal unitPrice,
-        Guid? warehouseId = null, string? warehouseName = null)
+        Guid? warehouseId = null, string? warehouseName = null, int maxAvailable = 0)
     {
         ProductId = productId;
         ProductName = productName;
@@ -33,10 +36,22 @@ public sealed partial class DraftLine : ObservableObject
         _unitPrice = unitPrice;
         WarehouseId = warehouseId;
         WarehouseName = warehouseName;
+        MaxAvailable = maxAvailable;
     }
 
+    /// <summary>#3 — say anbardakı boş saydan çoxdursa cədvəldə görünən xəbərdarlıq.</summary>
+    public bool ExceedsStock => MaxAvailable > 0 && Quantity > MaxAvailable;
+    public string StockHint => MaxAvailable > 0 ? $"boş: {MaxAvailable}" : "";
+
     public decimal LineTotal => Quantity * UnitPrice;
-    partial void OnQuantityChanged(int value) => OnPropertyChanged(nameof(LineTotal));
+    partial void OnQuantityChanged(int value)
+    {
+        OnPropertyChanged(nameof(LineTotal));
+        OnPropertyChanged(nameof(ExceedsStock));
+        // #3/#4 — say boş saydan çox olarsa ekran ortası xəbərdarlıq.
+        if (MaxAvailable > 0 && value > MaxAvailable)
+            ERP.Desktop.AppNotify.Show($"⚠ '{ProductName}' — anbarda boş yalnız {MaxAvailable} ədəddir (istənilən: {value}).");
+    }
     partial void OnUnitPriceChanged(decimal value) => OnPropertyChanged(nameof(LineTotal));
 }
 
@@ -194,6 +209,13 @@ public partial class OrdersViewModel : ViewModelBase
     {
         if (_pendingInvoiceId is not { } id) { ShowPaymentPrompt = false; return; }
 
+        // #4 — qeyd mütləqdir.
+        if (string.IsNullOrWhiteSpace(PaymentNote))
+        {
+            ERP.Desktop.AppNotify.Show("⚠ Qeyd mütləqdir — ödəniş/hesablaşma üçün qeyd yazın.");
+            return;
+        }
+
         // #C — qaytarmada zədə/cərimə → hesablaşma (fakturanın yekun borcunu artırır).
         if (IsReturnPrompt && (PromptDamage > 0 || PromptPenalty > 0))
         {
@@ -205,8 +227,9 @@ public partial class OrdersViewModel : ViewModelBase
         {
             var (ok, err) = await api.AddInvoicePaymentAsync(id, new AddPaymentRequest(PaymentAmount, PaymentMethod, null, PaymentNote));
             Status = ok ? $"Ödəniş əlavə olundu: {PaymentAmount:0.00} AZN ({PaymentMethod})" : (err ?? "Ödəniş alınmadı.");
+            ERP.Desktop.AppNotify.Show(ok ? $"✓ Ödəniş: {PaymentAmount:0.00} AZN ({PaymentMethod})" : (err ?? "Ödəniş alınmadı."));
         }
-        else Status = IsReturnPrompt ? "Hesablaşma qeyd olundu." : "Ödəniş məbləği daxil edilmədi.";
+        else { Status = IsReturnPrompt ? "Hesablaşma qeyd olundu." : "Ödəniş məbləği daxil edilmədi."; ERP.Desktop.AppNotify.Show(Status); }
 
         ShowPaymentPrompt = false;
         await LoadAsync();
@@ -278,6 +301,7 @@ public partial class OrdersViewModel : ViewModelBase
             if (ok) done++; else fail++;
         }
         Status = $"{done} sifariş təsdiqləndi" + (fail > 0 ? $", {fail} alınmadı" : "") + ".";
+        ERP.Desktop.AppNotify.Show($"✓ {done} sifariş təsdiqləndi" + (fail > 0 ? $" ({fail} alınmadı)" : "") + ".");
         await LoadAsync();
     }
 
@@ -309,16 +333,18 @@ public partial class OrdersViewModel : ViewModelBase
         if (LineUnitPrice < 0) { Status = "Qiymət mənfi ola bilməz."; return; }
         if (DraftLines.Any(l => l.ProductId == LineProduct.Id)) { Status = "Bu məhsul artıq əlavə olunub."; return; }
 
-        // #18/#19 — seçilmiş anbarda kifayət qədər boş varmı?
+        // #18/#19 — seçilmiş anbarda kifayət qədər boş varmı? (ekran ortası xəbərdarlıq)
         if (LineWarehouse is not null && LineQuantity > LineWarehouse.Free)
         {
-            Status = $"'{LineWarehouse.WarehouseName}' anbarında boş yalnız {LineWarehouse.Free} ədəddir.";
+            var msg = $"⚠ '{LineWarehouse.WarehouseName}' anbarında boş yalnız {LineWarehouse.Free} ədəddir (istənilən: {LineQuantity}).";
+            Status = msg;
+            ERP.Desktop.AppNotify.Show(msg);
             return;
         }
 
         // #29/#30 — istifadəçinin daxil etdiyi (dəyişdirilə bilən) vahid qiymət istifadə olunur.
         DraftLines.Add(Track(new DraftLine(LineProduct.Id, LineProduct.Name, LineQuantity, LineUnitPrice,
-            LineWarehouse?.WarehouseId, LineWarehouse?.WarehouseName)));
+            LineWarehouse?.WarehouseId, LineWarehouse?.WarehouseName, LineWarehouse?.Free ?? 0)));
         OnPropertyChanged(nameof(DraftTotal));
         LineQuantity = 1;
     }
@@ -352,6 +378,7 @@ public partial class OrdersViewModel : ViewModelBase
             Status = SelectedCreator is not null
                 ? $"Sifariş yaradıldı (Qaralama) — məsul: {SelectedCreator.FullName}."
                 : "Sifariş yaradıldı (Qaralama).";
+            ERP.Desktop.AppNotify.Show("✓ Sifariş yaradıldı (Qaralama).");
             DraftLines.Clear();
             NewCustomer = null;
             SelectedCreator = null;
@@ -394,6 +421,7 @@ public partial class OrdersViewModel : ViewModelBase
         var num = Selected.OrderNumber; var id = Selected.Id;
         var (ok, error) = await api.ConfirmOrderAsync(Selected.Id);
         Status = ok ? "Sifariş təsdiqləndi." : error ?? "Təsdiqlənmədi.";
+        ERP.Desktop.AppNotify.Show(ok ? $"✓ Sifariş təsdiqləndi: {num}" : error ?? "Təsdiqlənmədi.");
         await LoadAsync();
         if (ok) await OpenPaymentPromptAsync(id, num, "Təsdiqləndi");
     }
@@ -402,8 +430,10 @@ public partial class OrdersViewModel : ViewModelBase
     private async Task CancelAsync()
     {
         if (Selected is null) { Status = "Sifariş seçin."; return; }
+        var num = Selected.OrderNumber;
         var (ok, error) = await api.CancelOrderAsync(Selected.Id);
         Status = ok ? "Sifariş ləğv edildi." : error ?? "Ləğv edilmədi.";
+        ERP.Desktop.AppNotify.Show(ok ? $"✓ Sifariş ləğv edildi: {num}" : error ?? "Ləğv edilmədi.");
         await LoadAsync();
     }
 
@@ -414,6 +444,7 @@ public partial class OrdersViewModel : ViewModelBase
         var num = Selected.OrderNumber; var id = Selected.Id;
         var (ok, error) = await api.DeliverOrderAsync(Selected.Id);
         Status = ok ? "Sifariş təhvil verildi." : error ?? "Təhvil verilmədi.";
+        ERP.Desktop.AppNotify.Show(ok ? $"✓ Sifariş təhvil verildi: {num}" : error ?? "Təhvil verilmədi.");
         await LoadAsync();
         if (ok) await OpenPaymentPromptAsync(id, num, "Təhvil verildi");
     }
@@ -425,6 +456,7 @@ public partial class OrdersViewModel : ViewModelBase
         var num = Selected.OrderNumber; var id = Selected.Id;
         var (ok, error) = await api.ReturnOrderAsync(Selected.Id);
         Status = ok ? "Sifariş qaytarıldı." : error ?? "Qaytarılmadı.";
+        ERP.Desktop.AppNotify.Show(ok ? $"✓ Sifariş qaytarıldı: {num}" : error ?? "Qaytarılmadı.");
         await LoadAsync();
         if (ok) await OpenPaymentPromptAsync(id, num, "Qaytarıldı", isReturn: true);
     }

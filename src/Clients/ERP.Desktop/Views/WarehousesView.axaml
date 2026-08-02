@@ -27,6 +27,8 @@
                     </TextBox>
                     <Button Content="Axtar" Command="{Binding LoadCommand}" />
                     <Button Content="⟳ Yenilə" Command="{Binding LoadCommand}" />
+                    <Button Content="✎ Redaktə et" Command="{Binding EditSelectedCommand}"
+                            ToolTip.Tip="Seçilmiş anbarı redaktə et (ad, kod, şəhər, telefon)" />
                     <Button Content="🗑 Sil" Command="{Binding DeleteSelectedCommand}" Background="#E03131" Foreground="White"
                             ToolTip.Tip="Seçilmiş anbarı sil (bərpa oluna bilər)" />
                 </StackPanel>

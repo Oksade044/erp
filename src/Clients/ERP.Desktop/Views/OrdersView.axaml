@@ -168,6 +168,15 @@
                         <DataGridTextColumn Header="Məhsul" Binding="{Binding ProductName}" Width="2*" IsReadOnly="True" />
                         <DataGridTextColumn Header="Anbar" Binding="{Binding WarehouseName}" Width="*" IsReadOnly="True" />
                         <DataGridTextColumn Header="Say ✎" Binding="{Binding Quantity}" Width="*" />
+                        <DataGridTemplateColumn Header="Stok" Width="Auto">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:CompileBindings="False">
+                                    <TextBlock Text="{Binding StockHint}" VerticalAlignment="Center" Margin="6,0"
+                                               Foreground="{Binding ExceedsStock, Converter={x:Static conv:BoolToRedGrayConverter.Instance}}"
+                                               FontWeight="{Binding ExceedsStock, Converter={x:Static conv:BoolToBoldConverter.Instance}}" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
                         <DataGridTextColumn Header="Qiymət ✎" Binding="{Binding UnitPrice}" Width="*" />
                         <DataGridTextColumn Header="Cəm" Binding="{Binding LineTotal}" Width="*" IsReadOnly="True" />
                         <DataGridTemplateColumn Header="" Width="Auto">

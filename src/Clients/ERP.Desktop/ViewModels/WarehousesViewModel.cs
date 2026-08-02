@@ -12,6 +12,7 @@ public partial class WarehousesViewModel(ErpApiClient api) : ViewModelBase
 {
     public ObservableCollection<WarehouseDto> Warehouses { get; } = [];
     [ObservableProperty] private WarehouseDto? _selected;
+    private System.Guid? _editId;
 
     /// <summary>Seçilmiş anbarı silir (soft delete).</summary>
     [RelayCommand]
@@ -22,6 +23,16 @@ public partial class WarehousesViewModel(ErpApiClient api) : ViewModelBase
         var (ok, err) = await api.DeleteWarehouseAsync(Selected.Id);
         ERP.Desktop.AppNotify.Show(ok ? $"Anbar silindi: {name}" : err ?? "Silinmədi.");
         if (ok) await LoadAsync();
+    }
+
+    /// <summary>Seçilmiş anbarı forma sahələrinə yükləyir — 'Yadda saxla' yeniləyir.</summary>
+    [RelayCommand]
+    private void EditSelected()
+    {
+        if (Selected is null) { ERP.Desktop.AppNotify.Show("Redaktə üçün anbar seçin."); return; }
+        _editId = Selected.Id;
+        NewName = Selected.Name; NewCode = Selected.Code; NewCity = Selected.City; NewPhone = Selected.Phone;
+        ERP.Desktop.AppNotify.Show("Məlumatı dəyişib 'Yadda saxla' basın.");
     }
 
     [ObservableProperty] private string? _search;
@@ -69,12 +80,19 @@ public partial class WarehousesViewModel(ErpApiClient api) : ViewModelBase
         IsBusy = true;
         try
         {
-            var (ok, error) = await api.CreateWarehouseAsync(new CreateWarehouseRequest(
-                Name: NewName!, Code: NewCode!, Phone: NewPhone, City: NewCity));
+            bool ok; string? error;
+            if (_editId is { } id)
+                (ok, error) = await api.UpdateWarehouseAsync(id, new UpdateWarehouseRequest(
+                    Name: NewName!, Code: NewCode!, Phone: NewPhone, City: NewCity));
+            else
+                (ok, error) = await api.CreateWarehouseAsync(new CreateWarehouseRequest(
+                    Name: NewName!, Code: NewCode!, Phone: NewPhone, City: NewCity));
 
             if (ok)
             {
-                Status = "Anbar əlavə olundu.";
+                Status = _editId is null ? "Anbar əlavə olundu." : "Anbar yeniləndi.";
+                ERP.Desktop.AppNotify.Show(Status);
+                _editId = null;
                 NewName = NewCode = NewCity = NewPhone = null;
                 await LoadAsync();
             }

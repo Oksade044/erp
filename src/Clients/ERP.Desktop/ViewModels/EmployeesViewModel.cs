@@ -17,6 +17,8 @@ public partial class EmployeesViewModel(ErpApiClient api, bool canViewSalary = t
 
     public ObservableCollection<EmployeeDto> Employees { get; } = [];
     [ObservableProperty] private EmployeeDto? _selected;
+    private Guid? _editId;
+    private string _editStatus = "İşləyir";
 
     /// <summary>Maaş sütunu/sahəsinin görünürlüyü — sahə icazəsindən (employee.salary).</summary>
     public bool CanViewSalary { get; } = canViewSalary;
@@ -30,6 +32,18 @@ public partial class EmployeesViewModel(ErpApiClient api, bool canViewSalary = t
         var (ok, err) = await api.DeleteEmployeeAsync(Selected.Id);
         ERP.Desktop.AppNotify.Show(ok ? $"Təmsilçi silindi: {name}" : err ?? "Silinmədi.");
         if (ok) await LoadAsync();
+    }
+
+    /// <summary>Seçilmiş təmsilçini forma sahələrinə yükləyir — 'Yadda saxla' yeniləyir.</summary>
+    [RelayCommand]
+    private void EditSelected()
+    {
+        if (Selected is null) { ERP.Desktop.AppNotify.Show("Redaktə üçün təmsilçi seçin."); return; }
+        _editId = Selected.Id; _editStatus = Selected.Status;
+        NewFullName = Selected.FullName; NewPosition = Selected.Position; NewDepartment = Selected.Department;
+        NewPhone = Selected.Phone; NewEmail = Selected.Email; NewSalary = Selected.Salary;
+        NewHireDate = new DateTimeOffset(Selected.HireDate.ToDateTime(TimeOnly.MinValue));
+        ERP.Desktop.AppNotify.Show("Məlumatı dəyişib 'Yadda saxla' basın.");
     }
 
     [ObservableProperty] private string? _search;
@@ -81,18 +95,26 @@ public partial class EmployeesViewModel(ErpApiClient api, bool canViewSalary = t
         IsBusy = true;
         try
         {
-            var (ok, error) = await api.CreateEmployeeAsync(new CreateEmployeeRequest(
-                FullName: NewFullName!,
-                Position: NewPosition!,
-                Phone: NewPhone!,
-                HireDate: DateOnly.FromDateTime(NewHireDate.DateTime),
-                Salary: NewSalary,
-                Department: NewDepartment,
-                Email: NewEmail));
+            bool ok; string? error;
+            if (_editId is { } id)
+                (ok, error) = await api.UpdateEmployeeAsync(id, new UpdateEmployeeRequest(
+                    FullName: NewFullName!, Position: NewPosition!, Phone: NewPhone!,
+                    Salary: NewSalary, Status: _editStatus, Department: NewDepartment, Email: NewEmail));
+            else
+                (ok, error) = await api.CreateEmployeeAsync(new CreateEmployeeRequest(
+                    FullName: NewFullName!,
+                    Position: NewPosition!,
+                    Phone: NewPhone!,
+                    HireDate: DateOnly.FromDateTime(NewHireDate.DateTime),
+                    Salary: NewSalary,
+                    Department: NewDepartment,
+                    Email: NewEmail));
 
             if (ok)
             {
-                Status = "İşçi əlavə olundu.";
+                Status = _editId is null ? "İşçi əlavə olundu." : "İşçi yeniləndi.";
+                ERP.Desktop.AppNotify.Show(Status);
+                _editId = null;
                 NewFullName = NewPosition = NewDepartment = NewPhone = NewEmail = null;
                 NewSalary = 0;
                 await LoadAsync();
