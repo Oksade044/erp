@@ -1,0 +1,66 @@
+# Codemagic CI/CD — ERP İşçi mobil tətbiqi (.NET MAUI) iOS .ipa build
+# ------------------------------------------------------------------------------
+# Bu fayl repo kökündə olduğu üçün Codemagic Flutter AVTOMATİK-AŞKARLAMANI ATLAYIR.
+# Əvvəlki "Failed to install dependencies for pubspec file ... Directory was not found"
+# xətası məhz buna görə idi: layihə Flutter DEYİL (pubspec.yaml yoxdur), .NET MAUI-dir (C#).
+#
+# Codemagic-də BİR DƏFƏLİK quraşdırılmalı olanlar (UI-dan, kod deyil):
+#   1) Apple Developer Program üzvlüyü + App Store Connect girişi.
+#   2) Codemagic → Team settings → Integrations → App Store Connect:
+#      API key əlavə edin, ona ad verin və aşağıdakı `app_store_connect: CodemagicASC`
+#      dəyərini HƏMİN adla əvəz edin.
+#   3) Bundle Id `az.erp.employee` — `fetch-signing-files --create` onu avtomatik yaradacaq,
+#      və ya Apple Developer portalında əvvəlcədən qeydiyyatdan keçirin.
+# ------------------------------------------------------------------------------
+
+workflows:
+  ios-maui:
+    name: ERP İşçi — iOS (.ipa)
+    max_build_duration: 90
+    instance_type: mac_mini_m2
+
+    integrations:
+      # ↓ Codemagic-dəki App Store Connect API key-in ADI ilə əvəz edin.
+      app_store_connect: CodemagicASC
+
+    environment:
+      ios_signing:
+        # app_store = App Store / TestFlight üçün. Cihaza birbaşa yükləmə üçün: ad_hoc
+        distribution_type: app_store
+        bundle_identifier: az.erp.employee
+      vars:
+        BUNDLE_ID: "az.erp.employee"
+      # .NET 10 (layihə net10.0 hədəflidir). Codemagic dəstəkləmirsə konkret versiya yazın.
+      dotnet: 10.0
+
+    scripts:
+      - name: .NET MAUI workload quraşdır (android + ios + maccatalyst)
+        script: |
+          dotnet workload install maui
+
+      - name: İmza sertifikatı + provisioning profil gətir və tətbiq et
+        script: |
+          keychain initialize
+          app-store-connect fetch-signing-files "$BUNDLE_ID" \
+            --type IOS_APP_STORE \
+            --create
+          keychain add-certificates
+          xcode-project use-profiles
+
+      - name: .ipa qur (yalnız iOS hədəfi)
+        script: |
+          dotnet publish src/Clients/ERP.Mobile/ERP.Mobile.csproj \
+            -c Release \
+            -f net10.0-ios
+
+    artifacts:
+      - "**/*.ipa"
+
+    publishing:
+      email:
+        recipients:
+          - seymur15abbasli@gmail.com
+      # İstəsəniz avtomatik TestFlight-a göndərmə üçün aşağını açın:
+      # app_store_connect:
+      #   auth: integration
+      #   submit_to_testflight: true
