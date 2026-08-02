@@ -49,9 +49,13 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 
         // RowVersion (optimistic concurrency, TDD §35) — bütün BaseEntity-lər üçün provider-aware:
-        //  • SQLite (lokal): native rowversion yoxdur → sadə konkurentlik sütunu, dəyəri app idarə edir.
-        //  • SQL Server / PostgreSQL (server): əsl store-generated rowversion.
-        var isSqlite = Database.IsSqlite();
+        //  • SQL Server: əsl store-generated rowversion (DB avtomatik doldurur).
+        //  • SQLite (lokal) və PostgreSQL (server): native auto-generate byte[] rowversion yoxdur
+        //    (Npgsql IsRowVersion() byte[] sütununu doldurmur → NOT NULL pozuntusu). Ona görə
+        //    app-managed konkurentlik sütunu (boş byte[] = []). Qeyd: Postgres-də daha idiomatik
+        //    konkurentlik üçün gələcəkdə xmin (UseXminAsConcurrencyToken) nəzərdən keçirilə bilər.
+        var useStoreGeneratedRowVersion =
+            Database.ProviderName?.Contains("SqlServer", StringComparison.OrdinalIgnoreCase) == true;
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
             if (!typeof(BaseEntity).IsAssignableFrom(entityType.ClrType))
@@ -61,10 +65,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
                 .Property(nameof(BaseEntity.RowVersion))
                 .IsConcurrencyToken();
 
-            if (isSqlite)
-                rowVersion.ValueGeneratedNever();
-            else
+            if (useStoreGeneratedRowVersion)
                 rowVersion.IsRowVersion();
+            else
+                rowVersion.ValueGeneratedNever();
         }
 
         base.OnModelCreating(modelBuilder);
