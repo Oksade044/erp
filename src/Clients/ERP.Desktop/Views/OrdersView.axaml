@@ -231,7 +231,7 @@
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
                 <!-- #41 — sıra: Status, Növ, Müştəri, Yaradan, Maliyyə, Tarixlər, № -->
-                <DataGridTemplateColumn Header="Status" Width="Auto">
+                <DataGridTemplateColumn Header="Status" Width="Auto" SortMemberPath="Status">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Border Background="{Binding Status, Converter={StaticResource StatusColor}}"
@@ -255,7 +255,7 @@
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
                 <!-- #41 — Maliyyə: məbləğ + depozit + tutulma + qaytarma bir yerdə -->
-                <DataGridTemplateColumn Header="Maliyyə" Width="Auto" MinWidth="150">
+                <DataGridTemplateColumn Header="Maliyyə" Width="Auto" MinWidth="150" SortMemberPath="Total">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <StackPanel Margin="8,1" VerticalAlignment="Center">
