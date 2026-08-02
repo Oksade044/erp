@@ -115,18 +115,34 @@ public partial class OrdersViewModel : ViewModelBase
     public bool CreateMode { get; }
     public bool ListMode => !CreateMode;
 
-    public OrdersViewModel(ErpApiClient api, bool canChooseCreator = false, bool canViewCreator = true, bool createMode = false)
+    /// <summary>#B — status qrupu filtri (null=hamısı, "Qaralama", "Təhvil", "Qaytarılanlar", "Ləğv").</summary>
+    private readonly string? _statusGroup;
+
+    public OrdersViewModel(ErpApiClient api, bool canChooseCreator = false, bool canViewCreator = true,
+        bool createMode = false, string? statusGroup = null)
     {
         this.api = api;
         CanChooseCreator = canChooseCreator;
         CanViewCreator = canViewCreator;
         CreateMode = createMode;
+        _statusGroup = statusGroup;
         if (createMode)
         {
             ShowNewOrder = true;
             _ = EnsureFormDataAsync();
         }
     }
+
+    /// <summary>Sifarişin statusu bu bölmənin status qrupuna uyğundurmu.</summary>
+    private bool MatchesStatusGroup(string status) => _statusGroup switch
+    {
+        null => true,
+        "Qaralama" => status == "Qaralama",
+        "Təhvil" => status is "Təsdiqlənmiş" or "TəhvilVerilmiş",
+        "Qaytarılanlar" => status == "Qaytarılmış",
+        "Ləğv" => status == "Ləğv",
+        _ => true
+    };
 
     public ObservableCollection<OrderRow> Orders { get; } = [];
 
@@ -555,7 +571,7 @@ public partial class OrdersViewModel : ViewModelBase
             Orders.Clear();
             if (result is not null)
                 foreach (var o in result.Items)
-                    if (SelectedTypeFilter == "Hamısı" || o.OrderType == SelectedTypeFilter)
+                    if ((SelectedTypeFilter == "Hamısı" || o.OrderType == SelectedTypeFilter) && MatchesStatusGroup(o.Status))
                         Orders.Add(new OrderRow(o));
             Status = $"{Orders.Count} sifariş" + (SelectedTypeFilter == "Hamısı" ? "" : $" ({SelectedTypeFilter})");
         }
@@ -614,13 +630,25 @@ public partial class OrdersViewModel : ViewModelBase
         if (ok) await OpenPaymentPromptAsync(id, num, "Qaytarıldı", isReturn: true);
     }
 
-    /// <summary>Sifariş üçün fakturanı ödəniş paneli kimi aç (ödənişin nə qədəri göze girsin).</summary>
+    /// <summary>"Fakturaya bax" — sifarişin fakturasını PDF kimi açır.</summary>
     [RelayCommand]
     private async Task ViewInvoiceRowAsync(OrderRow? row)
     {
         row ??= Selected;
         if (row is null) return;
-        await OpenPaymentPromptAsync(row.Id, row.OrderNumber, "Faktura / ödəniş");
+        var invs = await api.GetInvoicesAsync(row.OrderNumber);
+        var inv = invs?.Items.FirstOrDefault(i => i.OrderNumber == row.OrderNumber);
+        if (inv is null) { ERP.Desktop.AppNotify.Show("Bu sifariş üçün faktura tapılmadı."); return; }
+        var bytes = await api.GetInvoicePdfAsync(inv.Id);
+        if (bytes is null) { ERP.Desktop.AppNotify.Show("PDF alınmadı."); return; }
+        try
+        {
+            var path = System.IO.Path.Combine(System.IO.Path.GetTempPath(), $"{inv.InvoiceNumber}.pdf");
+            await System.IO.File.WriteAllBytesAsync(path, bytes);
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(path) { UseShellExecute = true });
+            ERP.Desktop.AppNotify.Show($"📄 Faktura açıldı: {inv.InvoiceNumber}");
+        }
+        catch (System.Exception ex) { ERP.Desktop.AppNotify.Show("PDF açılmadı: " + ex.Message); }
     }
 
     /// <summary>#18 — qaralama sifarişi düzənlə: tərkibini forma-panelə yüklə.</summary>

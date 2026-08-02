@@ -54,6 +54,11 @@ public partial class MainViewModel : ViewModelBase
         var canViewCr = CanViewField("order.creator");
         var orders = new OrdersViewModel(api, canChoose, canViewCr, createMode: false);
         var ordersCreate = new OrdersViewModel(api, canChoose, canViewCr, createMode: true);
+        // #B — statusa görə ayrıca sifariş siyahıları (sol menyuda qruplar).
+        var ordersDraft = new OrdersViewModel(api, canChoose, canViewCr, statusGroup: "Qaralama");
+        var ordersDelivery = new OrdersViewModel(api, canChoose, canViewCr, statusGroup: "Təhvil");
+        var ordersReturned = new OrdersViewModel(api, canChoose, canViewCr, statusGroup: "Qaytarılanlar");
+        var ordersCancelled = new OrdersViewModel(api, canChoose, canViewCr, statusGroup: "Ləğv");
         var invoices = new InvoicesViewModel(api);
         var suppliers = new SuppliersViewModel(api);
         var purchases = new PurchasesViewModel(api);
@@ -83,8 +88,12 @@ public partial class MainViewModel : ViewModelBase
             ["Məhsullar"] = ("\U0001F4E6", "Məhsul siyahısı", products),
             ["Məhsul Yarat"] = ("\U00002795", "Yeni məhsul", productsCreate),
             ["Kateqoriyalar"] = ("\U0001F3F7", "Kateqoriyalar", categories),
-            ["Sifarişlər"] = ("\U0001F9FE", "Sifariş siyahısı", orders),
-            ["Yeni Sifariş"] = ("\U00002795", "Yeni sifariş", ordersCreate),
+            ["Sifarişlər"] = ("\U0001F9FE", "Bütün sifarişlər", orders),
+            ["Yeni Sifariş"] = ("\U00002795", "İcarə / Satış yarat", ordersCreate),
+            ["Sifariş: Qaralama"] = ("\U0001F4DD", "Qaralama sifarişlər", ordersDraft),
+            ["Sifariş: Təhvil"] = ("\U0001F69A", "Təhvildə olanlar", ordersDelivery),
+            ["Sifariş: Qaytarılanlar"] = ("\U000021A9", "Qaytarılanlar", ordersReturned),
+            ["Sifariş: Ləğv"] = ("\U0000274C", "Ləğv edilənlər", ordersCancelled),
             ["Fakturalar"] = ("\U0001F9FE", "Fakturalar", invoices),
             ["Təchizatçılar"] = ("\U0001F69A", "Təchizatçılar", suppliers),
             ["Alışlar"] = ("\U0001F6D2", "Alışlar", purchases),
@@ -113,38 +122,41 @@ public partial class MainViewModel : ViewModelBase
             return item;
         }
 
+        // #B — sol menyu istifadəçinin istədiyi qruplaşma ilə: Kartlar / Satış / Mal / Maliyyə.
         Menu.Add(new NavGroup("İDARƏ PANELİ", [Item("İdarə Paneli", "Ümumi baxış")], isExpanded: true));
-        Menu.Add(new NavGroup("KARTLAR", [
-            Item("Müştəri Yarat", "➕ Yeni müştəri"),
-            Item("Müştərilər", "Müştəri siyahısı"),
+        Menu.Add(new NavGroup("🪪 KARTLAR", [
+            Item("Müştəri Yarat", "➕ Müştəri əlavə et"),
+            Item("Təmsilçi Yarat", "➕ Təmsilçi əlavə et"),
+            Item("Müştərilər", "Müştərilər siyahısı"),
+            Item("İşçilər", "Təmsilçilər siyahısı"),
         ], isExpanded: true));
-        Menu.Add(new NavGroup("TƏMSİLÇİLƏR", [
-            Item("Təmsilçi Yarat", "➕ Yeni təmsilçi"),
-            Item("İşçilər", "Təmsilçi siyahısı"),
-            Item("Təmsilçi Borcları", "Borclar / Hesab"),
-            Item("Əməkhaqqı", "Əməkhaqqı"),
-        ], isExpanded: true));
-        Menu.Add(new NavGroup("SATIŞ / İCARƏ", [
-            Item("Yeni Sifariş", "➕ Yeni sifariş yarat"),
-            Item("Sifarişlər", "Sifariş siyahısı"),
+        Menu.Add(new NavGroup("🛒 SATIŞ", [
+            Item("Yeni Sifariş", "➕ İcarə / Satış yarat"),
+            Item("Sifarişlər", "Bütün sifarişlər"),
+            Item("Sifariş: Qaralama", "• Qaralamalar"),
+            Item("Sifariş: Təhvil", "• Təhvildə olanlar"),
+            Item("Sifariş: Qaytarılanlar", "• Qaytarılanlar"),
+            Item("Sifariş: Ləğv", "• Ləğv edilənlər"),
             Item("Fakturalar", "Fakturalar"),
             Item("İcarə Təqvimi", "İcarə Təqvimi"),
         ], isExpanded: true));
-        Menu.Add(new NavGroup("MALLAR", [
-            Item("Məhsul Yarat", "➕ Yeni məhsul"),
-            Item("Məhsullar", "Məhsul siyahısı"),
+        Menu.Add(new NavGroup("📦 MAL", [
+            Item("Məhsul Yarat", "➕ Məhsul yarat"),
+            Item("Məhsullar", "Məhsul siyahısı / stok"),
             Item("Kateqoriyalar", "Kateqoriyalar"),
             Item("Stok", "Anbar stokları"),
             Item("Anbarlar", "Anbarlar"),
             Item("Alışlar", "Alışlar"),
             Item("Təchizatçılar", "Təchizatçılar"),
         ], isExpanded: true));
-        Menu.Add(new NavGroup("MALİYYƏ", [
+        Menu.Add(new NavGroup("💰 MALİYYƏ", [
             Item("Kassa", "Kassa"),
-            Item("Maliyyə", "Maliyyə (gəlir/xərc)"),
+            Item("Maliyyə", "Maliyyə hesabatlar"),
             Item("Hesabatlar", "Hesabatlar"),
+            Item("Təmsilçi Borcları", "Borclar / Hesab"),
+            Item("Əməkhaqqı", "Əməkhaqqı"),
         ], isExpanded: true));
-        Menu.Add(new NavGroup("SİSTEM", [
+        Menu.Add(new NavGroup("⚙ SİSTEM", [
             Item("İstifadəçilər", "İstifadəçilər", CanManageUsers),
             Item("Rollar", "Rollar", CanManageUsers),
             Item("Sahə İcazələri", "Sahə İcazələri", CanManageUsers),
