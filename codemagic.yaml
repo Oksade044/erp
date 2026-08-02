@@ -47,15 +47,18 @@ workflows:
 
       - name: İmza sertifikatı + App ID + provisioning profil yarat/gətir
         script: |
+          set -x
           keychain initialize
-          # 1) iOS Distribution sertifikatı — mövcud varsa götür, YOXDURSA yarat.
-          #    (Yalnız --create/fetch-signing-files bəzən "No matching profiles" verir,
-          #     çünki hesabda distribution sertifikatı olmadan App Store profili yaradıla bilmir.)
-          app-store-connect list-certificates --type IOS_DISTRIBUTION --save \
-            || app-store-connect create-certificate --type IOS_DISTRIBUTION --save
-          # 2) Bundle ID (App ID) qeydiyyatı — idempotent (varsa xəta verməsin).
+          # 1) iOS Distribution sertifikatı MÜTLƏQ olmalıdır (fetch-signing-files --create
+          #    yalnız profil yaradır, sertifikat YOX). Əvvəlcə yaratmağa çalış; hesabda artıq
+          #    varsa (Apple max sayı) mövcudları götür (list boş olsa belə uğur qaytardığı üçün
+          #    əvvəl create edirik). ⚠ API key rolu App Manager/Admin olmalıdır, yoxsa yaratma
+          #    icazəsi olmaz və "No matching profiles" davam edər.
+          app-store-connect create-certificate --type IOS_DISTRIBUTION --save \
+            || app-store-connect list-certificates --type IOS_DISTRIBUTION --save
+          # 2) Bundle ID (App ID) qeydiyyatı — idempotent.
           app-store-connect create-bundle-id "$BUNDLE_ID" --name "ERP Isci" --platform IOS || true
-          # 3) App Store provisioning profilini (və sertifikatları) gətir/yarat.
+          # 3) App Store provisioning profilini gətir/yarat.
           app-store-connect fetch-signing-files "$BUNDLE_ID" \
             --type IOS_APP_STORE \
             --create
