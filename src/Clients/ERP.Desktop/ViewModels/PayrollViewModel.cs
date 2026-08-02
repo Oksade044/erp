@@ -33,12 +33,72 @@ public partial class PayrollRow : ObservableObject
     public DateOnly? PaidDate => Dto.PaidDate;
 }
 
+/// <summary>Ödəniş panelində bir işçinin sətri — nə qədər ödəniləcək + bonus (#20).</summary>
+public partial class PayEntry : ObservableObject
+{
+    public PayrollRow Row { get; }
+    [ObservableProperty] private decimal _amount;
+    [ObservableProperty] private decimal _bonus;
+    public PayEntry(PayrollRow row) { Row = row; _amount = row.Remaining; }
+
+    public string EmployeeName => Row.EmployeeName;
+    public string Period => $"{Row.Year}/{Row.Month:D2}";
+    public decimal Remaining => Row.Remaining;
+    public string Currency => Row.Currency;
+}
+
 /// <summary>
-/// Əməkhaqqı ekranı — hesablamalar, hissə-hissə ödəniş (installment), aylıq bonus,
-/// checkbox ilə toplu ödəniş və seçilmiş işçinin ödəniş tarixçəsi (#5).
+/// Əməkhaqqı ekranı — hesablamalar, checkbox ilə seçib "Seçilənləri ödə" düyməsi ilə açılan
+/// paneldə hər işçiyə ayrıca məbləğ + bonus (#20 — sadələşdirilmiş, düymə əsaslı).
 /// </summary>
 public partial class PayrollViewModel(ErpApiClient api) : ViewModelBase
 {
+    /// <summary>#20 — ödəniş paneli (seçilən işçilər üçün, ekran ortası).</summary>
+    public ObservableCollection<PayEntry> PayEntries { get; } = [];
+    [ObservableProperty] private bool _showPayPanel;
+    [ObservableProperty] private string _payPanelMethod = "Nağd";
+
+    /// <summary>Seçilmiş işçiləri ödəniş panelinə yığır və panели açır.</summary>
+    [RelayCommand]
+    private void OpenPayPanel()
+    {
+        var chosen = Payrolls.Where(r => r.IsSelected).ToList();
+        if (chosen.Count == 0) { ERP.Desktop.AppNotify.Show("Ödəmək üçün işçi(lər) seçin (checkbox)."); return; }
+        PayEntries.Clear();
+        foreach (var r in chosen) PayEntries.Add(new PayEntry(r));
+        PayPanelMethod = "Nağd";
+        ShowPayPanel = true;
+    }
+
+    [RelayCommand]
+    private void CancelPayPanel() => ShowPayPanel = false;
+
+    /// <summary>Paneldəki hər işçiyə öz məbləğini ödəyir + bonus varsa əlavə edir.</summary>
+    [RelayCommand]
+    private async Task SubmitPayAllAsync()
+    {
+        int paid = 0, bonuses = 0, fail = 0;
+        var today = DateOnly.FromDateTime(DateTime.Now);
+        foreach (var e in PayEntries.ToList())
+        {
+            if (e.Amount > 0)
+            {
+                var (ok, _) = await api.AddPayrollPaymentAsync(e.Row.Id,
+                    new AddPayrollPaymentRequest(e.Amount, today, PayPanelMethod, "Ödəniş"));
+                if (ok) paid++; else fail++;
+            }
+            if (e.Bonus > 0)
+            {
+                var (ok, _) = await api.AddPayrollBonusAsync(e.Row.Id,
+                    new AddPayrollPaymentRequest(e.Bonus, today, PayPanelMethod, "Bonus"));
+                if (ok) bonuses++; else fail++;
+            }
+        }
+        ShowPayPanel = false;
+        ERP.Desktop.AppNotify.Show($"✓ {paid} ödəniş" + (bonuses > 0 ? $", {bonuses} bonus" : "") + (fail > 0 ? $" ({fail} alınmadı)" : "") + ".");
+        await LoadAsync();
+    }
+
     public ObservableCollection<PayrollRow> Payrolls { get; } = [];
     public ObservableCollection<EmployeeDto> AllEmployees { get; } = [];
 
