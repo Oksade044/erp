@@ -3,7 +3,7 @@
 Masaüstü tətbiqi (Avalonia) **self-contained** paketlənir: bütün .NET 10 runtime + kitabxanalar
 setup daxilindədir, hədəf kompüterdə **heç nə (o cümlədən .NET) quraşdırmaq lazım deyil**.
 Tətbiq açılışda **konsol/kod göstərmir** (`OutputType=WinExe`) və defolt olaraq **VPS API-yə**
-qoşulur (`http://76.13.11.79`).
+qoşulur (`https://76.13.11.79.sslip.io`).
 
 ## Qurma (setup.exe yaratmaq)
 
@@ -15,7 +15,7 @@ dotnet publish src/Clients/ERP.Desktop/ERP.Desktop.csproj -c Release -r win-x64 
   --self-contained true -o publish/desktop
 
 # 2) Server ünvanı (istəyə görə dəyiş — default onsuz da VPS-dir)
-"http://76.13.11.79" | Out-File -Encoding ascii -NoNewline publish/desktop/server.url
+"https://76.13.11.79.sslip.io" | Out-File -Encoding ascii -NoNewline publish/desktop/server.url
 
 # 3) Installer-i qur
 & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" `
@@ -32,6 +32,6 @@ masaüstü qısayolu yaranır. İlk açılışda giriş: **admin / Admin123!** (
 Tətbiq API ünvanını bu ardıcıllıqla həll edir:
 1. `ERP_API_URL` mühit dəyişəni
 2. exe qovluğundakı `server.url` faylı (`C:\Program Files\ERP Sistemi\server.url`)
-3. default `http://76.13.11.79`
+3. default `https://76.13.11.79.sslip.io`
 
 Başqa serverə keçmək üçün `server.url` faylını redaktə edin (məs. domen + HTTPS).
