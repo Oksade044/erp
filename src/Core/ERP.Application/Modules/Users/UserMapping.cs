@@ -12,6 +12,5 @@ public static class UserMapping
         FullName: u.FullName,
         Role: u.RoleName,
         IsActive: u.IsActive,
-        CreatedAt: u.CreatedAt,
-        VisiblePassword: u.VisiblePassword);
+        CreatedAt: u.CreatedAt);
 }

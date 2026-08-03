@@ -18,13 +18,6 @@ public class User : BaseEntity, IAggregateRoot
     public string RoleName { get; private set; } = null!;
     public bool IsActive { get; private set; } = true;
 
-    /// <summary>
-    /// Admin təyin etdiyi şifrə — YALNIZ admin panelində (users.manage) göstərilir ki, admin
-    /// işçiyə çatdıra bilsin (daxili tələb; müvəqqəti şifrə/məcburi dəyişmə yoxdur). Autentifikasiya
-    /// yenə də hash+salt ilədir. Qeyd: bu, açıq şifrə saxlamağın təhlükəsizlik güzəştidir.
-    /// </summary>
-    public string? VisiblePassword { get; private set; }
-
     public string? RefreshToken { get; private set; }
     public DateTimeOffset? RefreshTokenExpiresAt { get; private set; }
 
@@ -40,8 +33,7 @@ public class User : BaseEntity, IAggregateRoot
         RoleName = roleName;
     }
 
-    public static User Create(string username, string passwordHash, string passwordSalt, string fullName, string roleName,
-        string? visiblePassword = null)
+    public static User Create(string username, string passwordHash, string passwordSalt, string fullName, string roleName)
     {
         if (string.IsNullOrWhiteSpace(username))
             throw new DomainException("İstifadəçi adı tələb olunur.");
@@ -52,10 +44,7 @@ public class User : BaseEntity, IAggregateRoot
         if (string.IsNullOrWhiteSpace(roleName))
             throw new DomainException("Rol tələb olunur.");
 
-        return new User(username.Trim().ToLowerInvariant(), passwordHash, passwordSalt, fullName.Trim(), roleName.Trim())
-        {
-            VisiblePassword = visiblePassword
-        };
+        return new User(username.Trim().ToLowerInvariant(), passwordHash, passwordSalt, fullName.Trim(), roleName.Trim());
     }
 
     public void SetRefreshToken(string token, DateTimeOffset expiresAt)

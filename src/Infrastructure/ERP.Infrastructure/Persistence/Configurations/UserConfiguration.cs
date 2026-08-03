@@ -19,7 +19,6 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(u => u.PasswordSalt).HasMaxLength(200).IsRequired();
         builder.Property(u => u.FullName).HasMaxLength(200).IsRequired();
         builder.Property(u => u.RefreshToken).HasMaxLength(200);
-        builder.Property(u => u.VisiblePassword).HasMaxLength(200);
         builder.Property(u => u.IsActive).IsRequired();
 
         // #16 — rol adı string kimi; köhnə "Role" sütununda qalır (data migration lazım deyil).

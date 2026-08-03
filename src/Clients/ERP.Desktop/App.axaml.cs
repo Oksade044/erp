@@ -35,7 +35,7 @@ public partial class App : Application
             _desktop = desktop;
 
             // Tək HttpClient bütün ekranlar arasında bölüşülür (JWT token da burada saxlanılır).
-            var http = new HttpClient { BaseAddress = new Uri("http://localhost:5080") };
+            var http = new HttpClient { BaseAddress = new Uri(ResolveApiBaseUrl()) };
             _api = new ErpApiClient(http);
 
             ShowLogin();
@@ -77,6 +77,29 @@ public partial class App : Application
         _desktop.MainWindow = window;
         window.Show();
         old?.Close();
+    }
+
+    /// <summary>
+    /// API server ünvanını həll edir (rebuild olmadan dəyişmək mümkün olsun):
+    ///  1) ERP_API_URL mühit dəyişəni,
+    ///  2) exe yanındakı server.url faylı,
+    ///  3) default — VPS serveri.
+    /// </summary>
+    private static string ResolveApiBaseUrl()
+    {
+        var env = Environment.GetEnvironmentVariable("ERP_API_URL");
+        if (!string.IsNullOrWhiteSpace(env)) return env.Trim();
+        try
+        {
+            var file = Path.Combine(AppContext.BaseDirectory, "server.url");
+            if (File.Exists(file))
+            {
+                var value = File.ReadAllText(file).Trim();
+                if (!string.IsNullOrWhiteSpace(value)) return value;
+            }
+        }
+        catch { /* faylı oxumaq alınmasa default işlədilir */ }
+        return "http://76.13.11.79";
     }
 
     private static void LogCrash(string source, Exception? ex)
