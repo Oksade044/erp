@@ -99,7 +99,7 @@ public partial class App : Application
             }
         }
         catch { /* faylı oxumaq alınmasa default işlədilir */ }
-        return "https://76.13.11.79.sslip.io";
+        return "https://186.240.145.239.sslip.io";
     }
 
     private static void LogCrash(string source, Exception? ex)
