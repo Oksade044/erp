@@ -28,6 +28,9 @@ public static class Permissions
     public const string WarehousesView = "warehouses.view";
     public const string WarehousesEdit = "warehouses.edit";
     public const string ReportsView = "reports.view";
+    /// <summary>Təmsilçi borcları / hesabatı (satış-kassa sahəsi, HR deyil).</summary>
+    public const string RepresentativesView = "representatives.view";
+    public const string RepresentativesEdit = "representatives.edit";
     public const string UsersManage = "users.manage";
     /// <summary>Audit jurnalını görmək — yalnız səlahiyyətli (Admin).</summary>
     public const string AuditView = "audit.view";
@@ -35,19 +38,20 @@ public static class Permissions
     /// <summary>Bütün icazələr + istifadəçi üçün aydın adları (#16 — rol matrisi UI).</summary>
     public static readonly IReadOnlyList<(string Key, string Label)> Catalog =
     [
-        (CustomersView, "Müştərilər — bax"), (CustomersEdit, "Müştərilər — dəyiş"),
-        (ProductsView, "Məhsullar — bax"), (ProductsEdit, "Məhsullar — dəyiş"),
+        (CustomersView, "Müştərilər (+ Borclar) — bax"), (CustomersEdit, "Müştərilər — dəyiş"),
+        (ProductsView, "Məhsullar (+ Kateqoriyalar) — bax"), (ProductsEdit, "Məhsullar/Kateqoriyalar — dəyiş"),
         (ProductsViewCost, "Məhsul alış/satış qiyməti — bax"),
-        (OrdersView, "Sifarişlər — bax"), (OrdersEdit, "Sifarişlər — dəyiş"),
+        (OrdersView, "Sifarişlər (+ Bron/İcarə) — bax"), (OrdersEdit, "Sifarişlər — dəyiş"),
         (OrdersApprove, "Sifariş — təsdiqlə"),
         (InvoicesView, "Fakturalar — bax"), (InvoicesEdit, "Fakturalar — dəyiş/ödəniş"),
         (SuppliersView, "Təchizatçılar — bax"), (SuppliersEdit, "Təchizatçılar — dəyiş"),
         (PurchasesView, "Alışlar — bax"), (PurchasesEdit, "Alışlar — dəyiş"),
-        (FinanceView, "Maliyyə — bax"), (FinanceEdit, "Maliyyə — dəyiş"),
-        (HrView, "HR (işçilər) — bax"), (HrEdit, "HR — dəyiş"),
+        (FinanceView, "Maliyyə (+ Kassa) — bax"), (FinanceEdit, "Maliyyə/Kassa — dəyiş"),
+        (RepresentativesView, "Təmsilçi borcları — bax"), (RepresentativesEdit, "Təmsilçi borcları — dəyiş"),
+        (HrView, "HR: İşçilər/Davamiyyət/Əməkhaqqı — bax"), (HrEdit, "HR — dəyiş"),
         (WarehousesView, "Anbarlar/Stok — bax"), (WarehousesEdit, "Anbarlar/Stok — dəyiş"),
-        (ReportsView, "Hesabatlar — bax"),
-        (UsersManage, "İstifadəçilər & Rollar — idarə et"),
+        (ReportsView, "Hesabatlar (+ Təqvim) — bax"),
+        (UsersManage, "İstifadəçilər & Rollar & Sahə icazələri — idarə et"),
         (AuditView, "Audit jurnalı — bax"),
     ];
 
@@ -59,7 +63,7 @@ public static class Permissions
             CustomersView, CustomersEdit, ProductsView, ProductsEdit, ProductsViewCost,
             OrdersView, OrdersEdit, OrdersApprove, InvoicesView, InvoicesEdit,
             SuppliersView, SuppliersEdit, PurchasesView, PurchasesEdit,
-            FinanceView, FinanceEdit, HrView, HrEdit,
+            FinanceView, FinanceEdit, RepresentativesView, RepresentativesEdit, HrView, HrEdit,
             WarehousesView, WarehousesEdit, ReportsView, UsersManage, AuditView
         ],
         Role.Menecer =>
@@ -67,7 +71,7 @@ public static class Permissions
             CustomersView, CustomersEdit, ProductsView, ProductsEdit, ProductsViewCost,
             OrdersView, OrdersEdit, OrdersApprove, InvoicesView, InvoicesEdit,
             SuppliersView, SuppliersEdit, PurchasesView, PurchasesEdit,
-            FinanceView, FinanceEdit, HrView, HrEdit,
+            FinanceView, FinanceEdit, RepresentativesView, RepresentativesEdit, HrView, HrEdit,
             WarehousesView, WarehousesEdit, ReportsView
         ],
         Role.Anbardar =>
@@ -79,7 +83,7 @@ public static class Permissions
         Role.Kassir =>
         [
             CustomersView, OrdersView, InvoicesView, InvoicesEdit,
-            FinanceView, FinanceEdit
+            FinanceView, FinanceEdit, RepresentativesView, RepresentativesEdit
         ],
         _ => []
     };

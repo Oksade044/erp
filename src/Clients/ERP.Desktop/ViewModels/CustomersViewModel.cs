@@ -8,11 +8,14 @@ using ERP.Shared.Contracts.Customers;
 namespace ERP.Desktop.ViewModels;
 
 /// <summary>Müştərilər ekranı — siyahı, axtarış və yeni müştəri əlavəsi (API üzərindən).</summary>
-public partial class CustomersViewModel(ErpApiClient api, bool createMode = false) : ViewModelBase
+public partial class CustomersViewModel(ErpApiClient api, bool createMode = false, bool canViewDebt = true) : ViewModelBase
 {
     /// <summary>#11 — yalnız müştəri yaratma ekranı (siyahı ayrı bölmədədir).</summary>
     public bool CreateMode { get; } = createMode;
     public bool ListMode => !createMode;
+
+    /// <summary>Sahə icazəsi (customer.debt) — borc sütunu/xanası yalnız icazə varsa görünür.</summary>
+    public bool CanViewDebt { get; } = canViewDebt;
 
     /// <summary>Redaktə rejimi — siyahı bölməsində forma göstərilir.</summary>
     [ObservableProperty] private bool _isEditing;

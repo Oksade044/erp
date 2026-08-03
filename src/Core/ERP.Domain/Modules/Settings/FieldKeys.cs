@@ -15,6 +15,9 @@ public static class FieldKeys
     /// <summary>İşçinin maaşı (əməkhaqqı məbləğləri).</summary>
     public const string EmployeeSalary = "employee.salary";
 
+    /// <summary>Müştərinin borc məbləği (Müştərilər siyahısındakı "Borc" sütunu).</summary>
+    public const string CustomerDebt = "customer.debt";
+
     /// <summary>Açar → istifadəçi üçün aydın ad.</summary>
     public static readonly IReadOnlyDictionary<string, string> DisplayNames =
         new Dictionary<string, string>
@@ -22,9 +25,10 @@ public static class FieldKeys
             [ProductCost] = "Məhsul alış/satış qiyməti",
             [OrderCreator] = "Sifarişi kim yaradıb",
             [EmployeeSalary] = "İşçi maaşı",
+            [CustomerDebt] = "Müştəri borcu",
         };
 
-    public static IReadOnlyList<string> All => [ProductCost, OrderCreator, EmployeeSalary];
+    public static IReadOnlyList<string> All => [ProductCost, OrderCreator, EmployeeSalary, CustomerDebt];
 
     public static string DisplayName(string key) =>
         DisplayNames.TryGetValue(key, out var name) ? name : key;

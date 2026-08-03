@@ -10,7 +10,7 @@ namespace ERP.Desktop.ViewModels;
 /// <summary>Giriş ekranı — istifadəçi adı/parol → JWT token alır (TDD §6).</summary>
 public partial class LoginViewModel(ErpApiClient api, Action<AuthResponse> onSuccess) : ViewModelBase
 {
-    [ObservableProperty] private string _username = "admin";
+    [ObservableProperty] private string _username = "";
     [ObservableProperty] private string _password = "";
     [ObservableProperty] private string? _error;
     [ObservableProperty] private bool _isBusy;

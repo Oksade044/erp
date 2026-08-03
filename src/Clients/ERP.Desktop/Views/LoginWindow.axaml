@@ -29,9 +29,6 @@
 
             <TextBlock Text="{Binding Error}" Foreground="#FF8787" TextWrapping="Wrap"
                        HorizontalAlignment="Center" TextAlignment="Center" />
-
-            <TextBlock Text="Standart: admin / Admin123!" Foreground="#5A6072" FontSize="11"
-                       HorizontalAlignment="Center" Margin="0,8,0,0" />
         </StackPanel>
     </Border>
 </Window>

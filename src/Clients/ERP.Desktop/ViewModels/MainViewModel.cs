@@ -46,8 +46,9 @@ public partial class MainViewModel : ViewModelBase
         }
 
         var dashboard = new DashboardViewModel(api);
-        var customers = new CustomersViewModel(api, createMode: false);
-        var customersCreate = new CustomersViewModel(api, createMode: true);
+        var canViewDebt = CanViewField("customer.debt");
+        var customers = new CustomersViewModel(api, createMode: false, canViewDebt: canViewDebt);
+        var customersCreate = new CustomersViewModel(api, createMode: true, canViewDebt: canViewDebt);
         var products = new ProductsViewModel(api, canViewCost: CanViewField("product.cost"), createMode: false);
         var productsCreate = new ProductsViewModel(api, canViewCost: CanViewField("product.cost"), createMode: true);
         var canChoose = auth.Role is "Admin" or "Menecer";

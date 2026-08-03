@@ -15,21 +15,21 @@ public static class RepresentativeEndpoints
         // Bütün təmsilçilərin cari balansı.
         group.MapGet("/", async (ISender sender) =>
             Results.Ok(await sender.Send(new GetRepresentativeBalancesQuery())))
-            .RequireAuthorization(Permissions.HrView);
+            .RequireAuthorization(Permissions.RepresentativesView);
 
         // Bir təmsilçinin defteri (balans + qeydlər).
         group.MapGet("/{name}/ledger", async (string name, ISender sender) =>
         {
             var result = await sender.Send(new GetRepresentativeLedgerQuery(Uri.UnescapeDataString(name)));
             return result.IsSuccess ? Results.Ok(result.Value) : Results.NotFound(new { error = result.Error });
-        }).RequireAuthorization(Permissions.HrView);
+        }).RequireAuthorization(Permissions.RepresentativesView);
 
         // Admin təmsilçiyə borc təyin edir.
         group.MapPost("/debt", async (AssignDebtRequest request, ISender sender) =>
         {
             var result = await sender.Send(new AssignDebtCommand(request));
             return result.IsSuccess ? Results.Ok() : Results.BadRequest(new { error = result.Error });
-        }).RequireAuthorization(Permissions.HrEdit);
+        }).RequireAuthorization(Permissions.RepresentativesEdit);
 
         return app;
     }

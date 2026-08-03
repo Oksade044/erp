@@ -43,6 +43,26 @@ public static class DbSeeder
                 await roles.AddAsync(AppRole.Create(role.ToString(), Permissions.ForRole(role), isSystem: true));
             await db.SaveChangesAsync();
         }
+        else
+        {
+            // Sistem rollarına YENİ modul icazələrini (məs. representatives) əlavə et — idempotent,
+            // mövcud icazələri SİLMƏDƏN (Admin-in əl dəyişiklikləri qorunur). Belə ki, köhnə DB-lərdə
+            // də yeni bölmələr rol matrisində görünsün və işləsin.
+            var changed = false;
+            foreach (var role in Enum.GetValues<Role>())
+            {
+                var appRole = await roles.GetByNameAsync(role.ToString());
+                if (appRole is null || !appRole.IsSystem) continue;
+
+                var merged = appRole.Permissions.Union(Permissions.ForRole(role)).ToList();
+                if (merged.Count != appRole.Permissions.Count)
+                {
+                    appRole.SetPermissions(merged);
+                    changed = true;
+                }
+            }
+            if (changed) await db.SaveChangesAsync();
+        }
 
         if (await users.AnyAsync())
             return;
