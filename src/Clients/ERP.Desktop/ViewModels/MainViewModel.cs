@@ -45,6 +45,9 @@ public partial class MainViewModel : ViewModelBase
             return rule is null ? auth.Role is "Admin" or "Menecer" : rule.AllowedRoles.Contains(auth.Role);
         }
 
+        // İcazə yoxlaması — istifadəçi yalnız icazəsi olan bölmələri görür (RBAC, TDD §7).
+        bool Has(string permission) => auth.Permissions.Contains(permission);
+
         var dashboard = new DashboardViewModel(api);
         var canViewDebt = CanViewField("customer.debt");
         var customers = new CustomersViewModel(api, createMode: false, canViewDebt: canViewDebt);
@@ -67,12 +70,13 @@ public partial class MainViewModel : ViewModelBase
         var finance = new FinanceViewModel(api);
         var kassa = new KassaViewModel(api);
         var categories = new CategoriesViewModel(api);
-        var employees = new EmployeesViewModel(api, canViewSalary: CanViewField("employee.salary"), createMode: false);
-        var employeesCreate = new EmployeesViewModel(api, canViewSalary: CanViewField("employee.salary"), createMode: true);
+        var canEditHr = Has("hr.edit");
+        var employees = new EmployeesViewModel(api, canViewSalary: CanViewField("employee.salary"), createMode: false, canEdit: canEditHr);
+        var employeesCreate = new EmployeesViewModel(api, canViewSalary: CanViewField("employee.salary"), createMode: true, canEdit: canEditHr);
         var representatives = new RepresentativesViewModel(api);
         var customerDebts = new CustomerDebtsViewModel(api);
         var attendance = new AttendanceViewModel(api);
-        var payroll = new PayrollViewModel(api);
+        var payroll = new PayrollViewModel(api, canViewSalary: CanViewField("employee.salary"));
         var warehouses = new WarehousesViewModel(api);
         var stock = new StockViewModel(api);
         var reports = new ReportsViewModel(api);
@@ -127,41 +131,42 @@ public partial class MainViewModel : ViewModelBase
             return item;
         }
 
-        // #B — sol menyu istifadəçinin istədiyi qruplaşma ilə: Kartlar / Satış / Mal / Maliyyə.
+        // #B — sol menyu qruplaşma ilə. Hər bölmə YALNIZ istifadəçinin icazəsi varsa görünür.
+        // Boş qalan qruplar (heç bir görünən bölmə) avtomatik gizlənir (NavGroup.HasVisible).
         Menu.Add(new NavGroup("İDARƏ PANELİ", [Item("İdarə Paneli", "Ümumi baxış")], isExpanded: true));
         Menu.Add(new NavGroup("🪪 KARTLAR", [
-            Item("Müştəri Yarat", "➕ Müştəri əlavə et"),
-            Item("Təmsilçi Yarat", "➕ Təmsilçi əlavə et"),
-            Item("Müştərilər", "Müştərilər siyahısı"),
-            Item("İşçilər", "Təmsilçilər siyahısı"),
+            Item("Müştəri Yarat", "➕ Müştəri əlavə et", Has("customers.edit")),
+            Item("Təmsilçi Yarat", "➕ Təmsilçi əlavə et", Has("hr.edit")),
+            Item("Müştərilər", "Müştərilər siyahısı", Has("customers.view")),
+            Item("İşçilər", "Təmsilçilər siyahısı", Has("hr.view")),
         ], isExpanded: true));
         Menu.Add(new NavGroup("🛒 SATIŞ", [
-            Item("Yeni Sifariş", "➕ İcarə / Satış yarat"),
-            Item("Sifarişlər", "Bütün sifarişlər"),
-            Item("Sifariş: Qaralama", "• Qaralamalar"),
-            Item("Sifariş: Bron", "• Bron (rezerv)"),
-            Item("Sifariş: Aparıldı", "• Aparılanlar"),
-            Item("Sifariş: Qaytarılanlar", "• Qaytarılanlar"),
-            Item("Sifariş: Ləğv", "• Ləğv edilənlər"),
-            Item("Fakturalar", "Fakturalar"),
-            Item("İcarə Təqvimi", "İcarə Təqvimi"),
+            Item("Yeni Sifariş", "➕ İcarə / Satış yarat", Has("orders.edit")),
+            Item("Sifarişlər", "Bütün sifarişlər", Has("orders.view")),
+            Item("Sifariş: Qaralama", "• Qaralamalar", Has("orders.view")),
+            Item("Sifariş: Bron", "• Bron (rezerv)", Has("orders.view")),
+            Item("Sifariş: Aparıldı", "• Aparılanlar", Has("orders.view")),
+            Item("Sifariş: Qaytarılanlar", "• Qaytarılanlar", Has("orders.view")),
+            Item("Sifariş: Ləğv", "• Ləğv edilənlər", Has("orders.view")),
+            Item("Fakturalar", "Fakturalar", Has("invoices.view")),
+            Item("İcarə Təqvimi", "İcarə Təqvimi", Has("reports.view")),
         ], isExpanded: true));
         Menu.Add(new NavGroup("📦 MAL", [
-            Item("Məhsul Yarat", "➕ Məhsul yarat"),
-            Item("Məhsullar", "Məhsul siyahısı / stok"),
-            Item("Kateqoriyalar", "Kateqoriyalar"),
-            Item("Stok", "Anbar stokları"),
-            Item("Anbarlar", "Anbarlar"),
-            Item("Alışlar", "Alışlar"),
-            Item("Təchizatçılar", "Təchizatçılar"),
+            Item("Məhsul Yarat", "➕ Məhsul yarat", Has("products.edit")),
+            Item("Məhsullar", "Məhsul siyahısı / stok", Has("products.view")),
+            Item("Kateqoriyalar", "Kateqoriyalar", Has("products.view")),
+            Item("Stok", "Anbar stokları", Has("warehouses.view")),
+            Item("Anbarlar", "Anbarlar", Has("warehouses.view")),
+            Item("Alışlar", "Alışlar", Has("purchases.view")),
+            Item("Təchizatçılar", "Təchizatçılar", Has("suppliers.view")),
         ], isExpanded: true));
         Menu.Add(new NavGroup("💰 MALİYYƏ", [
-            Item("Kassa", "Kassa"),
-            Item("Maliyyə", "Maliyyə hesabatlar"),
-            Item("Hesabatlar", "Hesabatlar"),
-            Item("Borclar", "Borclar (müştərilər)"),
-            Item("Hesablar", "Hesablar (təmsilçilər)"),
-            Item("Əməkhaqqı", "Əməkhaqqı"),
+            Item("Kassa", "Kassa", Has("finance.view")),
+            Item("Maliyyə", "Maliyyə hesabatlar", Has("finance.view")),
+            Item("Hesabatlar", "Hesabatlar", Has("reports.view")),
+            Item("Borclar", "Borclar (müştərilər)", Has("customers.view")),
+            Item("Hesablar", "Hesablar (təmsilçilər)", Has("representatives.view")),
+            Item("Əməkhaqqı", "Əməkhaqqı", Has("hr.view")),
         ], isExpanded: true));
         Menu.Add(new NavGroup("⚙ SİSTEM", [
             Item("İstifadəçilər", "İstifadəçilər", CanManageUsers),

@@ -51,8 +51,11 @@ public partial class PayEntry : ObservableObject
 /// Əməkhaqqı ekranı — hesablamalar, checkbox ilə seçib "Seçilənləri ödə" düyməsi ilə açılan
 /// paneldə hər işçiyə ayrıca məbləğ + bonus (#20 — sadələşdirilmiş, düymə əsaslı).
 /// </summary>
-public partial class PayrollViewModel(ErpApiClient api) : ViewModelBase
+public partial class PayrollViewModel(ErpApiClient api, bool canViewSalary = true) : ViewModelBase
 {
+    /// <summary>Maaş sahə icazəsi (employee.salary) — maaş sütunları/mətnləri yalnız icazə varsa görünür.</summary>
+    public bool CanViewSalary { get; } = canViewSalary;
+
     /// <summary>#20 — ödəniş paneli (seçilən işçilər üçün, ekran ortası).</summary>
     public ObservableCollection<PayEntry> PayEntries { get; } = [];
     [ObservableProperty] private bool _showPayPanel;
@@ -131,6 +134,13 @@ public partial class PayrollViewModel(ErpApiClient api) : ViewModelBase
 
     // Yeni hesablama forması
     [ObservableProperty] private EmployeeDto? _newEmployee;
+    partial void OnNewEmployeeChanged(EmployeeDto? value) => OnPropertyChanged(nameof(NewEmployeeSalaryText));
+
+    /// <summary>Seçilmiş işçinin baza maaşı (əməkhaqqı formasında görünür — icazəyə görə).</summary>
+    public string NewEmployeeSalaryText => !CanViewSalary || NewEmployee is null
+        ? ""
+        : $"Baza maaşı: {NewEmployee.Salary:0.00} {NewEmployee.Currency}";
+
     [ObservableProperty] private int _newYear = DateTime.Now.Year;
     [ObservableProperty] private int _newMonth = DateTime.Now.Month;
     [ObservableProperty] private decimal _newBonus;
