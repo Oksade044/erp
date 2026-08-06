@@ -80,7 +80,7 @@ public sealed class MobileApiClient(AppState state)
     // --- Fakturalar / ödənişlər ---
     public async Task<List<InvoiceDto>> GetInvoicesAsync(string? search = null, CancellationToken ct = default)
     {
-        var paged = await GetAsync<PagedResult<InvoiceDto>>($"/api/v1/invoices?search={Uri.EscapeDataString(search ?? "")}", ct);
+        var paged = await GetAsync<PagedResult<InvoiceDto>>($"/api/v1/invoices?search={Uri.EscapeDataString(search ?? "")}&pageSize=200", ct);
         return paged?.Items?.ToList() ?? [];
     }
 
@@ -92,7 +92,7 @@ public sealed class MobileApiClient(AppState state)
     // --- Müştəri axtarışı / yaratma ---
     public async Task<List<CustomerDto>> SearchCustomersAsync(string? search, CancellationToken ct = default)
     {
-        var paged = await GetAsync<PagedResult<CustomerDto>>($"/api/v1/customers?search={Uri.EscapeDataString(search ?? "")}", ct);
+        var paged = await GetAsync<PagedResult<CustomerDto>>($"/api/v1/customers?search={Uri.EscapeDataString(search ?? "")}&pageSize=200", ct);
         return paged?.Items?.ToList() ?? [];
     }
 
@@ -112,7 +112,7 @@ public sealed class MobileApiClient(AppState state)
     // --- Məhsul axtarışı + anbar mövcudluğu ---
     public async Task<List<ProductDto>> SearchProductsAsync(string? search, CancellationToken ct = default)
     {
-        var paged = await GetAsync<PagedResult<ProductDto>>($"/api/v1/products?search={Uri.EscapeDataString(search ?? "")}", ct);
+        var paged = await GetAsync<PagedResult<ProductDto>>($"/api/v1/products?search={Uri.EscapeDataString(search ?? "")}&pageSize=200", ct);
         return paged?.Items?.ToList() ?? [];
     }
 

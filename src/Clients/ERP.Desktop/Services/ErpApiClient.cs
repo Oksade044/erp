@@ -62,7 +62,7 @@ public sealed class ErpApiClient(HttpClient http)
     // --- Müştərilər ---
     public Task<PagedResult<CustomerDto>?> GetCustomersAsync(string? search, CancellationToken ct = default) =>
         http.GetFromJsonAsync<PagedResult<CustomerDto>>(
-            $"/api/v1/customers?search={Uri.EscapeDataString(search ?? "")}", JsonOpts, ct);
+            $"/api/v1/customers?search={Uri.EscapeDataString(search ?? "")}&pageSize=200", JsonOpts, ct);
 
     /// <summary>Kartında borcu olan bütün müştərilər (Borclar bölməsi — səhifələmədən asılı deyil).</summary>
     public Task<List<CustomerDto>?> GetCustomerDebtsAsync(CancellationToken ct = default) =>
@@ -83,7 +83,7 @@ public sealed class ErpApiClient(HttpClient http)
     // --- Təchizatçılar ---
     public Task<PagedResult<SupplierDto>?> GetSuppliersAsync(string? search, CancellationToken ct = default) =>
         http.GetFromJsonAsync<PagedResult<SupplierDto>>(
-            $"/api/v1/suppliers?search={Uri.EscapeDataString(search ?? "")}", JsonOpts, ct);
+            $"/api/v1/suppliers?search={Uri.EscapeDataString(search ?? "")}&pageSize=200", JsonOpts, ct);
 
     public async Task<(bool ok, string? error)> CreateSupplierAsync(CreateSupplierRequest request, CancellationToken ct = default)
     {
@@ -104,7 +104,7 @@ public sealed class ErpApiClient(HttpClient http)
     // --- Məhsullar ---
     public Task<PagedResult<ProductDto>?> GetProductsAsync(string? search, CancellationToken ct = default) =>
         http.GetFromJsonAsync<PagedResult<ProductDto>>(
-            $"/api/v1/products?search={Uri.EscapeDataString(search ?? "")}", JsonOpts, ct);
+            $"/api/v1/products?search={Uri.EscapeDataString(search ?? "")}&pageSize=200", JsonOpts, ct);
 
     /// <summary>Məhsul yaradır və uğurda yeni məhsulun Id-sini qaytarır (şəkil yükləmək üçün lazımdır).</summary>
     public async Task<(bool ok, Guid? id, string? error)> CreateProductAsync(CreateProductRequest request, CancellationToken ct = default)
@@ -197,7 +197,7 @@ public sealed class ErpApiClient(HttpClient http)
     // --- Sifarişlər ---
     public Task<PagedResult<OrderDto>?> GetOrdersAsync(string? search, CancellationToken ct = default) =>
         http.GetFromJsonAsync<PagedResult<OrderDto>>(
-            $"/api/v1/orders?search={Uri.EscapeDataString(search ?? "")}", JsonOpts, ct);
+            $"/api/v1/orders?search={Uri.EscapeDataString(search ?? "")}&pageSize=200", JsonOpts, ct);
 
     public async Task<(bool ok, string? error)> CreateOrderAsync(CreateOrderRequest request, CancellationToken ct = default)
     {
@@ -267,7 +267,7 @@ public sealed class ErpApiClient(HttpClient http)
     // --- Alışlar (Purchase) ---
     public Task<PagedResult<PurchaseDto>?> GetPurchasesAsync(string? search, CancellationToken ct = default) =>
         http.GetFromJsonAsync<PagedResult<PurchaseDto>>(
-            $"/api/v1/purchases?search={Uri.EscapeDataString(search ?? "")}", JsonOpts, ct);
+            $"/api/v1/purchases?search={Uri.EscapeDataString(search ?? "")}&pageSize=200", JsonOpts, ct);
 
     public async Task<(bool ok, string? error)> CreatePurchaseAsync(CreatePurchaseRequest request, CancellationToken ct = default)
     {
@@ -296,7 +296,7 @@ public sealed class ErpApiClient(HttpClient http)
     // --- İşçilər (HR) ---
     public Task<PagedResult<EmployeeDto>?> GetEmployeesAsync(string? search, CancellationToken ct = default) =>
         http.GetFromJsonAsync<PagedResult<EmployeeDto>>(
-            $"/api/v1/employees?search={Uri.EscapeDataString(search ?? "")}", JsonOpts, ct);
+            $"/api/v1/employees?search={Uri.EscapeDataString(search ?? "")}&pageSize=200", JsonOpts, ct);
 
     public async Task<(bool ok, string? error)> CreateEmployeeAsync(CreateEmployeeRequest request, CancellationToken ct = default)
     {
@@ -322,7 +322,7 @@ public sealed class ErpApiClient(HttpClient http)
     // --- Anbarlar (Warehouse) ---
     public Task<PagedResult<WarehouseDto>?> GetWarehousesAsync(string? search, CancellationToken ct = default) =>
         http.GetFromJsonAsync<PagedResult<WarehouseDto>>(
-            $"/api/v1/warehouses?search={Uri.EscapeDataString(search ?? "")}", JsonOpts, ct);
+            $"/api/v1/warehouses?search={Uri.EscapeDataString(search ?? "")}&pageSize=200", JsonOpts, ct);
 
     public async Task<(bool ok, string? error)> CreateWarehouseAsync(CreateWarehouseRequest request, CancellationToken ct = default)
     {
@@ -362,7 +362,7 @@ public sealed class ErpApiClient(HttpClient http)
     // --- Əməkhaqqı (Payroll) ---
     public Task<PagedResult<PayrollDto>?> GetPayrollsAsync(string? search, CancellationToken ct = default) =>
         http.GetFromJsonAsync<PagedResult<PayrollDto>>(
-            $"/api/v1/payrolls?search={Uri.EscapeDataString(search ?? "")}", JsonOpts, ct);
+            $"/api/v1/payrolls?search={Uri.EscapeDataString(search ?? "")}&pageSize=200", JsonOpts, ct);
 
     public async Task<(bool ok, string? error)> CreatePayrollAsync(CreatePayrollRequest request, CancellationToken ct = default)
     {
@@ -387,7 +387,7 @@ public sealed class ErpApiClient(HttpClient http)
     // --- Davamiyyət (Attendance) ---
     public Task<PagedResult<AttendanceDto>?> GetAttendanceAsync(string? search, CancellationToken ct = default) =>
         http.GetFromJsonAsync<PagedResult<AttendanceDto>>(
-            $"/api/v1/attendance?search={Uri.EscapeDataString(search ?? "")}", JsonOpts, ct);
+            $"/api/v1/attendance?search={Uri.EscapeDataString(search ?? "")}&pageSize=200", JsonOpts, ct);
 
     public async Task<(bool ok, string? error)> CreateAttendanceAsync(CreateAttendanceRequest request, CancellationToken ct = default)
     {
@@ -412,7 +412,7 @@ public sealed class ErpApiClient(HttpClient http)
     // --- Fakturalar ---
     public Task<PagedResult<InvoiceDto>?> GetInvoicesAsync(string? search, CancellationToken ct = default) =>
         http.GetFromJsonAsync<PagedResult<InvoiceDto>>(
-            $"/api/v1/invoices?search={Uri.EscapeDataString(search ?? "")}", JsonOpts, ct);
+            $"/api/v1/invoices?search={Uri.EscapeDataString(search ?? "")}&pageSize=200", JsonOpts, ct);
 
     public async Task<(bool ok, string? error)> CreateInvoiceAsync(Guid orderId, CancellationToken ct = default)
     {
