@@ -17,6 +17,7 @@ namespace ERP.Desktop.ViewModels;
 public partial class MainViewModel : ViewModelBase
 {
     private readonly Action _onLogout;
+    private readonly ErpApiClient _api;
     private readonly Dictionary<string, (string icon, string title, ViewModelBase vm)> _sections;
     private readonly List<NavItem> _allItems = [];
 
@@ -30,10 +31,22 @@ public partial class MainViewModel : ViewModelBase
     public bool CanManageUsers { get; }
     public bool CanViewAudit { get; }
 
+    /// <summary>Cari tətbiq versiyası (assembly-dən) — istifadəçi kartında göstərilir.</summary>
+    public string AppVersion
+    {
+        get
+        {
+            var v = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+            return v is null ? "v1.0.0" : $"v{v.Major}.{v.Minor}.{v.Build}";
+        }
+    }
+    [ObservableProperty] private bool _isCheckingUpdate;
+
     public MainViewModel(ErpApiClient api, AuthResponse auth, Action onLogout,
         IReadOnlyList<FieldPermissionDto>? fieldPermissions = null)
     {
         _onLogout = onLogout;
+        _api = api;
         CurrentUser = $"{auth.FullName} ({auth.Role})";
         UserInitial = string.IsNullOrWhiteSpace(auth.FullName) ? "?" : auth.FullName.Trim()[..1].ToUpperInvariant();
         CanManageUsers = auth.Permissions.Contains("users.manage");
@@ -240,4 +253,38 @@ public partial class MainViewModel : ViewModelBase
 
     [RelayCommand]
     private void Logout() => _onLogout();
+
+    /// <summary>
+    /// Güncəlləməni yoxlayır — serverdə daha yeni versiya varsa, yeni quraşdırıcını endirir,
+    /// işə salır və tətbiqi bağlayır (quraşdırıcı köhnəni yeniləyir).
+    /// </summary>
+    [RelayCommand]
+    private async System.Threading.Tasks.Task CheckUpdateAsync()
+    {
+        if (IsCheckingUpdate) return;
+        IsCheckingUpdate = true;
+        try
+        {
+            AppNotify.Show("Güncəlləmə yoxlanılır...");
+            var info = await _api.GetLatestVersionAsync();
+            if (info is null) { AppNotify.Show("⚠ Güncəlləmə serverinə qoşulmaq olmadı."); return; }
+
+            var current = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version ?? new Version(1, 0, 0);
+            if (!Version.TryParse(info.Version, out var latest) || latest <= current)
+            {
+                AppNotify.Show($"✓ Ən son versiyadasınız ({AppVersion}).");
+                return;
+            }
+
+            AppNotify.Show($"Yeni versiya endirilir: v{info.Version} ...");
+            var path = await _api.DownloadInstallerAsync(info.Url);
+            if (path is null) { AppNotify.Show("⚠ Endirmə alınmadı. Sonra yenidən cəhd edin."); return; }
+
+            // Quraşdırıcını işə sal və tətbiqi bağla ki, faylları yeniləyə bilsin.
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(path) { UseShellExecute = true });
+            Environment.Exit(0);
+        }
+        catch (Exception ex) { AppNotify.Show("⚠ Güncəlləmə xətası: " + ex.Message); }
+        finally { IsCheckingUpdate = false; }
+    }
 }

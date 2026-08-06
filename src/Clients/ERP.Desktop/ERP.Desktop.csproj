@@ -5,6 +5,8 @@
     <Nullable>enable</Nullable>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>Assets\erp-icon.ico</ApplicationIcon>
+    <!-- Güncəlləmə sistemi üçün versiya. Hər yeni buraxılışda artırılır. -->
+    <Version>1.0.0</Version>
   </PropertyGroup>
 
   <ItemGroup>

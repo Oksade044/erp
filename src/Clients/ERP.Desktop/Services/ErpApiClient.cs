@@ -7,6 +7,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Net.Http.Headers;
+using ERP.Shared.Contracts.App;
 using ERP.Shared.Contracts.Auth;
 using ERP.Shared.Contracts.Customers;
 using ERP.Shared.Contracts.Finance;
@@ -34,6 +35,37 @@ public sealed class ErpApiClient(HttpClient http)
 
     /// <summary>API-nin baza ünvanı (SignalR hub URL-i qurmaq üçün).</summary>
     public string BaseUrl => http.BaseAddress?.ToString().TrimEnd('/') ?? "http://localhost:5080";
+
+    // --- Güncəlləmə (auto-update) ---
+    /// <summary>Serverdəki son versiya məlumatını gətirir (Caddy statik /updates/version.json).</summary>
+    public async Task<AppVersionInfo?> GetLatestVersionAsync(CancellationToken ct = default)
+    {
+        try { return await http.GetFromJsonAsync<AppVersionInfo>($"{BaseUrl}/updates/version.json", JsonOpts, ct); }
+        catch { return null; }
+    }
+
+    /// <summary>Yeni quraşdırıcını müvəqqəti qovluğa endirir və faylın yolunu qaytarır.</summary>
+    public async Task<string?> DownloadInstallerAsync(string url, IProgress<double>? progress = null, CancellationToken ct = default)
+    {
+        try
+        {
+            var tmp = Path.Combine(Path.GetTempPath(), "ERP-Setup-yeni.exe");
+            using var resp = await http.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, ct);
+            resp.EnsureSuccessStatusCode();
+            var total = resp.Content.Headers.ContentLength ?? -1L;
+            await using var src = await resp.Content.ReadAsStreamAsync(ct);
+            await using var dst = File.Create(tmp);
+            var buf = new byte[81920]; long read = 0; int n;
+            while ((n = await src.ReadAsync(buf, ct)) > 0)
+            {
+                await dst.WriteAsync(buf.AsMemory(0, n), ct);
+                read += n;
+                if (total > 0) progress?.Report((double)read / total);
+            }
+            return tmp;
+        }
+        catch { return null; }
+    }
 
     // --- Autentifikasiya ---
     public async Task<(AuthResponse? auth, string? error)> LoginAsync(string username, string password, CancellationToken ct = default)

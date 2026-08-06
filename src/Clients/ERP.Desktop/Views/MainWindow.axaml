@@ -49,7 +49,7 @@
                 <!-- Alt: istifadəçi kartı -->
                 <Border DockPanel.Dock="Bottom" Padding="12,10" Margin="10,0,10,10"
                         Background="#F9FAFB" CornerRadius="12" BorderBrush="#EEF0F2" BorderThickness="1">
-                    <Grid ColumnDefinitions="Auto,*,Auto" >
+                    <Grid ColumnDefinitions="Auto,*,Auto,Auto" >
                         <Border Grid.Column="0" Width="34" Height="34" CornerRadius="17" Background="#4F46E5">
                             <TextBlock Text="{Binding UserInitial}" Foreground="White" FontWeight="Bold"
                                        HorizontalAlignment="Center" VerticalAlignment="Center" />
@@ -57,9 +57,13 @@
                         <StackPanel Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center" Spacing="0">
                             <TextBlock Text="{Binding CurrentUser}" FontSize="12" FontWeight="SemiBold"
                                        Foreground="#374151" TextTrimming="CharacterEllipsis" />
-                            <TextBlock Text="Aktiv sessiya" FontSize="10" Foreground="#9CA3AF" />
+                            <TextBlock Text="{Binding AppVersion}" FontSize="10" Foreground="#9CA3AF" />
                         </StackPanel>
-                        <Button Grid.Column="2" Content="⎋" Command="{Binding LogoutCommand}"
+                        <Button Grid.Column="2" Content="⬆" Command="{Binding CheckUpdateCommand}"
+                                IsEnabled="{Binding !IsCheckingUpdate}"
+                                ToolTip.Tip="Güncəlləməni yoxla / yenilə" Background="Transparent" Foreground="#4F46E5"
+                                FontSize="16" Padding="8,2" BorderThickness="0" />
+                        <Button Grid.Column="3" Content="⎋" Command="{Binding LogoutCommand}"
                                 ToolTip.Tip="Çıxış" Background="Transparent" Foreground="#9CA3AF"
                                 FontSize="16" Padding="8,2" BorderThickness="0" />
                     </Grid>
