@@ -54,23 +54,11 @@ builder.Services.AddAuthorization(options =>
 {
     options.FallbackPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
 
-    // İcazə-əsaslı siyasətlər (permission-based RBAC).
-    options.AddPolicy(Permissions.OrdersApprove, p => p.RequireClaim("permission", Permissions.OrdersApprove));
-    options.AddPolicy(Permissions.ReportsView, p => p.RequireClaim("permission", Permissions.ReportsView));
-    options.AddPolicy(Permissions.InvoicesEdit, p => p.RequireClaim("permission", Permissions.InvoicesEdit));
-    options.AddPolicy(Permissions.UsersManage, p => p.RequireClaim("permission", Permissions.UsersManage));
-    options.AddPolicy(Permissions.ProductsEdit, p => p.RequireClaim("permission", Permissions.ProductsEdit));
-    options.AddPolicy(Permissions.SuppliersView, p => p.RequireClaim("permission", Permissions.SuppliersView));
-    options.AddPolicy(Permissions.SuppliersEdit, p => p.RequireClaim("permission", Permissions.SuppliersEdit));
-    options.AddPolicy(Permissions.PurchasesView, p => p.RequireClaim("permission", Permissions.PurchasesView));
-    options.AddPolicy(Permissions.PurchasesEdit, p => p.RequireClaim("permission", Permissions.PurchasesEdit));
-    options.AddPolicy(Permissions.FinanceView, p => p.RequireClaim("permission", Permissions.FinanceView));
-    options.AddPolicy(Permissions.FinanceEdit, p => p.RequireClaim("permission", Permissions.FinanceEdit));
-    options.AddPolicy(Permissions.HrView, p => p.RequireClaim("permission", Permissions.HrView));
-    options.AddPolicy(Permissions.HrEdit, p => p.RequireClaim("permission", Permissions.HrEdit));
-    options.AddPolicy(Permissions.WarehousesView, p => p.RequireClaim("permission", Permissions.WarehousesView));
-    options.AddPolicy(Permissions.WarehousesEdit, p => p.RequireClaim("permission", Permissions.WarehousesEdit));
-    options.AddPolicy(Permissions.AuditView, p => p.RequireClaim("permission", Permissions.AuditView));
+    // İcazə-əsaslı siyasətlər (permission-based RBAC) — BÜTÜN icazələr kataloqdan avtomatik
+    // qeyd olunur. Belə ki, yeni icazə əlavə edəndə (məs. representatives) policy unudulmur
+    // və "AuthorizationPolicy not found" 500 xətası yaranmır.
+    foreach (var (key, _) in Permissions.Catalog)
+        options.AddPolicy(key, p => p.RequireClaim("permission", key));
 });
 
 // --- Rate limiting (TDD §39 — sui-istifadəyə qarşı müdafiə) ---

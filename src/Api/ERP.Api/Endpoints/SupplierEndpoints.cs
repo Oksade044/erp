@@ -43,6 +43,12 @@ public static class SupplierEndpoints
             return result.IsSuccess ? Results.NoContent() : Results.BadRequest(new { error = result.Error });
         }).RequireAuthorization(Permissions.SuppliersEdit);
 
+        group.MapDelete("/{id:guid}", async (Guid id, ISender sender) =>
+        {
+            var result = await sender.Send(new ERP.Application.Modules.Suppliers.Commands.DeleteSupplierCommand(id));
+            return result.IsSuccess ? Results.NoContent() : Results.BadRequest(new { error = result.Error });
+        }).RequireAuthorization(Permissions.SuppliersEdit);
+
         // #15 — təchizatçı defteri (borc/ödəniş + danışıq + sənəd tarixçəsi).
         group.MapGet("/{id:guid}/ledger", async (Guid id, ISender sender) =>
         {

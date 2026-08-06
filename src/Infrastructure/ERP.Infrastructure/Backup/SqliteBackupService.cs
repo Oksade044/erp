@@ -15,6 +15,16 @@ public sealed class SqliteBackupService(IConfiguration configuration, ILogger<Sq
 {
     public Task<string> BackupAsync(CancellationToken ct = default)
     {
+        // SQLite backup yalnız SQLite provayderi üçündür. Postgres-də (server) SqliteConnection
+        // "Host=..." connection string-i qəbul etmir → gündəlik job xəta verirdi. Provider SQLite
+        // deyilsə no-op (gələcəkdə pg_dump ilə əvəz olunacaq).
+        var provider = configuration["Database:Provider"] ?? "Sqlite";
+        if (!provider.Equals("Sqlite", StringComparison.OrdinalIgnoreCase))
+        {
+            logger.LogWarning("Backup atlandı: '{Provider}' provayderi üçün SQLite backup tətbiq olunmur (pg_dump — gələcək).", provider);
+            return Task.FromResult($"skipped: {provider}");
+        }
+
         var connectionString = configuration.GetConnectionString("Default") ?? "Data Source=erp.db";
 
         var backupDir = Path.Combine(AppContext.BaseDirectory, "backups");
