@@ -53,6 +53,12 @@ public static class DbSeeder
                         SELECT 1 FROM information_schema.columns c
                         WHERE c.table_schema = 'public' AND c.table_name = i.tablename
                           AND c.column_name = 'IsDeleted')
+                      -- Konstraint (PK / UNIQUE constraint) arxasında olan indeksləri ÇIXAR:
+                      -- onlar DROP INDEX ilə silinə bilməz (yalnız ALTER TABLE ilə).
+                      AND NOT EXISTS (
+                        SELECT 1 FROM pg_constraint con
+                        JOIN pg_class ic ON ic.oid = con.conindid
+                        WHERE ic.relname = i.indexname)
                   LOOP
                     EXECUTE 'DROP INDEX ' || quote_ident(r.indexname);
                     EXECUTE r.indexdef || ' WHERE "IsDeleted" = false';
