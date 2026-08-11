@@ -25,11 +25,14 @@
                 <ComboBox ItemsSource="{Binding Roles}" SelectedItem="{Binding NewRole}" Width="120" />
                 <Button Content="+ Yarat" Command="{Binding AddCommand}"
                         Background="#3B5BDB" Foreground="White" />
+                <Button Content="🗑 Sil" Command="{Binding DeleteSelectedCommand}"
+                        Background="#E03131" Foreground="White"
+                        ToolTip.Tip="Seçilmiş istifadəçini sil (admin qorunur)" />
                 <Button Content="⟳" Command="{Binding LoadCommand}" />
             </StackPanel>
         </Border>
 
-        <DataGrid Grid.Row="2" ItemsSource="{Binding Users}" IsReadOnly="True"
+        <DataGrid Grid.Row="2" ItemsSource="{Binding Users}" SelectedItem="{Binding Selected}" IsReadOnly="True"
                   GridLinesVisibility="Horizontal" BorderThickness="1" BorderBrush="#E0E2EA">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="İstifadəçi adı" Binding="{Binding Username}" Width="*" />

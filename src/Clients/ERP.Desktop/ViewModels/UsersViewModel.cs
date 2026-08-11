@@ -13,9 +13,21 @@ namespace ERP.Desktop.ViewModels;
 public partial class UsersViewModel(ErpApiClient api) : ViewModelBase
 {
     public ObservableCollection<UserDto> Users { get; } = [];
+    [ObservableProperty] private UserDto? _selected;
 
     [ObservableProperty] private bool _isBusy;
     [ObservableProperty] private string? _status;
+
+    /// <summary>Seçilmiş istifadəçini silir (soft delete; admin qorunur — server enforce edir).</summary>
+    [RelayCommand]
+    private async Task DeleteSelectedAsync()
+    {
+        if (Selected is null) { ERP.Desktop.AppNotify.Show("Silmək üçün istifadəçi seçin."); return; }
+        var name = Selected.Username;
+        var (ok, err) = await api.DeleteUserAsync(Selected.Id);
+        ERP.Desktop.AppNotify.Show(ok ? $"İstifadəçi silindi: {name}" : err ?? "Silinmədi.");
+        if (ok) await LoadAsync();
+    }
 
     // Yeni istifadəçi forması
     [ObservableProperty] private string? _newUsername;

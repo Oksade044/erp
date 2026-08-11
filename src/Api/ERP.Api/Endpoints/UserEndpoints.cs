@@ -26,6 +26,12 @@ public static class UserEndpoints
                 : Results.BadRequest(new { error = result.Error });
         });
 
+        group.MapDelete("/{id:guid}", async (Guid id, ISender sender) =>
+        {
+            var result = await sender.Send(new ERP.Application.Modules.Users.Commands.DeleteUserCommand(id));
+            return result.IsSuccess ? Results.NoContent() : Results.BadRequest(new { error = result.Error });
+        });
+
         // --- Dinamik rollar (#16) ---
         var roles = app.MapGroup("/api/v1/roles").WithTags("Roles")
             .RequireAuthorization(Permissions.UsersManage);
