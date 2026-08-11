@@ -630,6 +630,19 @@ public partial class OrdersViewModel : ViewModelBase
         await LoadAsync();
     }
 
+    /// <summary>Sifarişi bazadan silir — yalnız Qaralama və ya Ləğv edilmiş (server enforce edir).</summary>
+    [RelayCommand]
+    private async Task DeleteRowAsync(OrderRow? row)
+    {
+        row ??= Selected;
+        if (row is null) { ERP.Desktop.AppNotify.Show("Silmək üçün sifariş seçin."); return; }
+        var num = row.OrderNumber;
+        var (ok, error) = await api.DeleteOrderAsync(row.Id);
+        Status = ok ? "Sifariş silindi." : error ?? "Silinmədi.";
+        ERP.Desktop.AppNotify.Show(ok ? $"✓ Silindi: {num}" : "⚠ " + (error ?? "Silinmədi."));
+        if (ok) await LoadAsync();
+    }
+
     /// <summary>Təhvil verilmiş sifarişi qaytar + ödəniş/hesablaşma panelini aç.</summary>
     [RelayCommand]
     private async Task ReturnRowAsync(OrderRow? row)

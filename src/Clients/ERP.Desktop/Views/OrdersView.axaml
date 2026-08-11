@@ -53,6 +53,9 @@
             <Button Content="✓✓ Seçilənləri təsdiqlə" Command="{Binding ConfirmSelectedCommand}"
                     Background="#0CA678" Foreground="White"
                     ToolTip.Tip="Checkbox ilə bir neçə qaralama sifariş seçin və hamısını birdəfəyə təsdiqləyin (#7)." />
+            <Button Content="🗑 Seçilmişi sil" Command="{Binding DeleteRowCommand}"
+                    Background="#E03131" Foreground="White"
+                    ToolTip.Tip="Seçilmiş sifarişi bazadan silir — yalnız Qaralama və ya Ləğv edilmiş sifarişlər (məs. lazımsız ləğv sifarişlərini təmizləmək üçün)." />
         </StackPanel>
 
         <!-- Yeni sifariş forması (yaratma və ya qaralama düzənləmə) -->
