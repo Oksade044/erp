@@ -1,0 +1,32 @@
+@page "/profile"
+@inject AppState State
+@inject NavigationManager Nav
+
+<div class="title">Profil</div>
+
+<div class="card">
+    <div style="text-align:center;padding:10px 0">
+        <div style="width:70px;height:70px;border-radius:50%;background:var(--primary);color:#fff;font-size:30px;font-weight:700;display:flex;align-items:center;justify-content:center;margin:0 auto 10px">
+            @Initial
+        </div>
+        <div style="font-size:18px;font-weight:700">@(State.FullName ?? "İşçi")</div>
+        <div class="muted">@State.Role</div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="muted">Tətbiq</div>
+    <div>ERP İşçi — web (v1.0)</div>
+</div>
+
+<button class="btn btn-red" @onclick="Logout">⎋ Çıxış</button>
+
+@code {
+    private string Initial => string.IsNullOrWhiteSpace(State.FullName) ? "?" : State.FullName!.Trim()[..1].ToUpperInvariant();
+
+    private async Task Logout()
+    {
+        await State.LogoutAsync();
+        Nav.NavigateTo("login");
+    }
+}

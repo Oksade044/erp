@@ -1,19 +1,25 @@
-# Caddy reverse proxy — mobil/desktop tətbiq üçün avtomatik HTTPS.
-# {$DOMAIN} docker-compose-dəki DOMAIN dəyişənindən gəlir (məs. 186.240.145.239.sslip.io).
-# Caddy Let's Encrypt sertifikatını avtomatik alır və yeniləyir.
+# Caddy reverse proxy — web PWA (işçi tətbiqi) + API + auto-update, avtomatik HTTPS.
+# {$DOMAIN} docker-compose-dəki DOMAIN dəyişənindən gəlir.
 
 {$DOMAIN} {
 	encode gzip
 
-	# Auto-update faylları (version.json + ERP-Setup.exe) — statik verilir.
-	# /srv/updates konteynerə mount olunur (deploy/updates → :ro).
+	# Auto-update faylları (desktop installer + APK + version.json).
 	handle_path /updates/* {
 		root * /srv/updates
-		file_server browse
+		file_server
 	}
 
-	# Qalan hər şey API-yə (reverse proxy).
-	handle {
+	# Backend API (web PWA, desktop, mobil hamısı) — /api, /health, /hubs (SignalR).
+	@backend path /api/* /health /hubs/*
+	handle @backend {
 		reverse_proxy api:8080
+	}
+
+	# Web işçi tətbiqi (Blazor WASM PWA) — root-da, SPA fallback index.html.
+	handle {
+		root * /srv/webapp
+		try_files {path} /index.html
+		file_server
 	}
 }

@@ -64,6 +64,7 @@ services:
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - ./updates:/srv/updates:ro
+      - ./webapp:/srv/webapp:ro
       - erp-caddy-data:/data
       - erp-caddy-config:/config
     restart: unless-stopped

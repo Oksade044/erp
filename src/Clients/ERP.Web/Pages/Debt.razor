@@ -1,0 +1,45 @@
+@page "/debt"
+@inject WebApiClient Api
+
+<div class="title">Borcum</div>
+
+<div class="debt-card">
+    <div class="lbl">Qalan borc</div>
+    <div class="val">@Owed</div>
+    <div class="muted">Yaradılmış: @($"{(debt?.TotalDebt ?? 0):0.00}")  •  Bağlanmış: @($"{(debt?.TotalOrders ?? 0):0.00}") AZN</div>
+</div>
+
+<div class="card">
+    <h2>Hərəkət tarixçəsi</h2>
+    @if (debt is null || debt.Entries.Count == 0) { <div class="muted">Hələ qeyd yoxdur.</div> }
+    @foreach (var e in debt?.Entries ?? new List<RepresentativeEntryDto>())
+    {
+        <div class="list-item">
+            <div>
+                <div>@e.Type @(string.IsNullOrEmpty(e.OrderNumber) ? "" : $"({e.OrderNumber})")</div>
+                <div class="muted">@e.Date.ToString("yyyy-MM-dd") @e.Description</div>
+            </div>
+            <div style="font-weight:700;color:@(e.SignedAmount < 0 ? "var(--red)" : "var(--green)")">
+                @($"{e.SignedAmount:+0.00;-0.00}")
+            </div>
+        </div>
+    }
+</div>
+
+@if (loading) { <div class="status">Yüklənir...</div> }
+
+@code {
+    private RepresentativeLedgerDto? debt;
+    private bool loading = true;
+
+    private string Owed
+    {
+        get { var o = (debt?.Balance ?? 0) < 0 ? -(debt!.Balance) : 0; return $"{o:0.00} {debt?.Currency ?? "AZN"}"; }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        debt = await Api.GetMyDebtAsync();
+        loading = false;
+    }
+}

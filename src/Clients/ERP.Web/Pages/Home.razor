@@ -1,0 +1,45 @@
+@page "/"
+@inject WebApiClient Api
+@inject AppState State
+@inject NavigationManager Nav
+
+<div class="title">Xoş gəlmisiniz, @(State.FullName ?? "işçi")</div>
+
+<div class="debt-card">
+    <div class="lbl">💳 Borc vəziyyəti</div>
+    <div class="val">@DebtText</div>
+    <div class="muted">@DebtSub</div>
+</div>
+
+<button class="btn btn-green" @onclick='() => Nav.NavigateTo("neworder")'>➕ Sifariş yarat (borcu bağla)</button>
+
+<div class="card">
+    <div class="muted">Bu ay bağladığınız (dövriyyə)</div>
+    <div style="font-size:22px;font-weight:700;color:var(--green)">@($"{(dash?.RevenueThisMonth ?? 0):0.00} AZN")</div>
+</div>
+
+@if (loading) { <div class="status">Yüklənir...</div> }
+
+@code {
+    private EmployeeDashboardDto? dash;
+    private RepresentativeLedgerDto? debt;
+    private bool loading = true;
+
+    private string DebtText
+    {
+        get
+        {
+            if (debt is null) return "—";
+            var owed = debt.Balance < 0 ? -debt.Balance : 0;
+            return owed > 0 ? $"Qalan borcunuz: {owed:0.00} {debt.Currency}" : "Borcunuz yoxdur ✓";
+        }
+    }
+    private string DebtSub => debt is null ? "" : $"Bağlanan (sifarişlər): {debt.TotalOrders:0.00} {debt.Currency}";
+
+    protected override async Task OnInitializedAsync()
+    {
+        dash = await Api.GetMyDashboardAsync();
+        debt = await Api.GetMyDebtAsync();
+        loading = false;
+    }
+}

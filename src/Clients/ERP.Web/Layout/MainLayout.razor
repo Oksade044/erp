@@ -1,0 +1,39 @@
+@inherits LayoutComponentBase
+@inject AppState State
+@inject NavigationManager Nav
+@implements IDisposable
+
+<div class="app-shell">
+    <main class="app-main">
+        @Body
+    </main>
+
+    @if (State.IsLoggedIn)
+    {
+        <nav class="tabbar">
+            <NavLink class="tab" href="" Match="NavLinkMatch.All"><span class="ic">🏠</span><span>Əsas</span></NavLink>
+            <NavLink class="tab" href="neworder"><span class="ic">➕</span><span>Yeni sifariş</span></NavLink>
+            <NavLink class="tab" href="debt"><span class="ic">💳</span><span>Borcum</span></NavLink>
+            <NavLink class="tab" href="profile"><span class="ic">👤</span><span>Profil</span></NavLink>
+        </nav>
+    }
+</div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        State.Changed += OnChanged;
+        RedirectIfNeeded();
+    }
+
+    private void OnChanged() => InvokeAsync(() => { RedirectIfNeeded(); StateHasChanged(); });
+
+    private void RedirectIfNeeded()
+    {
+        var path = Nav.ToBaseRelativePath(Nav.Uri).Split('?')[0].TrimEnd('/');
+        if (!State.IsLoggedIn && path != "login")
+            Nav.NavigateTo("login");
+    }
+
+    public void Dispose() => State.Changed -= OnChanged;
+}

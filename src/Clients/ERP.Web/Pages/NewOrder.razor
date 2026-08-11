@@ -1,0 +1,147 @@
+@page "/neworder"
+@inject WebApiClient Api
+
+<div class="title">Yeni sifariş</div>
+
+<!-- 1. Müştəri -->
+<div class="card">
+    <h2>1. Müştəri seçin</h2>
+    @if (selectedCustomer is null)
+    {
+        <input @bind="customerSearch" @bind:event="oninput" placeholder="Müştərilərinizdə axtar (ad/telefon)" />
+        @foreach (var c in FilteredCustomers.Take(30))
+        {
+            <div class="list-item" @onclick="() => PickCustomer(c)">
+                <span>@c.Name</span><span class="muted">@c.Phone</span>
+            </div>
+        }
+        @if (myCustomers.Count == 0 && !loadingCustomers) { <div class="muted">Sizə təyin edilmiş müştəri yoxdur.</div> }
+    }
+    else
+    {
+        <div style="color:var(--green);font-weight:700">✓ @selectedCustomer.Name</div>
+        <button class="btn btn-red" style="width:auto;padding:8px 14px;font-size:13px" @onclick="() => selectedCustomer = null">Dəyiş</button>
+    }
+</div>
+
+<!-- 2. Məhsul -->
+<div class="card">
+    <h2>2. Məhsul əlavə et</h2>
+    <input @bind="productSearch" @bind:event="oninput" @bind:after="SearchProducts" placeholder="Məhsul adı ilə axtar" />
+    @if (selectedProduct is null)
+    {
+        @foreach (var p in productResults.Take(15))
+        {
+            <div class="list-item" @onclick="() => PickProduct(p)">
+                <span>@p.Name</span><span class="muted">@($"{p.RentalPrice:0.00} AZN")</span>
+            </div>
+        }
+    }
+    else
+    {
+        <div style="background:#F1F3F5;border-radius:10px;padding:10px;margin-top:6px">
+            <div style="font-weight:700">✓ @selectedProduct.Name</div>
+            @if (stock.Count > 0)
+            {
+                <label class="muted">Anbar</label>
+                <select @bind="selectedWarehouseId">
+                    @foreach (var s in stock) { <option value="@s.WarehouseId">@s.WarehouseName (mövcud: @s.Quantity)</option> }
+                </select>
+            }
+            <div style="display:flex;gap:8px">
+                <div style="flex:1"><label class="muted">Say</label><input type="number" @bind="lineQty" /></div>
+                <div style="flex:1"><label class="muted">Qiymət</label><input type="number" @bind="linePrice" /></div>
+            </div>
+            <button class="btn btn-primary" @onclick="AddLine">Sifarişə əlavə et</button>
+        </div>
+    }
+</div>
+
+<!-- 3. Sətirlər -->
+<div class="card">
+    <h2>3. Sifariş sətirləri</h2>
+    @if (lines.Count == 0) { <div class="muted">Hələ məhsul əlavə edilməyib.</div> }
+    @foreach (var l in lines)
+    {
+        <div class="list-item" @onclick="() => lines.Remove(l)">
+            <span>@l.ProductName × @l.Quantity = @($"{(l.Quantity*l.UnitPrice):0.00}")</span><span style="color:var(--red)">✕</span>
+        </div>
+    }
+    <div class="total">Ümumi: @($"{Total:0.00} AZN")</div>
+</div>
+
+<button class="btn btn-green" @onclick="CreateOrder" disabled="@busy">✓ Sifarişi yarat</button>
+@if (!string.IsNullOrEmpty(status)) { <div class="status">@status</div> }
+
+@code {
+    private List<CustomerDto> myCustomers = [];
+    private bool loadingCustomers = true;
+    private string? customerSearch;
+    private CustomerDto? selectedCustomer;
+
+    private string? productSearch;
+    private List<ProductDto> productResults = [];
+    private ProductDto? selectedProduct;
+    private List<StockLevelDto> stock = [];
+    private Guid? selectedWarehouseId;
+    private int lineQty = 1;
+    private decimal linePrice;
+
+    private record Line(Guid ProductId, string ProductName, int Quantity, decimal UnitPrice, Guid? WarehouseId);
+    private readonly List<Line> lines = [];
+    private decimal Total => lines.Sum(l => l.Quantity * l.UnitPrice);
+
+    private bool busy;
+    private string? status;
+
+    private IEnumerable<CustomerDto> FilteredCustomers =>
+        string.IsNullOrWhiteSpace(customerSearch) ? myCustomers
+        : myCustomers.Where(c => (c.Name ?? "").Contains(customerSearch, StringComparison.OrdinalIgnoreCase)
+                              || (c.Phone ?? "").Contains(customerSearch, StringComparison.OrdinalIgnoreCase));
+
+    protected override async Task OnInitializedAsync()
+    {
+        myCustomers = await Api.GetMyCustomersAsync();
+        loadingCustomers = false;
+    }
+
+    private void PickCustomer(CustomerDto c) { selectedCustomer = c; customerSearch = null; }
+
+    private async Task SearchProducts()
+    {
+        if (string.IsNullOrWhiteSpace(productSearch)) { productResults = []; return; }
+        productResults = await Api.SearchProductsAsync(productSearch);
+    }
+
+    private async Task PickProduct(ProductDto p)
+    {
+        selectedProduct = p; productResults = []; linePrice = p.RentalPrice;
+        stock = await Api.GetProductStockAsync(p.Id);
+        selectedWarehouseId = stock.FirstOrDefault()?.WarehouseId;
+    }
+
+    private void AddLine()
+    {
+        if (selectedProduct is null || lineQty <= 0) { status = "Məhsul və say seçin."; return; }
+        if (lines.Any(l => l.ProductId == selectedProduct.Id)) { status = "Bu məhsul artıq əlavə olunub."; return; }
+        lines.Add(new Line(selectedProduct.Id, selectedProduct.Name, lineQty, linePrice, selectedWarehouseId));
+        selectedProduct = null; productSearch = null; lineQty = 1; linePrice = 0; stock = []; status = null;
+    }
+
+    private async Task CreateOrder()
+    {
+        if (selectedCustomer is null) { status = "Müştəri seçin."; return; }
+        if (lines.Count == 0) { status = "Ən azı bir məhsul əlavə edin."; return; }
+        busy = true;
+        var today = DateOnly.FromDateTime(DateTime.Today);
+        var req = new CreateOrderRequest(
+            CustomerId: selectedCustomer.Id, StartDate: today, EndDate: today,
+            Lines: lines.Select(l => new CreateOrderLineRequest(l.ProductId, l.Quantity, l.UnitPrice, l.WarehouseId)).ToList(),
+            OrderType: "Satış");
+        var (id, err) = await Api.CreateOrderAsync(req);
+        busy = false;
+        if (id is null) { status = err; return; }
+        status = "Sifariş yaradıldı ✓ — borcunuz bağlanır.";
+        selectedCustomer = null; lines.Clear();
+    }
+}

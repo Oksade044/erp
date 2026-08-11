@@ -1,0 +1,61 @@
+:root {
+    --primary: #3B5BDB;
+    --green: #2F9E44;
+    --red: #C92A2A;
+    --bg: #F1F3F5;
+    --muted: #868E96;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; font-family: -apple-system, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: #212529; }
+
+.app-shell { min-height: 100dvh; display: flex; flex-direction: column; }
+.app-main { flex: 1; padding: 16px; padding-bottom: 84px; max-width: 640px; margin: 0 auto; width: 100%; }
+
+.tabbar {
+    position: fixed; bottom: 0; left: 0; right: 0; height: 66px;
+    background: #fff; border-top: 1px solid #E9ECEF;
+    display: flex; justify-content: space-around; align-items: center;
+    padding-bottom: env(safe-area-inset-bottom); z-index: 100;
+}
+.tab { flex: 1; text-align: center; text-decoration: none; color: var(--muted); font-size: 11px; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 6px 0; }
+.tab .ic { font-size: 22px; }
+.tab.active { color: var(--primary); font-weight: 600; }
+
+.card { background: #fff; border-radius: 14px; padding: 16px; margin-bottom: 14px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+.card h2 { margin: 0 0 10px; font-size: 15px; font-weight: 600; }
+.title { font-size: 20px; font-weight: 700; margin: 4px 0 14px; }
+.muted { color: var(--muted); font-size: 12px; }
+
+.debt-card { background: #FFF0F0; border-radius: 16px; padding: 18px; margin-bottom: 14px; }
+.debt-card .lbl { color: var(--red); font-size: 13px; }
+.debt-card .val { color: var(--red); font-size: 26px; font-weight: 700; }
+
+input, select { width: 100%; padding: 12px; border: 1px solid #CED4DA; border-radius: 10px; font-size: 15px; margin: 4px 0 10px; background: #fff; }
+.btn { display: block; width: 100%; border: none; border-radius: 10px; padding: 14px; font-size: 16px; font-weight: 600; color: #fff; cursor: pointer; margin: 6px 0; }
+.btn-primary { background: var(--primary); }
+.btn-green { background: var(--green); }
+.btn-red { background: var(--red); }
+.btn:disabled { opacity: .6; }
+
+.list-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: #F8F9FA; border-radius: 8px; margin: 4px 0; cursor: pointer; }
+.list-item:active { background: #E9ECEF; }
+
+.status { text-align: center; color: var(--primary); font-weight: 600; margin: 10px 0; }
+.error { color: var(--red); font-weight: 600; text-align: center; }
+.total { text-align: right; font-size: 16px; font-weight: 700; margin-top: 8px; }
+
+.login-wrap { min-height: 100dvh; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 24px; background: linear-gradient(160deg, #3B5BDB, #5F3DC4); }
+.login-box { background: #fff; border-radius: 18px; padding: 28px; width: 100%; max-width: 380px; }
+.login-logo { text-align: center; font-size: 34px; font-weight: 800; color: var(--primary); margin-bottom: 2px; }
+.login-sub { text-align: center; color: var(--muted); font-size: 13px; margin-bottom: 18px; }
+
+#blazor-error-ui { background: #ffe3e3; bottom: 0; box-shadow: 0 -1px 2px rgba(0,0,0,.2); display: none; left: 0; padding: 10px 16px; position: fixed; width: 100%; z-index: 1000; }
+#blazor-error-ui .dismiss { cursor: pointer; position: absolute; right: 12px; top: 8px; }
+.blazor-error-boundary { background: #b32121; padding: 1rem; color: white; }
+.blazor-error-boundary::after { content: "Xəta baş verdi."; }
+.loading-progress { position: absolute; display: block; width: 8rem; height: 8rem; inset: 30vh 0 auto 0; margin: 0 auto; }
+.loading-progress circle { fill: none; stroke: #e0e0e0; stroke-width: .6rem; transform-origin: 50% 50%; transform: rotate(-90deg); }
+.loading-progress circle:last-child { stroke: var(--primary); stroke-dasharray: calc(3.141 * var(--blazor-load-percentage, 0%) * 0.8), 500%; transition: stroke-dasharray .05s ease-in-out; }
+.loading-progress-text { position: absolute; text-align: center; font-weight: bold; inset: calc(30vh + 3.25rem) 0 auto 0; }
+.loading-progress-text:after { content: "Yüklənir..."; }

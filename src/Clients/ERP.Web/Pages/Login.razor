@@ -1,0 +1,48 @@
+@page "/login"
+@layout EmptyLayout
+@inject WebApiClient Api
+@inject AppState State
+@inject NavigationManager Nav
+
+<div class="login-wrap">
+    <div class="login-box">
+        <div class="login-logo">ERP</div>
+        <div class="login-sub">İşçi / Təmsilçi girişi</div>
+
+        <label class="muted">İstifadəçi adı</label>
+        <input @bind="username" @bind:event="oninput" placeholder="istifadəçi adı" autocapitalize="none" />
+
+        <label class="muted">Şifrə</label>
+        <input type="password" @bind="password" @bind:event="oninput" @onkeydown="OnKey" placeholder="şifrə" />
+
+        <button class="btn btn-primary" @onclick="DoLogin" disabled="@busy">@(busy ? "Yoxlanılır..." : "Daxil ol")</button>
+
+        @if (!string.IsNullOrEmpty(error)) { <div class="error">@error</div> }
+    </div>
+</div>
+
+@code {
+    private string username = "";
+    private string password = "";
+    private string? error;
+    private bool busy;
+
+    protected override void OnInitialized()
+    {
+        if (State.IsLoggedIn) Nav.NavigateTo("");
+    }
+
+    private async Task OnKey(KeyboardEventArgs e) { if (e.Key == "Enter") await DoLogin(); }
+
+    private async Task DoLogin()
+    {
+        error = null;
+        if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
+        { error = "İstifadəçi adı və şifrə tələb olunur."; return; }
+        busy = true;
+        var (ok, err) = await Api.LoginAsync(username.Trim(), password);
+        busy = false;
+        if (ok) Nav.NavigateTo("");
+        else error = err;
+    }
+}
