@@ -85,6 +85,12 @@ public partial class EmployeesViewModel(ErpApiClient api, bool canViewSalary = t
     [ObservableProperty] private DateTimeOffset _newHireDate = DateTimeOffset.Now;
     [ObservableProperty] private decimal _newSalary;
 
+    // Mobil/sistem girişi (opsional) — şifrə verilsə işçi üçün login (User) yaradılır.
+    [ObservableProperty] private string? _newLoginUsername;
+    [ObservableProperty] private string? _newLoginPassword;
+    [ObservableProperty] private string? _newLoginRole;
+    public ObservableCollection<string> Roles { get; } = [];
+
     [RelayCommand]
     private async Task LoadAsync()
     {
@@ -96,6 +102,12 @@ public partial class EmployeesViewModel(ErpApiClient api, bool canViewSalary = t
             Employees.Clear();
             if (result is not null)
                 foreach (var e in result.Items) Employees.Add(e);
+            // Login üçün rollar (bir dəfə).
+            if (Roles.Count == 0)
+            {
+                var rs = await api.GetRolesAsync();
+                if (rs is not null) foreach (var r in rs) Roles.Add(r.Name);
+            }
             Status = $"{Employees.Count} işçi";
         }
         catch (System.Exception ex)
@@ -131,7 +143,10 @@ public partial class EmployeesViewModel(ErpApiClient api, bool canViewSalary = t
                     HireDate: DateOnly.FromDateTime(NewHireDate.DateTime),
                     Salary: NewSalary,
                     Department: NewDepartment,
-                    Email: NewEmail));
+                    Email: NewEmail,
+                    LoginUsername: string.IsNullOrWhiteSpace(NewLoginUsername) ? null : NewLoginUsername,
+                    LoginPassword: string.IsNullOrWhiteSpace(NewLoginPassword) ? null : NewLoginPassword,
+                    LoginRole: NewLoginRole));
 
             if (ok)
             {
@@ -141,6 +156,7 @@ public partial class EmployeesViewModel(ErpApiClient api, bool canViewSalary = t
                 IsEditing = false;
                 NewFullName = NewPosition = NewDepartment = NewPhone = NewEmail = null;
                 NewSalary = 0;
+                NewLoginUsername = NewLoginPassword = NewLoginRole = null;
                 await LoadAsync();
             }
             else Status = error ?? "Əlavə edilmədi.";

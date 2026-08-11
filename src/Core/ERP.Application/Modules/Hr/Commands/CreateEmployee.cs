@@ -3,6 +3,7 @@ using ERP.Application.Common.Messaging;
 using ERP.Application.Common.Models;
 using ERP.Domain.Modules.Customers;
 using ERP.Domain.Modules.Hr;
+using ERP.Domain.Modules.Users;
 using ERP.Domain.ValueObjects;
 using ERP.Shared.Contracts.Hr;
 using FluentValidation;
@@ -25,6 +26,9 @@ public sealed class CreateEmployeeValidator : AbstractValidator<CreateEmployeeCo
 
 public sealed class CreateEmployeeHandler(
     IEmployeeRepository employees,
+    IUserRepository users,
+    IRoleRepository roles,
+    IPasswordHasher passwordHasher,
     IUnitOfWork unitOfWork)
     : IRequestHandler<CreateEmployeeCommand, Result<Guid>>
 {
@@ -44,6 +48,26 @@ public sealed class CreateEmployeeHandler(
             number, dto.FullName, dto.Position, phone, dto.HireDate, salary, dto.Department, email, dto.Notes);
 
         await employees.AddAsync(employee, ct);
+
+        // Şifrə verilibsə — işçi üçün sistem/mobil giriş (User) də yarat (eyni transaksiya).
+        // Belə ki, işçi Android/iOS tətbiqinə öz adı ilə daxil ola bilsin.
+        if (!string.IsNullOrWhiteSpace(dto.LoginPassword))
+        {
+            var username = (string.IsNullOrWhiteSpace(dto.LoginUsername) ? phone.Value : dto.LoginUsername)
+                .Trim().ToLowerInvariant();
+
+            if (await users.GetByUsernameAsync(username, ct) is not null)
+                return Result.Failure<Guid>($"Bu istifadəçi adı artıq mövcuddur: {username}");
+
+            var roleName = string.IsNullOrWhiteSpace(dto.LoginRole) ? Role.Kassir.ToString() : dto.LoginRole.Trim();
+            if (await roles.GetByNameAsync(roleName, ct) is null)
+                return Result.Failure<Guid>($"Belə rol yoxdur: {roleName}");
+
+            var (hash, salt) = passwordHasher.Hash(dto.LoginPassword);
+            var user = User.Create(username, hash, salt, dto.FullName, roleName);
+            await users.AddAsync(user, ct);
+        }
+
         await unitOfWork.SaveChangesAsync(ct);
 
         return Result.Success(employee.Id);

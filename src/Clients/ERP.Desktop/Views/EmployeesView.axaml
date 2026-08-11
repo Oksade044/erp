@@ -42,6 +42,16 @@
                     <TextBox Width="110" PlaceholderText="Şöbə" Text="{Binding NewDepartment}" />
                     <TextBox Width="130" PlaceholderText="Telefon *" Text="{Binding NewPhone}" />
                 </StackPanel>
+                <!-- Mobil/sistem girişi — şifrə verilsə işçi Android/iOS-a daxil ola bilər (yalnız yaratmada). -->
+                <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding CreateMode}">
+                    <TextBlock Text="🔑 Mobil giriş:" VerticalAlignment="Center" Foreground="#5A6072" />
+                    <TextBox Width="170" PlaceholderText="İstifadəçi adı (boş=telefon)" Text="{Binding NewLoginUsername}"
+                             ToolTip.Tip="Boş buraxsanız telefon nömrəsi istifadəçi adı olur" />
+                    <TextBox Width="140" PlaceholderText="Şifrə" Text="{Binding NewLoginPassword}" PasswordChar="•"
+                             ToolTip.Tip="Şifrə versəniz işçi üçün mobil/sistem girişi yaradılır" />
+                    <ComboBox Width="140" ItemsSource="{Binding Roles}" SelectedItem="{Binding NewLoginRole}"
+                              PlaceholderText="Rol (boş=Kassir)" />
+                </StackPanel>
                 <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding FormVisible}">
                     <TextBox Width="160" PlaceholderText="E-poçt" Text="{Binding NewEmail}" />
                     <TextBlock Text="İşə qəbul:" VerticalAlignment="Center" />
