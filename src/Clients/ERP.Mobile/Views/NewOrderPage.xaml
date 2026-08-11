@@ -11,13 +11,13 @@
     <ScrollView>
         <VerticalStackLayout Padding="14" Spacing="12">
 
-            <!-- 1. Müştəri -->
+            <!-- 1. Müştəri (yalnız öz müştəriləriniz) -->
             <Border Style="{StaticResource Card}">
                 <VerticalStackLayout Spacing="8">
-                    <Label Text="1. Müştəri" Style="{StaticResource SectionTitle}" />
-                    <Entry Placeholder="Ad və ya telefonla axtar" Text="{Binding CustomerSearch}" />
+                    <Label Text="1. Müştəri seçin" Style="{StaticResource SectionTitle}" />
+                    <Entry Placeholder="Müştərilərinizdə axtar (ad/telefon)" Text="{Binding CustomerSearch}" />
                     <CollectionView x:Name="CustomerList" ItemsSource="{Binding CustomerResults}"
-                                    SelectionMode="Single" SelectionChanged="OnCustomerSelected">
+                                    SelectionMode="Single" SelectionChanged="OnCustomerSelected" MaximumHeightRequest="220">
                         <CollectionView.ItemTemplate>
                             <DataTemplate x:DataType="cdto:CustomerDto">
                                 <Grid Padding="8" ColumnDefinitions="*,Auto" BackgroundColor="#F8F9FA" Margin="0,2">
@@ -28,38 +28,13 @@
                         </CollectionView.ItemTemplate>
                     </CollectionView>
                     <Label Text="{Binding SelectedCustomer.Name, StringFormat='✓ Seçilmiş müştəri: {0}'}" TextColor="#2F9E44" FontAttributes="Bold" IsVisible="{Binding SelectedCustomer, Converter={StaticResource NotNull}}" />
-                    <Button Text="+ Yeni müştəri yarat" FontSize="13" BackgroundColor="#868E96" Command="{Binding ToggleCreatingCustomerCommand}" />
-                    <VerticalStackLayout IsVisible="{Binding CreatingCustomer}" Spacing="6" BackgroundColor="#F1F3F5" Padding="10">
-                        <Label Text="Ad Soyad" FontSize="12" TextColor="Gray" />
-                        <Entry Placeholder="Məs. Aysel Məmmədova" Text="{Binding NewCustomerName}" />
-                        <Label Text="Telefon" FontSize="12" TextColor="Gray" />
-                        <Entry Placeholder="Məs. 0501234567" Keyboard="Telephone" Text="{Binding NewCustomerPhone}" />
-                        <Label Text="Ünvan (istəyə görə)" FontSize="12" TextColor="Gray" />
-                        <Entry Placeholder="Ünvan" Text="{Binding NewCustomerAddress}" />
-                        <Button Text="Müştərini yadda saxla" Command="{Binding CreateCustomerCommand}" FontSize="13" BackgroundColor="#0CA678" />
-                    </VerticalStackLayout>
                 </VerticalStackLayout>
             </Border>
 
-            <!-- 2. Tarixlər -->
+            <!-- 2. Məhsul əlavə et -->
             <Border Style="{StaticResource Card}">
                 <VerticalStackLayout Spacing="8">
-                    <Label Text="2. Tarix və növ" Style="{StaticResource SectionTitle}" />
-                    <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="8">
-                        <Label Grid.Row="0" Grid.Column="0" Text="Başlama:" VerticalOptions="Center" WidthRequest="70" />
-                        <DatePicker Grid.Row="0" Grid.Column="1" Date="{Binding StartDate}" />
-                        <Label Grid.Row="1" Grid.Column="0" Text="Bitmə:" VerticalOptions="Center" WidthRequest="70" />
-                        <DatePicker Grid.Row="1" Grid.Column="1" Date="{Binding EndDate}" />
-                        <Label Grid.Row="2" Grid.Column="0" Text="Növ:" VerticalOptions="Center" WidthRequest="70" />
-                        <Picker Grid.Row="2" Grid.Column="1" ItemsSource="{Binding OrderTypes}" SelectedItem="{Binding OrderType}" />
-                    </Grid>
-                </VerticalStackLayout>
-            </Border>
-
-            <!-- 3. Məhsul əlavə et -->
-            <Border Style="{StaticResource Card}">
-                <VerticalStackLayout Spacing="8">
-                    <Label Text="3. Məhsul əlavə et" Style="{StaticResource SectionTitle}" />
+                    <Label Text="2. Məhsul əlavə et" Style="{StaticResource SectionTitle}" />
                     <Entry Placeholder="Məhsul adı ilə axtar" Text="{Binding ProductSearch}" />
                     <CollectionView x:Name="ProductList" ItemsSource="{Binding ProductResults}"
                                     SelectionMode="Single" SelectionChanged="OnProductSelected">
@@ -91,7 +66,7 @@
             <!-- 4. Sətirlər -->
             <Border Style="{StaticResource Card}">
                 <VerticalStackLayout Spacing="6">
-                    <Label Text="4. Sifariş sətirləri" Style="{StaticResource SectionTitle}" />
+                    <Label Text="3. Sifariş sətirləri" Style="{StaticResource SectionTitle}" />
                     <Label Text="Silmək üçün sətrə toxunun." FontSize="12" TextColor="Gray" IsVisible="{Binding DraftLines.Count, Converter={StaticResource NotNull}}" />
                     <CollectionView x:Name="DraftList" ItemsSource="{Binding DraftLines}"
                                     SelectionMode="Single" SelectionChanged="OnDraftLineSelected">

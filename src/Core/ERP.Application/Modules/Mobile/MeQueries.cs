@@ -65,6 +65,27 @@ public sealed class GetMyDebtHandler(
     }
 }
 
+// --- Mənim müştərilərim (təmsilçiyə təyin edilmiş) ---
+public sealed record GetMyCustomersQuery : IRequest<Result<IReadOnlyList<ERP.Shared.Contracts.Customers.CustomerDto>>>;
+
+public sealed class GetMyCustomersHandler(ICustomerRepository customers, ICurrentUser currentUser)
+    : IRequestHandler<GetMyCustomersQuery, Result<IReadOnlyList<ERP.Shared.Contracts.Customers.CustomerDto>>>
+{
+    public async Task<Result<IReadOnlyList<ERP.Shared.Contracts.Customers.CustomerDto>>> Handle(GetMyCustomersQuery request, CancellationToken ct)
+    {
+        var name = currentUser.FullName ?? currentUser.UserName;
+        if (string.IsNullOrWhiteSpace(name))
+            return Result.Failure<IReadOnlyList<ERP.Shared.Contracts.Customers.CustomerDto>>("İstifadəçi müəyyən edilmədi.");
+
+        var page = await customers.SearchAsync(null, 1, 1000, ct);
+        var mine = page.Items
+            .Where(c => string.Equals(c.RepresentativeName, name, StringComparison.OrdinalIgnoreCase))
+            .Select(c => ERP.Application.Modules.Customers.CustomerMapping.ToDto(c))
+            .ToList();
+        return Result.Success<IReadOnlyList<ERP.Shared.Contracts.Customers.CustomerDto>>(mine);
+    }
+}
+
 // --- Mənim sifarişlərim (gün/status filtri ilə) ---
 public sealed record GetMyOrdersQuery(string? Filter = "all") : IRequest<Result<IReadOnlyList<OrderDto>>>;
 

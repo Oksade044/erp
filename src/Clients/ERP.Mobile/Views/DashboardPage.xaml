@@ -10,6 +10,15 @@
             <VerticalStackLayout Padding="16" Spacing="14">
                 <Label Text="{Binding Welcome}" FontSize="20" FontAttributes="Bold" />
 
+                <!-- Təmsilçi borcu (əsas ekranda) -->
+                <Border StrokeShape="RoundRectangle 14" BackgroundColor="#FFF0F0" Padding="16">
+                    <VerticalStackLayout Spacing="2">
+                        <Label Text="💳 Borc vəziyyəti" FontSize="12" TextColor="#C92A2A" />
+                        <Label Text="{Binding DebtText}" FontSize="22" FontAttributes="Bold" TextColor="#C92A2A" />
+                        <Label Text="{Binding DebtSubText}" FontSize="12" TextColor="#868E96" />
+                    </VerticalStackLayout>
+                </Border>
+
                 <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="12" RowSpacing="12">
                     <Border Grid.Row="0" Grid.Column="0" StrokeShape="RoundRectangle 12" BackgroundColor="#E7F5FF" Padding="14">
                         <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding OpenOrdersCommand}" CommandParameter="today-delivery" /></Border.GestureRecognizers>

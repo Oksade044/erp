@@ -13,6 +13,14 @@ public partial class NewOrderPage : ContentPage
 		BindingContext = _vm = vm;
 	}
 
+	protected override void OnAppearing()
+	{
+		base.OnAppearing();
+		// Səhifə açılanda təmsilçinin öz müştərilərini yüklə.
+		if (_vm.LoadCustomersCommand.CanExecute(null))
+			_vm.LoadCustomersCommand.Execute(null);
+	}
+
 	private void OnCustomerSelected(object? sender, SelectionChangedEventArgs e)
 	{
 		if (e.CurrentSelection.FirstOrDefault() is CustomerDto c) _vm.PickCustomer(c);

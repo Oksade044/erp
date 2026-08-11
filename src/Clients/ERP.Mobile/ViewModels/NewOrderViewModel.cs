@@ -9,25 +9,18 @@ using ERP.Shared.Contracts.Warehouses;
 
 namespace ERP.Mobile.ViewModels;
 
-/// <summary>Yeni sifariş — müştəri (axtar/yarat) + məhsul axtarışı + anbar seçimi + sətirlər.</summary>
+/// <summary>
+/// Təmsilçi üçün SADƏ sifariş yaratma: yalnız öz müştərini seç + məhsul əlavə et + yarat.
+/// Müştəri əlavə etmək, tarix, növ, qaralama/bron/təhvil və s. YOXDUR — sifariş yaradıldıqda
+/// təmsilçinin borcu bağlanmağa başlayır (server RepresentativeEntry).
+/// </summary>
 public partial class NewOrderViewModel(MobileApiClient api) : ObservableObject
 {
-    // Müştəri
+    // Müştəri — yalnız təmsilçiyə təyin edilmiş müştərilər (öz müştəriləri).
+    private readonly List<CustomerDto> _allMyCustomers = [];
     [ObservableProperty] private string? _customerSearch;
     [ObservableProperty] private CustomerDto? _selectedCustomer;
     public ObservableCollection<CustomerDto> CustomerResults { get; } = [];
-
-    // Yeni müştəri
-    [ObservableProperty] private bool _creatingCustomer;
-    [ObservableProperty] private string? _newCustomerName;
-    [ObservableProperty] private string? _newCustomerPhone;
-    [ObservableProperty] private string? _newCustomerAddress;
-
-    // Tarixlər
-    [ObservableProperty] private DateTime _startDate = DateTime.Today;
-    [ObservableProperty] private DateTime _endDate = DateTime.Today.AddDays(1);
-    [ObservableProperty] private string _orderType = "İcarə";
-    public string[] OrderTypes { get; } = ["İcarə", "Satış"];
 
     // Məhsul axtarışı
     [ObservableProperty] private string? _productSearch;
@@ -44,27 +37,30 @@ public partial class NewOrderViewModel(MobileApiClient api) : ObservableObject
     [ObservableProperty] private bool _isBusy;
     [ObservableProperty] private string? _status;
 
-    partial void OnCustomerSearchChanged(string? value) => _ = SearchCustomersAsync();
+    /// <summary>Səhifə açılanda təmsilçinin müştərilərini yükləyir.</summary>
+    [RelayCommand]
+    private async Task LoadCustomersAsync()
+    {
+        var list = await api.GetMyCustomersAsync();
+        _allMyCustomers.Clear();
+        _allMyCustomers.AddRange(list);
+        FilterCustomers();
+        Status = _allMyCustomers.Count == 0 ? "Sizə təyin edilmiş müştəri yoxdur." : $"{_allMyCustomers.Count} müştəri";
+    }
+
+    partial void OnCustomerSearchChanged(string? value) => FilterCustomers();
     partial void OnProductSearchChanged(string? value) => _ = SearchProductsAsync();
 
-    private async Task SearchCustomersAsync()
+    private void FilterCustomers()
     {
-        if (string.IsNullOrWhiteSpace(CustomerSearch)) { CustomerResults.Clear(); return; }
-        var list = await api.SearchCustomersAsync(CustomerSearch);
         CustomerResults.Clear();
-        foreach (var c in list.Take(10)) CustomerResults.Add(c);
+        var q = (CustomerSearch ?? "").Trim();
+        var items = string.IsNullOrEmpty(q)
+            ? _allMyCustomers
+            : _allMyCustomers.Where(c => (c.Name ?? "").Contains(q, StringComparison.OrdinalIgnoreCase)
+                                       || (c.Phone ?? "").Contains(q, StringComparison.OrdinalIgnoreCase));
+        foreach (var c in items.Take(50)) CustomerResults.Add(c);
     }
-
-    private async Task SearchProductsAsync()
-    {
-        if (string.IsNullOrWhiteSpace(ProductSearch)) { ProductResults.Clear(); return; }
-        var list = await api.SearchProductsAsync(ProductSearch);
-        ProductResults.Clear();
-        foreach (var p in list.Take(10)) ProductResults.Add(p);
-    }
-
-    [RelayCommand]
-    private void ToggleCreatingCustomer() => CreatingCustomer = !CreatingCustomer;
 
     public void PickCustomer(CustomerDto? c)
     {
@@ -72,17 +68,12 @@ public partial class NewOrderViewModel(MobileApiClient api) : ObservableObject
         if (c is not null) { CustomerSearch = c.Name; CustomerResults.Clear(); }
     }
 
-    [RelayCommand]
-    private async Task CreateCustomerAsync()
+    private async Task SearchProductsAsync()
     {
-        if (string.IsNullOrWhiteSpace(NewCustomerName) || string.IsNullOrWhiteSpace(NewCustomerPhone))
-        { Status = "Müştəri adı və telefon tələb olunur."; return; }
-        var (id, err) = await api.CreateCustomerAsync(new CreateCustomerRequest(
-            Type: "Fərdi", Name: NewCustomerName!, Phone: NewCustomerPhone!, AddressLine: NewCustomerAddress));
-        if (id is null) { Status = err; return; }
-        SelectedCustomer = new CustomerDto(id.Value, "Fərdi", NewCustomerName!, NewCustomerPhone!, null, null, NewCustomerAddress, null, null, true, DateTimeOffset.Now);
-        CreatingCustomer = false;
-        Status = "Müştəri yaradıldı və seçildi.";
+        if (string.IsNullOrWhiteSpace(ProductSearch)) { ProductResults.Clear(); return; }
+        var list = await api.SearchProductsAsync(ProductSearch);
+        ProductResults.Clear();
+        foreach (var p in list.Take(15)) ProductResults.Add(p);
     }
 
     public async Task PickProductAsync(ProductDto? p)
@@ -110,7 +101,6 @@ public partial class NewOrderViewModel(MobileApiClient api) : ObservableObject
             SelectedProduct.Id, SelectedProduct.Name, LineQuantity, LineUnitPrice,
             SelectedWarehouse?.WarehouseId, SelectedWarehouse?.WarehouseName));
         OnPropertyChanged(nameof(DraftTotal));
-        // sıfırla
         SelectedProduct = null; ProductSearch = null; LineQuantity = 1; LineUnitPrice = 0;
         ProductStock.Clear(); SelectedWarehouse = null;
     }
@@ -127,21 +117,22 @@ public partial class NewOrderViewModel(MobileApiClient api) : ObservableObject
     {
         if (SelectedCustomer is null) { Status = "Müştəri seçin."; return; }
         if (DraftLines.Count == 0) { Status = "Ən azı bir məhsul əlavə edin."; return; }
-        if (EndDate < StartDate) { Status = "Bitmə tarixi başlanğıcdan əvvəl ola bilməz."; return; }
 
         IsBusy = true;
         try
         {
+            // Tarix/növ təmsilçidən soruşulmur — sadə satış sifarişi (borc bağlanması üçün).
+            var today = DateOnly.FromDateTime(DateTime.Today);
             var req = new CreateOrderRequest(
                 CustomerId: SelectedCustomer.Id,
-                StartDate: DateOnly.FromDateTime(StartDate),
-                EndDate: DateOnly.FromDateTime(EndDate),
+                StartDate: today,
+                EndDate: today,
                 Lines: DraftLines.Select(l => new CreateOrderLineRequest(l.ProductId, l.Quantity, l.UnitPrice, l.WarehouseId)).ToList(),
-                OrderType: OrderType);
+                OrderType: "Satış");
             var (id, err) = await api.CreateOrderAsync(req);
             if (id is null) { Status = err; return; }
 
-            Status = "Sifariş yaradıldı ✓";
+            Status = "Sifariş yaradıldı ✓ — borcunuz bağlanır.";
             Reset();
         }
         finally { IsBusy = false; }
@@ -149,9 +140,9 @@ public partial class NewOrderViewModel(MobileApiClient api) : ObservableObject
 
     private void Reset()
     {
-        SelectedCustomer = null; CustomerSearch = null; CustomerResults.Clear();
+        SelectedCustomer = null; CustomerSearch = null;
         DraftLines.Clear(); OnPropertyChanged(nameof(DraftTotal));
-        StartDate = DateTime.Today; EndDate = DateTime.Today.AddDays(1); OrderType = "İcarə";
+        FilterCustomers();
     }
 }
 
