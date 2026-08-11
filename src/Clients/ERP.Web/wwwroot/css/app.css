@@ -6,8 +6,22 @@
     --muted: #868E96;
 }
 
-* { box-sizing: border-box; }
-html, body { margin: 0; padding: 0; font-family: -apple-system, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: #212529; }
+* {
+    box-sizing: border-box;
+    /* Native tətbiq hissi — mətn seçmə, uzun-basma menyusu, tap-vurğu YOXDUR. */
+    -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+}
+/* Yazı sahələrində mətn daxil etmək mümkün olsun. */
+input, select, textarea, [contenteditable] { -webkit-user-select: text; user-select: text; }
+
+html, body {
+    margin: 0; padding: 0; font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg); color: #212529;
+    overscroll-behavior: none; /* pull-to-refresh/bounce yoxdur */
+    touch-action: manipulation; /* ikiqat-toxunma zoom yoxdur */
+}
 
 .app-shell { min-height: 100dvh; display: flex; flex-direction: column; }
 .app-main { flex: 1; padding: 16px; padding-bottom: 84px; max-width: 640px; margin: 0 auto; width: 100%; }

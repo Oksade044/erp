@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ERP.Mobile.Views.AppWebViewPage"
+             BackgroundColor="#3B5BDB"
+             Shell.NavBarIsVisible="False">
+    <Grid>
+        <WebView x:Name="Web" Source="https://186.240.145.239.sslip.io/"
+                 Navigating="OnNavigating" Navigated="OnNavigated" />
+
+        <!-- İlk açılış yüklənmə göstəricisi (native hiss) -->
+        <VerticalStackLayout x:Name="Splash" BackgroundColor="#3B5BDB"
+                             HorizontalOptions="Fill" VerticalOptions="Fill"
+                             Spacing="16" Padding="0" >
+            <Label Text="ERP" FontSize="48" FontAttributes="Bold" TextColor="White"
+                   HorizontalOptions="Center" VerticalOptions="EndAndExpand" />
+            <ActivityIndicator IsRunning="True" Color="White" HorizontalOptions="Center" />
+            <Label Text="Yüklənir..." TextColor="White" FontSize="13"
+                   HorizontalOptions="Center" VerticalOptions="StartAndExpand" />
+        </VerticalStackLayout>
+    </Grid>
+</ContentPage>
