@@ -6,8 +6,9 @@ using ERP.Domain.Modules.Orders;
 namespace ERP.Application.Modules.Orders.Commands;
 
 /// <summary>
-/// Sifarişi silir (soft delete). Yalnız QARALAMA sifariş silinə bilər — təsdiqlənmiş/təhvil
-/// verilmiş sifarişlərin izi qalmalıdır (audit/rezerv). Qaralama düzənləmə üçün istifadə olunur.
+/// Sifarişi silir (soft delete). Yalnız QARALAMA və ya LƏĞV edilmiş sifariş silinə bilər —
+/// bunların stok/maliyyə təsiri yoxdur (rezerv ləğvdə azad olunub). Təsdiqlənmiş/təhvil verilmiş/
+/// qaytarılmış sifarişlərin izi qalmalıdır (audit/rezerv/maliyyə).
 /// </summary>
 public sealed record DeleteOrderCommand(Guid Id) : IRequest<Result>;
 
@@ -22,8 +23,8 @@ public sealed class DeleteOrderHandler(
         if (order is null)
             return Result.Failure($"Sifariş tapılmadı: {request.Id}");
 
-        if (order.Status != OrderStatus.Qaralama)
-            return Result.Failure("Yalnız qaralama sifariş silinə bilər.");
+        if (order.Status is not (OrderStatus.Qaralama or OrderStatus.Ləğv))
+            return Result.Failure("Yalnız qaralama və ya ləğv edilmiş sifariş silinə bilər.");
 
         orders.Remove(order);
         await unitOfWork.SaveChangesAsync(ct);
