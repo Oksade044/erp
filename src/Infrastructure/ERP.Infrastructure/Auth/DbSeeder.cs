@@ -32,7 +32,34 @@ public static class DbSeeder
         // assembly-yə keçilməlidir (EnsureCreated __EFMigrationsHistory yaratmır).
         var isPostgres = db.Database.ProviderName?.Contains("Npgsql", StringComparison.OrdinalIgnoreCase) == true;
         if (isPostgres)
+        {
             await db.Database.EnsureCreatedAsync();
+
+            // Soft-delete olunmuş sətirlər unikal indeksdə yeri tutmasın — indeksləri "partial"
+            // et (WHERE "IsDeleted" = false). Belə ki, silinmiş adı/telefonu/kodu təzədən yaratmaq
+            // mümkün olsun (əvvəl "duplicate key" → 500 verirdi, bütün bölmələrdə). Dinamik +
+            // idempotent: yalnız IsDeleted sütunu olan cədvəllərin filtri olmayan unikal indeksləri.
+            await db.Database.ExecuteSqlRawAsync("""
+                DO $$
+                DECLARE r RECORD;
+                BEGIN
+                  FOR r IN
+                    SELECT i.indexname, i.indexdef
+                    FROM pg_indexes i
+                    WHERE i.schemaname = 'public'
+                      AND i.indexdef ILIKE '%UNIQUE INDEX%'
+                      AND i.indexdef NOT ILIKE '%WHERE%'
+                      AND EXISTS (
+                        SELECT 1 FROM information_schema.columns c
+                        WHERE c.table_schema = 'public' AND c.table_name = i.tablename
+                          AND c.column_name = 'IsDeleted')
+                  LOOP
+                    EXECUTE 'DROP INDEX ' || quote_ident(r.indexname);
+                    EXECUTE r.indexdef || ' WHERE "IsDeleted" = false';
+                  END LOOP;
+                END $$;
+                """);
+        }
         else
             await db.Database.MigrateAsync();
 
