@@ -8,8 +8,7 @@
 
     <TabBar>
         <ShellContent Title="Əsas" Icon="tab_home.png" ContentTemplate="{DataTemplate views:DashboardPage}" Route="dashboard" />
-        <ShellContent Title="Sifarişlərim" Icon="tab_orders.png" ContentTemplate="{DataTemplate views:MyOrdersPage}" Route="myorders" />
-        <ShellContent Title="Yeni" Icon="tab_new.png" ContentTemplate="{DataTemplate views:NewOrderPage}" Route="neworder" />
+        <ShellContent Title="Yeni sifariş" Icon="tab_new.png" ContentTemplate="{DataTemplate views:NewOrderPage}" Route="neworder" />
         <ShellContent Title="Borcum" Icon="tab_debt.png" ContentTemplate="{DataTemplate views:DebtPage}" Route="debt" />
         <ShellContent Title="Profil" Icon="tab_profile.png" ContentTemplate="{DataTemplate views:ProfilePage}" Route="profile" />
     </TabBar>

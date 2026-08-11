@@ -54,6 +54,23 @@ public sealed class AssignDebtHandler(IRepresentativeRepository repo, IUnitOfWor
     }
 }
 
+// --- Təmsilçinin bütün defter qeydlərini sil (borcu sıfırla) ---
+public sealed record ResetRepresentativeCommand(string Name) : IRequest<Result>;
+
+public sealed class ResetRepresentativeHandler(IRepresentativeRepository repo, IUnitOfWork uow)
+    : IRequestHandler<ResetRepresentativeCommand, Result>
+{
+    public async Task<Result> Handle(ResetRepresentativeCommand request, CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(request.Name))
+            return Result.Failure("Təmsilçi tələb olunur.");
+        var entries = await repo.GetByRepresentativeAsync(request.Name, ct);
+        foreach (var e in entries) repo.Remove(e);
+        await uow.SaveChangesAsync(ct);
+        return Result.Success();
+    }
+}
+
 // --- Bir təmsilçinin defteri (balans + qeydlər) ---
 public sealed record GetRepresentativeLedgerQuery(string Name) : IRequest<Result<RepresentativeLedgerDto>>;
 

@@ -21,6 +21,14 @@ public partial class RepresentativesViewModel(ErpApiClient api) : ViewModelBase
     [ObservableProperty] private bool _isBusy;
     [ObservableProperty] private string? _status;
     [ObservableProperty] private decimal _ledgerBalance;
+    /// <summary>Admin/mərkəz tərəfindən yaradılmış ümumi borc.</summary>
+    [ObservableProperty] private decimal _ledgerTotalDebt;
+    /// <summary>Təmsilçinin sifariş/ödənişlə bağladığı ümumi məbləğ.</summary>
+    [ObservableProperty] private decimal _ledgerTotalOrders;
+    /// <summary>Qalan bağlanmamış borc (mənfi = hələ borclu).</summary>
+    public string LedgerSummary =>
+        Selected is null ? "" :
+        $"Yaradılmış borc: −{LedgerTotalDebt:0.00}   |   Bağlanmış: +{LedgerTotalOrders:0.00}   |   Qalıq: {LedgerBalance:0.00} AZN";
 
     // Borc təyin etmə forması
     [ObservableProperty] private string? _newRepName;
@@ -59,6 +67,9 @@ public partial class RepresentativesViewModel(ErpApiClient api) : ViewModelBase
             {
                 foreach (var e in ledger.Entries) Entries.Add(e);
                 LedgerBalance = ledger.Balance;
+                LedgerTotalDebt = ledger.TotalDebt;
+                LedgerTotalOrders = ledger.TotalOrders;
+                OnPropertyChanged(nameof(LedgerSummary));
             }
         }
         catch (Exception ex) { Status = $"Xəta: {ex.Message}"; }
@@ -81,5 +92,16 @@ public partial class RepresentativesViewModel(ErpApiClient api) : ViewModelBase
         NewDebtAmount = 0; NewDebtNote = null;
         await LoadAsync();
         await LoadLedgerAsync(NewRepName!.Trim());
+    }
+
+    /// <summary>Seçilmiş təmsilçinin bütün borc/hərəkət qeydlərini silir (sıfırlayır).</summary>
+    [RelayCommand]
+    private async Task ResetSelectedAsync()
+    {
+        if (Selected is null) { ERP.Desktop.AppNotify.Show("Sıfırlamaq üçün təmsilçi seçin."); return; }
+        var name = Selected.RepresentativeName;
+        var (ok, err) = await api.ResetRepresentativeAsync(name);
+        ERP.Desktop.AppNotify.Show(ok ? $"✓ Təmsilçi borcu sıfırlandı: {name}" : "⚠ " + (err ?? "Sıfırlanmadı."));
+        if (ok) { Entries.Clear(); LedgerBalance = LedgerTotalDebt = LedgerTotalOrders = 0; OnPropertyChanged(nameof(LedgerSummary)); await LoadAsync(); }
     }
 }

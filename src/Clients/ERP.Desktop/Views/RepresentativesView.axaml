@@ -46,9 +46,14 @@
 
             <!-- Seçilən təmsilçinin defteri -->
             <StackPanel Grid.Column="2">
-                <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,0,0,8">
-                    <TextBlock Text="Defter (tarixçə)" FontWeight="SemiBold" FontSize="15" />
-                    <TextBlock Text="{Binding LedgerBalance, StringFormat='Cari balans: {0:0.00} AZN'}" FontWeight="Bold" Foreground="#1971C2" VerticalAlignment="Center" />
+                <StackPanel Spacing="4" Margin="0,0,0,8">
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <TextBlock Text="Defter (tarixçə)" FontWeight="SemiBold" FontSize="15" VerticalAlignment="Center" />
+                        <Button Content="🗑 Borcu sıfırla" Command="{Binding ResetSelectedCommand}"
+                                Background="#E03131" Foreground="White" Padding="8,3"
+                                ToolTip.Tip="Seçilmiş təmsilçinin bütün borc/hərəkət qeydlərini silir (sıfırlayır)." />
+                    </StackPanel>
+                    <TextBlock Text="{Binding LedgerSummary}" FontWeight="Bold" Foreground="#1971C2" TextWrapping="Wrap" />
                 </StackPanel>
                 <DataGrid ItemsSource="{Binding Entries}" IsReadOnly="True"
                           GridLinesVisibility="Horizontal" BorderThickness="1" BorderBrush="#E0E2EA">

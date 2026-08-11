@@ -11,56 +11,25 @@
                 <Label Text="{Binding Welcome}" FontSize="20" FontAttributes="Bold" />
 
                 <!-- Təmsilçi borcu (əsas ekranda) -->
-                <Border StrokeShape="RoundRectangle 14" BackgroundColor="#FFF0F0" Padding="16">
-                    <VerticalStackLayout Spacing="2">
-                        <Label Text="💳 Borc vəziyyəti" FontSize="12" TextColor="#C92A2A" />
-                        <Label Text="{Binding DebtText}" FontSize="22" FontAttributes="Bold" TextColor="#C92A2A" />
+                <Border StrokeShape="RoundRectangle 14" BackgroundColor="#FFF0F0" Padding="18">
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="💳 Borc vəziyyəti" FontSize="13" TextColor="#C92A2A" />
+                        <Label Text="{Binding DebtText}" FontSize="26" FontAttributes="Bold" TextColor="#C92A2A" />
                         <Label Text="{Binding DebtSubText}" FontSize="12" TextColor="#868E96" />
                     </VerticalStackLayout>
                 </Border>
 
-                <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="12" RowSpacing="12">
-                    <Border Grid.Row="0" Grid.Column="0" StrokeShape="RoundRectangle 12" BackgroundColor="#E7F5FF" Padding="14">
-                        <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding OpenOrdersCommand}" CommandParameter="today-delivery" /></Border.GestureRecognizers>
-                        <VerticalStackLayout>
-                            <Label Text="Bu gün təhvil" FontSize="12" TextColor="#1971C2" />
-                            <Label Text="{Binding Data.DeliveriesToday}" FontSize="26" FontAttributes="Bold" TextColor="#1971C2" />
-                        </VerticalStackLayout>
-                    </Border>
-                    <Border Grid.Row="0" Grid.Column="1" StrokeShape="RoundRectangle 12" BackgroundColor="#EBFBEE" Padding="14">
-                        <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding OpenOrdersCommand}" CommandParameter="today-return" /></Border.GestureRecognizers>
-                        <VerticalStackLayout>
-                            <Label Text="Bu gün qaytarma" FontSize="12" TextColor="#2F9E44" />
-                            <Label Text="{Binding Data.ReturnsToday}" FontSize="26" FontAttributes="Bold" TextColor="#2F9E44" />
-                        </VerticalStackLayout>
-                    </Border>
-                    <Border Grid.Row="1" Grid.Column="0" StrokeShape="RoundRectangle 12" BackgroundColor="#F3F0FF" Padding="14">
-                        <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding OpenOrdersCommand}" CommandParameter="active" /></Border.GestureRecognizers>
-                        <VerticalStackLayout>
-                            <Label Text="Aktiv sifarişlərim" FontSize="12" TextColor="#7048E8" />
-                            <Label Text="{Binding Data.ActiveOrders}" FontSize="26" FontAttributes="Bold" TextColor="#7048E8" />
-                        </VerticalStackLayout>
-                    </Border>
-                    <Border Grid.Row="1" Grid.Column="1" StrokeShape="RoundRectangle 12" BackgroundColor="#FFF9DB" Padding="14">
-                        <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding OpenOrdersCommand}" CommandParameter="pending" /></Border.GestureRecognizers>
-                        <VerticalStackLayout>
-                            <Label Text="Gözləyən sifarişlərim" FontSize="12" TextColor="#F08C00" />
-                            <Label Text="{Binding Data.PendingOrders}" FontSize="26" FontAttributes="Bold" TextColor="#F08C00" />
-                        </VerticalStackLayout>
-                    </Border>
-                    <Border Grid.Row="2" Grid.Column="0" StrokeShape="RoundRectangle 12" BackgroundColor="#F1F3F5" Padding="14">
-                        <VerticalStackLayout>
-                            <Label Text="Bu ay sifariş" FontSize="12" TextColor="Gray" />
-                            <Label Text="{Binding Data.OrdersThisMonth}" FontSize="26" FontAttributes="Bold" />
-                        </VerticalStackLayout>
-                    </Border>
-                    <Border Grid.Row="2" Grid.Column="1" StrokeShape="RoundRectangle 12" BackgroundColor="#E6FCF5" Padding="14">
-                        <VerticalStackLayout>
-                            <Label Text="Bu ay dövriyyə" FontSize="12" TextColor="#0CA678" />
-                            <Label Text="{Binding Data.RevenueThisMonth, StringFormat='{0:0.00} AZN'}" FontSize="20" FontAttributes="Bold" TextColor="#0CA678" />
-                        </VerticalStackLayout>
-                    </Border>
-                </Grid>
+                <!-- Borcu bağla → sifariş yarat -->
+                <Button Text="➕ Sifariş yarat (borcu bağla)" Command="{Binding GoNewOrderCommand}"
+                        BackgroundColor="#2F9E44" TextColor="White" FontSize="16" HeightRequest="54" />
+
+                <!-- Bu ay bağladığınız (info) -->
+                <Border StrokeShape="RoundRectangle 12" BackgroundColor="#E6FCF5" Padding="14">
+                    <VerticalStackLayout>
+                        <Label Text="Bu ay bağladığınız (dövriyyə)" FontSize="12" TextColor="#0CA678" />
+                        <Label Text="{Binding Data.RevenueThisMonth, StringFormat='{0:0.00} AZN'}" FontSize="22" FontAttributes="Bold" TextColor="#0CA678" />
+                    </VerticalStackLayout>
+                </Border>
 
                 <Label Text="{Binding Status}" TextColor="Gray" IsVisible="{Binding Status, Converter={StaticResource NotNull}}" />
             </VerticalStackLayout>

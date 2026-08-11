@@ -76,19 +76,19 @@ public partial class EmployeesViewModel(ErpApiClient api, bool canViewSalary = t
     [ObservableProperty] private bool _isBusy;
     [ObservableProperty] private string? _status;
 
-    // Yeni işçi forması
+    // Yeni işçi forması. Vəzifə/şöbə göstərilmir — təmsilçi üçün vəzifə defolt "Təmsilçi".
     [ObservableProperty] private string? _newFullName;
-    [ObservableProperty] private string? _newPosition;
+    [ObservableProperty] private string? _newPosition = "Təmsilçi";
     [ObservableProperty] private string? _newDepartment;
     [ObservableProperty] private string? _newPhone;
     [ObservableProperty] private string? _newEmail;
     [ObservableProperty] private DateTimeOffset _newHireDate = DateTimeOffset.Now;
     [ObservableProperty] private decimal _newSalary;
 
-    // Mobil/sistem girişi (opsional) — şifrə verilsə işçi üçün login (User) yaradılır.
+    // Mobil/sistem girişi — şifrə verilsə təmsilçi üçün login (User) yaradılır. Rol defolt Kassir.
     [ObservableProperty] private string? _newLoginUsername;
     [ObservableProperty] private string? _newLoginPassword;
-    [ObservableProperty] private string? _newLoginRole;
+    [ObservableProperty] private string? _newLoginRole = "Kassir";
     public ObservableCollection<string> Roles { get; } = [];
 
     [RelayCommand]
@@ -120,12 +120,12 @@ public partial class EmployeesViewModel(ErpApiClient api, bool canViewSalary = t
     [RelayCommand]
     private async Task AddAsync()
     {
-        if (string.IsNullOrWhiteSpace(NewFullName) || string.IsNullOrWhiteSpace(NewPosition)
-            || string.IsNullOrWhiteSpace(NewPhone))
+        if (string.IsNullOrWhiteSpace(NewFullName) || string.IsNullOrWhiteSpace(NewPhone))
         {
-            Status = "Ad, vəzifə və telefon tələb olunur.";
+            Status = "Ad və telefon tələb olunur.";
             return;
         }
+        if (string.IsNullOrWhiteSpace(NewPosition)) NewPosition = "Təmsilçi";
 
         IsBusy = true;
         try
@@ -154,9 +154,11 @@ public partial class EmployeesViewModel(ErpApiClient api, bool canViewSalary = t
                 ERP.Desktop.AppNotify.Show(Status);
                 _editId = null;
                 IsEditing = false;
-                NewFullName = NewPosition = NewDepartment = NewPhone = NewEmail = null;
+                NewFullName = NewDepartment = NewPhone = NewEmail = null;
+                NewPosition = "Təmsilçi";
                 NewSalary = 0;
-                NewLoginUsername = NewLoginPassword = NewLoginRole = null;
+                NewLoginUsername = NewLoginPassword = null;
+                NewLoginRole = "Kassir";
                 await LoadAsync();
             }
             else Status = error ?? "Əlavə edilmədi.";

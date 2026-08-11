@@ -511,6 +511,10 @@ public sealed class ErpApiClient(HttpClient http)
         return await ReadResultAsync(resp, ct);
     }
 
+    /// <summary>Təmsilçinin bütün borc/hərəkət qeydlərini silir (sıfırlayır).</summary>
+    public async Task<(bool ok, string? error)> ResetRepresentativeAsync(string name, CancellationToken ct = default) =>
+        await ReadResultAsync(await http.DeleteAsync($"/api/v1/representatives/{Uri.EscapeDataString(name)}", ct), ct);
+
     public Task<List<RentalCalendarEntryDto>?> GetRentalCalendarAsync(DateOnly? from = null, DateOnly? to = null, CancellationToken ct = default)
     {
         var q = from is not null && to is not null ? $"?from={from:yyyy-MM-dd}&to={to:yyyy-MM-dd}" : "";

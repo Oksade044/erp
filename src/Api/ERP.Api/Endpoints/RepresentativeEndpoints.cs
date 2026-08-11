@@ -31,6 +31,13 @@ public static class RepresentativeEndpoints
             return result.IsSuccess ? Results.Ok() : Results.BadRequest(new { error = result.Error });
         }).RequireAuthorization(Permissions.RepresentativesEdit);
 
+        // Təmsilçinin bütün borc/hərəkət qeydlərini sil (sıfırla).
+        group.MapDelete("/{name}", async (string name, ISender sender) =>
+        {
+            var result = await sender.Send(new ResetRepresentativeCommand(Uri.UnescapeDataString(name)));
+            return result.IsSuccess ? Results.NoContent() : Results.BadRequest(new { error = result.Error });
+        }).RequireAuthorization(Permissions.RepresentativesEdit);
+
         return app;
     }
 }

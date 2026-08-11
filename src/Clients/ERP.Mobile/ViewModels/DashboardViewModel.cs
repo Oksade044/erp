@@ -52,8 +52,7 @@ public partial class DashboardViewModel(MobileApiClient api, AppState state) : O
     [RelayCommand]
     private Task RefreshAsync() => LoadAsync();
 
-    /// <summary>Kartdan "mənim sifarişlərim" səhifəsinə süzgəclə keç.</summary>
+    /// <summary>"Borcu bağla" — yeni sifariş yaratma səhifəsinə keçir.</summary>
     [RelayCommand]
-    private async Task OpenOrdersAsync(string filter) =>
-        await Shell.Current.GoToAsync($"//myorders?filter={filter}");
+    private async Task GoNewOrderAsync() => await Shell.Current.GoToAsync("//neworder");
 }
