@@ -35,8 +35,18 @@ public partial class App : Application
             _desktop = desktop;
 
             // Tək HttpClient bütün ekranlar arasında bölüşülür (JWT token da burada saxlanılır).
-            var http = new HttpClient { BaseAddress = new Uri(ResolveApiBaseUrl()) };
+            // SessionExpiredHandler: 401 (token bitib) → təmiz şəkildə giriş ekranına qaytarır.
+            var http = new HttpClient(new SessionExpiredHandler()) { BaseAddress = new Uri(ResolveApiBaseUrl()) };
             _api = new ErpApiClient(http);
+
+            SessionExpiredHandler.OnUnauthorized = () =>
+                Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+                {
+                    if (_desktop?.MainWindow is LoginWindow) return; // artıq giriş ekranındadır
+                    _api.SetBearerToken(null);
+                    AppNotify.Show("Sessiya bitdi — yenidən daxil olun.");
+                    ShowLogin();
+                });
 
             ShowLogin();
         }
