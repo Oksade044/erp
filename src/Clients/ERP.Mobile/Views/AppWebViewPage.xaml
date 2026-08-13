@@ -6,17 +6,31 @@
              Shell.NavBarIsVisible="False">
     <Grid>
         <WebView x:Name="Web" Source="https://186.240.145.239.sslip.io/"
-                 Navigating="OnNavigating" Navigated="OnNavigated" />
+                 Navigated="OnNavigated" />
 
         <!-- İlk açılış yüklənmə göstəricisi (native hiss) -->
         <VerticalStackLayout x:Name="Splash" BackgroundColor="#3B5BDB"
-                             HorizontalOptions="Fill" VerticalOptions="Fill"
-                             Spacing="16" Padding="0" >
+                             HorizontalOptions="Fill" VerticalOptions="Fill" Spacing="16">
             <Label Text="ERP" FontSize="48" FontAttributes="Bold" TextColor="White"
                    HorizontalOptions="Center" VerticalOptions="EndAndExpand" />
             <ActivityIndicator IsRunning="True" Color="White" HorizontalOptions="Center" />
             <Label Text="Yüklənir..." TextColor="White" FontSize="13"
                    HorizontalOptions="Center" VerticalOptions="StartAndExpand" />
+        </VerticalStackLayout>
+
+        <!-- Yüklənmə uğursuz olsa — boş ağ ekran əvəzinə xəta + yenidən cəhd -->
+        <VerticalStackLayout x:Name="ErrorView" IsVisible="False" BackgroundColor="White"
+                             HorizontalOptions="Fill" VerticalOptions="Fill" Spacing="14" Padding="30">
+            <Label Text="⚠️" FontSize="46" HorizontalOptions="Center" VerticalOptions="EndAndExpand" />
+            <Label Text="Serverə qoşulmaq mümkün olmadı"
+                   FontSize="17" FontAttributes="Bold" TextColor="#212529"
+                   HorizontalOptions="Center" HorizontalTextAlignment="Center" />
+            <Label Text="İnternet bağlantınızı yoxlayın və yenidən cəhd edin."
+                   FontSize="13" TextColor="#868E96"
+                   HorizontalOptions="Center" HorizontalTextAlignment="Center" />
+            <Button Text="Yenidən cəhd et" Clicked="OnRetry"
+                    BackgroundColor="#3B5BDB" TextColor="White" WidthRequest="200"
+                    HorizontalOptions="Center" VerticalOptions="StartAndExpand" />
         </VerticalStackLayout>
     </Grid>
 </ContentPage>
